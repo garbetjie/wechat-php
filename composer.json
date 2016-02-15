@@ -1,0 +1,20 @@
+{
+    "name": "garbetjie/wechat-php",
+    "description": "PHP client library for interacting with the WeChat API",
+    "authors": [
+        {
+            "name": "Geoff Garbers",
+            "email": "geoff@garbers.co.za"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "guzzlehttp/guzzle": "~6.0",
+        "league/event": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+          "Garbetjie\\WeChat\\": "src/"
+        }
+    }
+}
