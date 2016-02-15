@@ -29,14 +29,14 @@ viewed in the [authentication readme](./src/Auth/readme.md).
 Further documentation on how to use each component can be viewed in each component's individual readme file. Links to the
 relevant README files have been provided below:
 
- * [Auth](./src/Auth/README.md)
- * [Groups](./src/Groups/README.md)
- * [Media](./src/Media/README.md)
- * [Menu](./src/Menu/README.md)
- * [Messaging](./src/Messaging/README.md)
- * [QR Codes](./src/QR/README.md)
- * [Responders](./src/Responder/README.md)
- * [Users](./src/Users/README.md)
+ * [Auth](./src/Auth/readme.md)
+ * [Groups](./src/Groups/readme.md)
+ * [Media](./src/Media/readme.md)
+ * [Menu](./src/Menu/readme.md)
+ * [Messaging](./src/Messaging/readme.md)
+ * [QR Codes](./src/QR/readme.md)
+ * [Responders](./src/Responder/readme.md)
+ * [Users](./src/Users/readme.md)
 
 
 # Terminology
