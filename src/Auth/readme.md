@@ -60,7 +60,7 @@ columns used can be customised.
     $pdo = new PDO( 'mysql:dbname=wechat;host=localhost' );
     $storage = new WeChat\Auth\Storage\MysqlStorage( $pdo );
     
-    // Change the table name (defaults to _wechat_tokens).
+    // Change the table name (defaults to _wechat_tokens, with (hash, expires, tokens) columns).
     $storage = new WeChat\Auth\Storage\MysqlStorage( $pdo, 'my_table_name' );
     
     // Change the columns used.
