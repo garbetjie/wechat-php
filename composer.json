@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-          "Garbetjie\\WeChat\\": "src/"
+          "WeChat\\": "src/"
         }
     }
 }
