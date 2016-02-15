@@ -1,5 +1,5 @@
 {
-    "name": "garbetjie/wechat-php",
+    "name": "garbetjie/wechat",
     "description": "PHP client library for interacting with the WeChat API",
     "authors": [
         {
