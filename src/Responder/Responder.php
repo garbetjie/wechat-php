@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Responder;
+namespace WeChat\Responder;
 
 use SimpleXMLElement;
 use WeChat\Messaging\Type\TypeInterface;

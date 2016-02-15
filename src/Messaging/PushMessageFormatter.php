@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Messaging;
+namespace WeChat\Messaging;
 
 use WeChat\Messaging\Type\Audio;
 use WeChat\Messaging\Type\Image;

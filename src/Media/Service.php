@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Media;
+namespace WeChat\Media;
 
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;

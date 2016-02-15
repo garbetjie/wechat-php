@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Urls;
+namespace WeChat\Urls;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;

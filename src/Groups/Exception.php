@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Groups;
+namespace WeChat\Groups;
 
 class Exception extends \RuntimeException
 {

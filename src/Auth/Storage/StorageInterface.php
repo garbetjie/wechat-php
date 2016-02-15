@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Auth\Storage;
+namespace WeChat\Auth\Storage;
 
 use WeChat\Auth\AccessToken;
 

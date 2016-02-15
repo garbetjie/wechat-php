@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Auth;
+namespace WeChat\Auth;
 
 use DateTime;
 use JsonSerializable;

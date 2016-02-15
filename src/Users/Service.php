@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Users;
+namespace WeChat\Users;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;

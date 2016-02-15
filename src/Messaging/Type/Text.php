@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Messaging\Type;
+namespace WeChat\Messaging\Type;
 
 class Text extends AbstractType
 {

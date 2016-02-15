@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Auth;
+namespace WeChat\Auth;
 
 class Exception extends \RuntimeException
 {

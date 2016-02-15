@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Urls;
+namespace WeChat\Urls;
 
 class Exception extends \RuntimeException
 {

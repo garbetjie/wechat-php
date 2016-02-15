@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Groups;
+namespace WeChat\Groups;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;

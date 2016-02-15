@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Menu;
+namespace WeChat\Menu;
 
 use LengthException;
 

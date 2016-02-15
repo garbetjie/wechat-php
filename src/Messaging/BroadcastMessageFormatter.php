@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Messaging;
+namespace WeChat\Messaging;
 
 use WeChat\Groups\Group;
 use WeChat\Messaging\Type\Article;

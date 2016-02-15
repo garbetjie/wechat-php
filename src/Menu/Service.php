@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Menu;
+namespace WeChat\Menu;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;

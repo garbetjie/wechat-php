@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Responder\Input;
+namespace WeChat\Responder\Input;
 
 use DateTime;
 use SimpleXMLElement;

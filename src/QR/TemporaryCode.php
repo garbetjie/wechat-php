@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\QR;
+namespace WeChat\QR;
 
 use DateTime;
 

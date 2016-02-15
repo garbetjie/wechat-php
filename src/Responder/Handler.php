@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Responder;
+namespace WeChat\Responder;
 
 use InvalidArgumentException;
 use League\Event\Emitter;

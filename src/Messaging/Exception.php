@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Messaging;
+namespace WeChat\Messaging;
 
 class Exception extends \RuntimeException
 {

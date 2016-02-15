@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Messaging;
+namespace WeChat\Messaging;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
