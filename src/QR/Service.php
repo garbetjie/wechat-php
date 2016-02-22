@@ -5,6 +5,7 @@ namespace WeChat\QR;
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 use WeChat\Client;
@@ -97,24 +98,25 @@ class Service
      */
     public function download ( CodeInterface $code, $into = null )
     {
-        if ( is_string( $into ) ) {
-            $stream = fopen( $into, 'wb' );
-
-            if ( ! $stream ) {
-                throw new Exception( "Can't open file '{$into}' for writing." );
+        if (is_resource($into)) {
+            $stream = $into;
+        } elseif (is_string($into)) {
+            $stream = fopen($into, 'wb');
+            if (! $stream) {
+                throw new Exception("Can't open file '{$into}' for writing.");
             }
         } else {
             $stream = tmpfile();
         }
 
         try {
-            $request = new Request( 'GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->ticket()}" );
-            $response = $this->client->send( $request, [ RequestOptions::SINK => $stream ] );
+            $request = new Request('GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->ticket()}");
+            $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
             $stream = $response->getBody()->detach();
 
             return $stream;
-        } catch ( GuzzleException $e ) {
-            throw new Exception( "Can't download Builder code. HTTP error occurred.", null, $e );
+        } catch (GuzzleException $e) {
+            throw new Exception("Can't download QR code. HTTP error occurred.", null, $e);
         }
     }
 
@@ -144,7 +146,7 @@ class Service
                 return [ $ticket, $url, DateTime::createFromFormat( 'U', time() + $json[ 'expire_seconds' ] ) ];
             }
         } catch ( GuzzleException $e ) {
-            throw new Exception( "Unable to create Builder code. HTTP error occurred.", null, $e );
+            throw new Exception( "Unable to create QR code. HTTP error occurred.", null, $e );
         }
     }
 }

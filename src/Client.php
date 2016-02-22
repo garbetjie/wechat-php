@@ -64,10 +64,17 @@ class Client extends GuzzleClient
             return function ( RequestInterface $request, array $options = [ ] ) use ( $handler ) {
                 return $handler( $request, $options )->then(
                     function ( ResponseInterface $response ) use ( $request ) {
+                        // Non-success page, so we won't attempt to parse.
                         if ( $response->getStatusCode() >= 300 ) {
                             return $response;
+                        } 
+                        
+                        // Non-JSON response - do not parse.
+                        if (preg_match('/(application|text)\/json/', $response->getHeaderLine('Content-Type')) < 1) {
+                            return $response;
                         }
-
+                        
+                        // Begin parsing JSON body.
                         $body = (string) $response->getBody();
                         $json = json_decode( $body, true );
                         $errorCode = json_last_error();
