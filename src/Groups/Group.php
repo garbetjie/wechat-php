@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\Groups;
+namespace Garbetjie\WeChatClient\Groups;
 
 class Group
 {

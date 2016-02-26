@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat;
+namespace Garbetjie\WeChatClient;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
@@ -8,7 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use WeChat\Auth\AccessToken;
+use Garbetjie\WeChatClient\Auth\AccessToken;
 
 class Client extends GuzzleClient
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace WeChat\Responder;
+namespace Garbetjie\WeChatClient\Responder;
 
-use WeChat\Messaging\Type\TypeInterface;
-use WeChat\Responder\Input\InputInterface;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class Response
 {

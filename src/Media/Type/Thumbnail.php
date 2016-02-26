@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\Media\Type;
+namespace Garbetjie\WeChatClient\Media\Type;
 
 class Thumbnail extends AbstractType
 {

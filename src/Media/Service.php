@@ -1,15 +1,15 @@
 <?php
 
-namespace WeChat\Media;
+namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
-use WeChat\Client;
-use WeChat\Media\Type\Article;
-use WeChat\Media\Type\TypeInterface;
+use Garbetjie\WeChatClient\Client;
+use Garbetjie\WeChatClient\Media\Type\Article;
+use Garbetjie\WeChatClient\Media\Type\TypeInterface;
 
 class Service
 {

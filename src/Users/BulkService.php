@@ -1,13 +1,13 @@
 <?php
 
-namespace WeChat\Users;
+namespace Garbetjie\WeChatClient\Users;
 
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
-use WeChat\Client;
+use Garbetjie\WeChatClient\Client;
 
 class BulkService
 {

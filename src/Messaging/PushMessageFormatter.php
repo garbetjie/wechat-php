@@ -1,14 +1,14 @@
 <?php
 
-namespace WeChat\Messaging;
+namespace Garbetjie\WeChatClient\Messaging;
 
-use WeChat\Messaging\Type\Audio;
-use WeChat\Messaging\Type\Image;
-use WeChat\Messaging\Type\Music;
-use WeChat\Messaging\Type\RichMedia;
-use WeChat\Messaging\Type\Text;
-use WeChat\Messaging\Type\TypeInterface;
-use WeChat\Messaging\Type\Video;
+use Garbetjie\WeChatClient\Messaging\Type\Audio;
+use Garbetjie\WeChatClient\Messaging\Type\Image;
+use Garbetjie\WeChatClient\Messaging\Type\Music;
+use Garbetjie\WeChatClient\Messaging\Type\RichMedia;
+use Garbetjie\WeChatClient\Messaging\Type\Text;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\Video;
 
 class PushMessageFormatter
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\Users;
+namespace Garbetjie\WeChatClient\Users;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -9,8 +9,8 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
-use WeChat\Client;
-use WeChat\Groups\Group;
+use Garbetjie\WeChatClient\Client;
+use Garbetjie\WeChatClient\Groups\Group;
 
 class Service
 {

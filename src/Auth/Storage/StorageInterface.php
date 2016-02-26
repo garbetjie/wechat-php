@@ -1,8 +1,8 @@
 <?php
 
-namespace WeChat\Auth\Storage;
+namespace Garbetjie\WeChatClient\Auth\Storage;
 
-use WeChat\Auth\AccessToken;
+use Garbetjie\WeChatClient\Auth\AccessToken;
 
 interface StorageInterface
 {

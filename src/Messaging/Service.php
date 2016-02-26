@@ -1,11 +1,11 @@
 <?php
 
-namespace WeChat\Messaging;
+namespace Garbetjie\WeChatClient\Messaging;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use WeChat\Client;
-use WeChat\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Client;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
 
 class Service
 {

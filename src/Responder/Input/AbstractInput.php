@@ -1,12 +1,12 @@
 <?php
 
-namespace WeChat\Responder\Input;
+namespace Garbetjie\WeChatClient\Responder\Input;
 
 use DateTime;
 use SimpleXMLElement;
-use WeChat\Responder\Input;
+use Garbetjie\WeChatClient\Responder\Input;
 
-class AbstractInput implements InputInterface
+abstract class AbstractInput implements InputInterface
 {
     /**
      * @var string

@@ -1,10 +1,10 @@
 <?php
 
-namespace WeChat\Responder;
+namespace Garbetjie\WeChatClient\Responder;
 
 use SimpleXMLElement;
-use WeChat\Messaging\Type\TypeInterface;
-use WeChat\Responder\Input\AbstractInput;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Responder\Input\AbstractInput;
 
 class Responder
 {

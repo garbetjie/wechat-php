@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\Urls;
+namespace Garbetjie\WeChatClient\Urls;
 
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -9,8 +9,8 @@ use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use WeChat\Auth\AccessToken;
-use WeChat\Client;
+use Garbetjie\WeChatClient\Auth\AccessToken;
+use Garbetjie\WeChatClient\Client;
 
 class BulkService
 {

@@ -1,18 +1,18 @@
 <?php
 
-namespace WeChat\Responder;
+namespace Garbetjie\WeChatClient\Responder;
 
 use DOMCdataSection;
 use DOMDocument;
 use DOMElement;
-use WeChat\Messaging\Type\Audio;
-use WeChat\Messaging\Type\Image;
-use WeChat\Messaging\Type\Music;
-use WeChat\Messaging\Type\RichMedia;
-use WeChat\Messaging\Type\Text;
-use WeChat\Messaging\Type\TypeInterface;
-use WeChat\Messaging\Type\Video;
-use WeChat\Responder\Input\InputInterface;
+use Garbetjie\WeChatClient\Messaging\Type\Audio;
+use Garbetjie\WeChatClient\Messaging\Type\Image;
+use Garbetjie\WeChatClient\Messaging\Type\Music;
+use Garbetjie\WeChatClient\Messaging\Type\RichMedia;
+use Garbetjie\WeChatClient\Messaging\Type\Text;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\Video;
+use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class ResponseFormatter
 {

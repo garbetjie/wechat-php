@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\QR;
+namespace Garbetjie\WeChatClient\QR;
 
 class PermanentCode implements CodeInterface
 {

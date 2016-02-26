@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\Responder\Input;
+namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 

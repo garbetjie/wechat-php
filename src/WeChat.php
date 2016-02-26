@@ -1,14 +1,14 @@
 <?php
 
-namespace WeChat;
+namespace Garbetjie\WeChatClient;
 
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use WeChat\Auth\AccessToken;
-use WeChat\Auth\Storage\File;
-use WeChat\Auth\Storage\StorageInterface;
-use WeChat\Auth\Exception as AuthException;
+use Garbetjie\WeChatClient\Auth\AccessToken;
+use Garbetjie\WeChatClient\Auth\Storage\File;
+use Garbetjie\WeChatClient\Auth\Storage\StorageInterface;
+use Garbetjie\WeChatClient\Auth\Exception as AuthException;
 
 class WeChat
 {

@@ -1,14 +1,14 @@
 <?php
 
-namespace WeChat\Responder;
+namespace Garbetjie\WeChatClient\Responder;
 
 use InvalidArgumentException;
 use League\Event\Emitter;
 use League\Event\EventInterface;
-use WeChat\Messaging\Type\TypeInterface;
-use WeChat\Responder\Input\Audio;
-use WeChat\Responder\Input\Event;
-use WeChat\Responder\Input\InputInterface;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Responder\Input\Audio;
+use Garbetjie\WeChatClient\Responder\Input\Event;
+use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class Handler
 {

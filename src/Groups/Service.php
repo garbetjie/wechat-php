@@ -1,10 +1,10 @@
 <?php
 
-namespace WeChat\Groups;
+namespace Garbetjie\WeChatClient\Groups;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use WeChat\Client;
+use Garbetjie\WeChatClient\Client;
 
 class Service
 {

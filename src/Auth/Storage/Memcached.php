@@ -1,10 +1,9 @@
 <?php
 
-namespace WeChat\Auth\Storage;
+namespace Garbetjie\WeChatClient\Auth\Storage;
 
 use DateTime;
-use Memcached;
-use WeChat\Auth\AccessToken;
+use Garbetjie\WeChatClient\Auth\AccessToken;
 
 class Memcached implements StorageInterface
 {
@@ -24,7 +23,7 @@ class Memcached implements StorageInterface
      * @param Memcached $memcached
      * @param string    $prefix
      */
-    public function __construct ( Memcached $memcached, $prefix = 'wechatToken:' )
+    public function __construct ( \Memcached $memcached, $prefix = 'wechatToken:' )
     {
         $this->memcached = $memcached;
         $this->prefix = (string) $prefix;
@@ -39,7 +38,7 @@ class Memcached implements StorageInterface
     {
         $cached = $this->memcached->get( $this->prefix . $hash );
 
-        if ( $this->memcached->getResultCode() === Memcached::RES_SUCCESS ) {
+        if ( $this->memcached->getResultCode() === \Memcached::RES_SUCCESS ) {
             $json = json_decode( $cached, true );
 
             if ( isset( $json[ 'token' ], $json[ 'expires' ] ) ) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\QR;
+namespace Garbetjie\WeChatClient\QR;
 
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;
@@ -8,7 +8,7 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
-use WeChat\Client;
+use Garbetjie\WeChatClient\Client;
 
 class Service
 {

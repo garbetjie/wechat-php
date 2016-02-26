@@ -1,11 +1,11 @@
 <?php
 
-namespace WeChat\Menu;
+namespace Garbetjie\WeChatClient\Menu;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
-use WeChat\Client;
+use Garbetjie\WeChatClient\Client;
 
 class Service
 {

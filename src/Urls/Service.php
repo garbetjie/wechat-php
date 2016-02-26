@@ -1,6 +1,6 @@
 <?php
 
-namespace WeChat\Urls;
+namespace Garbetjie\WeChatClient\Urls;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
@@ -8,7 +8,7 @@ use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use WeChat\Client;
+use Garbetjie\WeChatClient\Client;
 
 class Service
 {
