@@ -1,5 +1,15 @@
 # Change log
 
+## [Unreleased]
+
+- Normalizing of responder input.
+
+## Version 0.3.1
+
+### Fixed
+
+- Added proper supporting of string-based QR codes. Only permanent QR codes can have a string format - temporary codes can only be integers.
+
 ## Version 0.3.0
 
 ### Added

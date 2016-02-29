@@ -22,7 +22,7 @@ class Service
      *
      * @param Client $client
      */
-    public function __construct ( Client $client )
+    public function __construct (Client $client)
     {
         $this->client = $client;
     }
@@ -33,35 +33,37 @@ class Service
      *
      * Expiry times of less than 1 second will cause and `InvalidArgumentException` to be thrown.
      *
-     * @param int|string   $value   The value of the Service code.
+     * @param int          $value   The value of the Service code.
      * @param int|DateTime $expires The duration of the Service code, or the `DateTime` instance at which the
      *                              code should expire.
      *
      * @return TemporaryCode
      */
-    public function temporary ( $value, $expires = 1800 )
+    public function temporary ($value, $expires = 1800)
     {
-        if ( $expires instanceof DateTime ) {
+        if ($expires instanceof DateTime) {
             $expires = $expires->getTimestamp() - time();
         }
 
-        if ( $expires > 1800 ) {
+        if ($expires > 1800) {
             $expires = 1800;
-        } else if ( $expires < 1 ) {
-            throw new InvalidArgumentException( "Code expiry can not be less than 1 second." );
+        } else {
+            if ($expires < 1) {
+                throw new InvalidArgumentException("Code expiry can not be less than 1 second.");
+            }
         }
 
-        $args = $this->createCode( [
+        $args = $this->createCode([
             'expire_seconds' => $expires,
             'action_name'    => 'QR_SCENE',
             'action_info'    => [
                 'scene' => [
-                    ( is_int( $value ) ? 'scene_id' : 'scene_str' ) => $value,
+                    'scene_id' => $value,
                 ],
             ],
-        ] );
+        ]);
 
-        return new TemporaryCode( $args[ 0 ], $args[ 1 ], $args[ 2 ] );
+        return new TemporaryCode($args[0], $args[1], $args[2]);
     }
 
     /**
@@ -73,18 +75,20 @@ class Service
      * @return PermanentCode
      * @throws Exception
      */
-    public function permanent ( $value )
+    public function permanent ($value)
     {
-        $args = $this->createCode( [
-            'action_name' => 'QR_LIMIT_SCENE',
+        $str = is_string($value);
+
+        $args = $this->createCode([
+            'action_name' => $str ? 'QR_LIMIT_STR_SCENE' : 'QR_LIMIT_SCENE',
             'action_info' => [
                 'scene' => [
-                    is_int( $value ) ? 'scene_id' : 'scene_str' => $value,
+                    ($str ? 'scene_str' : 'scene_id') => $value,
                 ],
             ],
-        ] );
+        ]);
 
-        return new PermanentCode( $args[ 0 ], $args[ 1 ] );
+        return new PermanentCode($args[0], $args[1]);
     }
 
     /**
@@ -96,7 +100,7 @@ class Service
      *
      * @return resource
      */
-    public function download ( CodeInterface $code, $into = null )
+    public function download (CodeInterface $code, $into = null)
     {
         if (is_resource($into)) {
             $stream = $into;
@@ -129,24 +133,24 @@ class Service
      * @return array
      * @throws Exception
      */
-    protected function createCode ( array $body )
+    protected function createCode (array $body)
     {
         try {
-            $request = new Request( 'POST', 'https://api.wechat.com/cgi-bin/qrcode/create', [ ], json_encode( $body ) );
-            $response = $this->client->send( $request );
+            $request = new Request('POST', 'https://api.wechat.com/cgi-bin/qrcode/create', [], json_encode($body));
+            $response = $this->client->send($request);
 
 
-            $json = json_decode( $response->getBody(), true );
-            $ticket = $json[ 'ticket' ];
-            $url = $json[ 'url' ];
+            $json = json_decode($response->getBody(), true);
+            $ticket = $json['ticket'];
+            $url = $json['url'];
 
-            if ( $body[ 'action_name' ] === 'QR_LIMIT_SCENE' ) {
-                return [ $ticket, $url ];
+            if ($body['action_name'] === 'QR_LIMIT_SCENE' || $body['action_name'] === 'QR_LIMIT_STR_SCENE') {
+                return [$ticket, $url];
             } else {
-                return [ $ticket, $url, DateTime::createFromFormat( 'U', time() + $json[ 'expire_seconds' ] ) ];
+                return [$ticket, $url, DateTime::createFromFormat('U', time() + $json['expire_seconds'])];
             }
-        } catch ( GuzzleException $e ) {
-            throw new Exception( "Unable to create QR code. HTTP error occurred.", null, $e );
+        } catch (GuzzleException $e) {
+            throw new Exception("Unable to create QR code. HTTP error occurred.", null, $e);
         }
     }
 }
