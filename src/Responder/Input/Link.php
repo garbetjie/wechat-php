@@ -28,14 +28,14 @@ class Link extends AbstractInput
      */
     public function __construct (SimpleXMLElement $xml)
     {
-        $this->title = (string) $xml->Title;
-        $this->description = (string) $xml->Description;
-        $this->url = (string) $xml->Url;
+        $this->title = (string)$xml->Title;
+        $this->description = (string)$xml->Description;
+        $this->url = (string)$xml->Url;
     }
 
     /**
      * Title given to the link.
-     * 
+     *
      * @return string
      */
     public function title ()
@@ -45,7 +45,7 @@ class Link extends AbstractInput
 
     /**
      * Custom description given to the link.
-     * 
+     *
      * @return string
      */
     public function description ()
@@ -55,7 +55,7 @@ class Link extends AbstractInput
 
     /**
      * The URL of the link.
-     * 
+     *
      * @return string
      */
     public function url ()

@@ -25,8 +25,8 @@ class Event extends AbstractInput
     {
         $this->event = strtolower($xml->Event);
         $method = sprintf('parseEvent_%s', ucfirst($this->event));
-        
-        if ( method_exists($this, $method) && is_callable([$this, $method])) {
+
+        if (method_exists($this, $method) && is_callable([$this, $method])) {
             call_user_func([$this, $method], $xml);
         }
     }
@@ -74,7 +74,7 @@ class Event extends AbstractInput
         $this->params['latitude'] = (float)$xml->Latitide;
         $this->params['longitude'] = (float)$xml->Longitude;
         $this->params['precision'] = (float)$xml->Precision;
-        $this->params['coordinates'] = [ $this->params['latitude'], $this->params['longitude'] ];
+        $this->params['coordinates'] = [$this->params['latitude'], $this->params['longitude']];
     }
 
     /**
@@ -83,7 +83,7 @@ class Event extends AbstractInput
     private function parseEvent_Subscribe (SimpleXMLElement $xml)
     {
         $this->params['scanned'] = false;
-        
+
         if (isset($xml->EventKey, $xml->Ticket)) {
             $this->params['scanned'] = true;
             $this->params['ticket'] = (string)$xml->Ticket;

@@ -28,14 +28,14 @@ class Location extends AbstractInput
      */
     public function __construct (SimpleXMLElement $xml)
     {
-        $this->coordinates = [ (float) $xml->Location_X, (float) $xml->Location_Y ];
-        $this->scale = (float) $xml->Scale;
-        $this->name = (string) $xml->Label;
+        $this->coordinates = [(float)$xml->Location_X, (float)$xml->Location_Y];
+        $this->scale = (float)$xml->Scale;
+        $this->name = (string)$xml->Label;
     }
 
     /**
      * Co-ordinates as an array of [ $latitude, $longitude ].
-     * 
+     *
      * @return array
      */
     public function coordinates ()
@@ -45,7 +45,7 @@ class Location extends AbstractInput
 
     /**
      * The latitude of the location.
-     * 
+     *
      * @return float
      */
     public function latitude ()
@@ -55,7 +55,7 @@ class Location extends AbstractInput
 
     /**
      * Longitude of the location.
-     * 
+     *
      * @return mixed
      */
     public function longitude ()
@@ -65,7 +65,7 @@ class Location extends AbstractInput
 
     /**
      * Scale of the location ("zoom level").
-     * 
+     *
      * @return float
      */
     public function scale ()
@@ -75,7 +75,7 @@ class Location extends AbstractInput
 
     /**
      * Return the name given to the location.
-     * 
+     *
      * @return string
      */
     public function name ()

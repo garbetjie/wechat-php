@@ -10,12 +10,12 @@ class Audio extends AbstractInput
      * @var string
      */
     private $mediaID;
-    
+
     /**
      * @var string
      */
     private $format;
-    
+
     /**
      * @var string
      */
@@ -28,37 +28,37 @@ class Audio extends AbstractInput
      */
     public function __construct (SimpleXMLElement $xml)
     {
-        $this->mediaID = (string) $xml->MediaId;
-        $this->format = (string) $xml->Format;
-        $this->recognition = (string) $xml->Recognition;
+        $this->mediaID = (string)$xml->MediaId;
+        $this->format = (string)$xml->Format;
+        $this->recognition = (string)$xml->Recognition;
     }
 
     /**
      * Returns the media ID of the audio item.
-     * 
+     *
      * @return string
      */
-    public function mediaID()
+    public function mediaID ()
     {
         return $this->mediaID;
     }
 
     /**
      * Returns the format of the audio item.
-     * 
+     *
      * @return string
      */
-    public function format()
+    public function format ()
     {
         return $this->format;
     }
 
     /**
      * If speech recognition is enabled & was successful, the extract text will be returned.
-     * 
+     *
      * @return string
      */
-    public function recognition()
+    public function recognition ()
     {
         return $this->recognition;
     }

@@ -23,26 +23,26 @@ class Image extends AbstractInput
      */
     public function __construct (SimpleXMLElement $xml)
     {
-        $this->mediaID = (string) $xml->MediaId;
-        $this->url = (string) $xml->PicUrl;
+        $this->mediaID = (string)$xml->MediaId;
+        $this->url = (string)$xml->PicUrl;
     }
 
     /**
      * Image's media ID.
-     * 
+     *
      * @return string
      */
-    public function mediaID()
+    public function mediaID ()
     {
         return $this->mediaID;
     }
 
     /**
      * URL from which the image can be downloaded.
-     * 
+     *
      * @return string
      */
-    public function url()
+    public function url ()
     {
         return $this->url;
     }

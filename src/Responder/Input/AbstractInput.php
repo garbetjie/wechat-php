@@ -33,24 +33,24 @@ abstract class AbstractInput implements InputInterface
      *
      * @return InputInterface
      */
-    static public function create ( SimpleXMLElement $xml )
+    static public function create (SimpleXMLElement $xml)
     {
         // Start parsing the input.
-        $type = strtolower( $xml->MsgType );
-        $function = 'parseInput_' . ucfirst( $type );
+        $type = strtolower($xml->MsgType);
+        $function = 'parseInput_' . ucfirst($type);
         $method = static::class . '::' . $function;
 
-        if ( method_exists( static::class, $method ) && is_callable( $method ) ) {
-            $input = call_user_func( $method, $xml );
+        if (is_callable($method)) {
+            $input = call_user_func($method, $xml);
         } else {
             // @todo: implement unexpected input handling.
         }
 
         /* @var AbstractInput $input */
-        $input->sender = (string) $xml->FromUserName;
-        $input->recipient = (string) $xml->ToUserName;
-        $input->created = DateTime::createFromFormat( 'U', (int) $xml->CreateTime );
-        $input->id = (int) $xml->MsgId;
+        $input->sender = (string)$xml->FromUserName;
+        $input->recipient = (string)$xml->ToUserName;
+        $input->created = DateTime::createFromFormat('U', (int)$xml->CreateTime);
+        $input->id = (int)$xml->MsgId;
 
         return $input;
     }
@@ -92,7 +92,7 @@ abstract class AbstractInput implements InputInterface
      */
     public function unique ()
     {
-        return hash( 'sha1', $this->id() . $this->created()->format( 'U' ) );
+        return hash('sha1', $this->id() . $this->created()->format('U'));
     }
 
     /**
@@ -100,9 +100,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Text
      */
-    static private function parseInput_Text ( SimpleXMLElement $xml )
+    static private function parseInput_Text (SimpleXMLElement $xml)
     {
-        return new Input\Text( $xml, false );
+        return new Input\Text($xml, false);
     }
 
     /**
@@ -110,9 +110,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Image
      */
-    static private function parseInput_Image ( SimpleXMLElement $xml )
+    static private function parseInput_Image (SimpleXMLElement $xml)
     {
-        return new Input\Image( $xml );
+        return new Input\Image($xml);
     }
 
     /**
@@ -120,9 +120,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Audio
      */
-    static private function parseInput_Voice ( SimpleXMLElement $xml )
+    static private function parseInput_Voice (SimpleXMLElement $xml)
     {
-        return new Input\Audio( $xml );
+        return new Input\Audio($xml);
     }
 
     /**
@@ -130,9 +130,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Video
      */
-    static private function parseInput_Shortvideo ( SimpleXMLElement $xml )
+    static private function parseInput_Shortvideo (SimpleXMLElement $xml)
     {
-        return new Input\Video( $xml, true );
+        return new Input\Video($xml, true);
     }
 
     /**
@@ -140,9 +140,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Video
      */
-    static private function parseInput_Video ( SimpleXMLElement $xml )
+    static private function parseInput_Video (SimpleXMLElement $xml)
     {
-        return new Input\Video( $xml, false );
+        return new Input\Video($xml, false);
     }
 
     /**
@@ -150,9 +150,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Location
      */
-    static private function parseInput_Location ( SimpleXMLElement $xml )
+    static private function parseInput_Location (SimpleXMLElement $xml)
     {
-        return new Input\Location( $xml );
+        return new Input\Location($xml);
     }
 
     /**
@@ -160,9 +160,9 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Link
      */
-    static private function parseInput_Link ( SimpleXMLElement $xml )
+    static private function parseInput_Link (SimpleXMLElement $xml)
     {
-        return new Input\Link( $xml );
+        return new Input\Link($xml);
     }
 
     /**
@@ -170,8 +170,8 @@ abstract class AbstractInput implements InputInterface
      *
      * @return Event
      */
-    static private function parseInput_Event ( SimpleXMLElement $xml )
+    static private function parseInput_Event (SimpleXMLElement $xml)
     {
-        return new Input\Event( $xml );
+        return new Input\Event($xml);
     }
 }

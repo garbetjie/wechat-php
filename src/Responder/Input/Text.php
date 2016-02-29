@@ -30,20 +30,20 @@ class Text extends AbstractInput
 
     /**
      * The text content sent in.
-     * 
+     *
      * @return string
      */
-    public function content()
+    public function content ()
     {
         return $this->content;
     }
 
     /**
      * Indicates whether this was text sent via a button on the menu.
-     * 
+     *
      * @return bool
      */
-    public function menu()
+    public function menu ()
     {
         return $this->menu;
     }

@@ -45,13 +45,23 @@ class Video extends AbstractInput
     }
 
     /**
-     * The media ID for this video's thumbnai image.
+     * The media ID for this video's thumbnail image.
      * 
      * @return string
      */
     public function thumbnailID ()
     {
         return $this->thumbnailID;
+    }
+
+    /**
+     * Returns boolean value indicating whether this is a short "sight" video.
+     * 
+     * @return bool
+     */
+    public function isSight ()
+    {
+        return $this->sight;
     }
 
     /**
