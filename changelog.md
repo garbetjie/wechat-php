@@ -1,0 +1,28 @@
+# Change log
+
+## Version 0.3.0
+
+### Added
+
+- Change log
+- Support for PSR-7 responses in the responder.
+
+### Changed
+
+- Sending of replies in the responder are now done by returning the message to send from the event listener. 
+
+## Version 0.2.0
+
+### Changed
+
+- Moved the namespace from `\WeChat` to `\Garbetjie\WeChatClient`, to prevent accidental namespace clashes.
+
+## Version 0.1.1
+
+### Fixed
+
+- Non-JSON responses were being parsed as JSON, and causing failures ([#1](https://github.com/garbetjie/wechat-php/issues/1)).
+
+## Version 0.1.0
+
+Initial release.
