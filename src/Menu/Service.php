@@ -35,7 +35,7 @@ class Service
     {
         try {
             $json = json_encode( $this->reduceMenu( $menu ) );
-            $request = new Request( 'POST', "https://api.wechat.com/cgi-bin/menu/create", [ ], $json );
+            $request = new Request( 'POST', "https://api.weixin.qq.com/cgi-bin/menu/create", [ ], $json );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot create menu. HTTP error occurred.", null, $e );
@@ -50,7 +50,7 @@ class Service
     public function delete ()
     {
         try {
-            $request = new Request( 'GET', "https://api.wechat.com/cgi-bin/menu/delete" );
+            $request = new Request( 'GET', "https://api.weixin.qq.com/cgi-bin/menu/delete" );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot delete menu. HTTP error occurred.", null, $e );
@@ -66,7 +66,7 @@ class Service
     public function fetch ()
     {
         try {
-            $request = new Request( "GET", "https://api.wechat.com/cgi-bin/menu/get" );
+            $request = new Request( "GET", "https://api.weixin.qq.com/cgi-bin/menu/get" );
             $response = $this->client->send( $request );
             $json = json_decode( (string) $response->getBody(), true );
 

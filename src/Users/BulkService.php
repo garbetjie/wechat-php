@@ -48,7 +48,7 @@ class BulkService
             foreach ( array_chunk( $users, 50 ) as $chunk ) {
                 yield new Request(
                     "POST",
-                    "https://api.wechat.com/cgi-bin/groups/members/batchupdate",
+                    "https://api.weixin.qq.com/cgi-bin/groups/members/batchupdate",
                     [ ],
                     json_encode( [
                         'openid_list' => $chunk,
@@ -110,7 +110,7 @@ class BulkService
         // Build requests.
         $requests = function ( $users ) {
             foreach ( $users as $user ) {
-                yield new Request( 'POST', "https://api.wechat.com/cgi-bin/user/info?openid={$user}" );
+                yield new Request( 'POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}" );
             }
         };
         

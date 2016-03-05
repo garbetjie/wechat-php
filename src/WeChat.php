@@ -132,7 +132,7 @@ class WeChat
         }
 
         try {
-            $request = new Request( 'GET', "https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid={$appId}&secret={$secretKey}" );
+            $request = new Request( 'GET', "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$appId}&secret={$secretKey}" );
             $response = $this->client->send( $request );
             $json = json_decode( (string) $response->getBody(), true );
 
@@ -158,7 +158,7 @@ class WeChat
     public function ipList ()
     {
         try {
-            $request = new Request( 'GET', 'https://api.wechat.com/cgi-bin/getcallbackip' );
+            $request = new Request( 'GET', 'https://api.weixin.qq.com/cgi-bin/getcallbackip' );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 
