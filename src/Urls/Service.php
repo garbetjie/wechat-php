@@ -51,7 +51,7 @@ class Service
                 'long_url' => $url,
             ] );
             
-            $request = new Request( 'POST', 'https://api.wechat.com/cgi-bin/shorturl', [], $json );
+            $request = new Request( 'POST', 'https://api.weixin.qq.com/cgi-bin/shorturl', [], $json );
             $response = $this->client->send( $request );
             $json = json_decode( (string) $response->getBody(), true );
             

@@ -48,7 +48,7 @@ class BulkService
             foreach ( $urls as $url ) {
                 yield new Request(
                     'POST',
-                    'https://api.wechat.com/cgi-bin/shorturl',
+                    'https://api.weixin.qq.com/cgi-bin/shorturl',
                     [ ],
                     json_encode( [
                         'action'   => 'long2short',

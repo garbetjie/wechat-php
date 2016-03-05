@@ -39,7 +39,7 @@ class Service
                 ],
             ] );
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/groups/create", [ ], $json );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/groups/create", [ ], $json );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 
@@ -61,7 +61,7 @@ class Service
     public function all ()
     {
         try {
-            $request = new Request( "GET", "https://api.wechat.com/cgi-bin/groups/get" );
+            $request = new Request( "GET", "https://api.weixin.qq.com/cgi-bin/groups/get" );
             $response = $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot fetch groups. HTTP error occurred.", null, $e );
@@ -96,7 +96,7 @@ class Service
                 ],
             ];
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/groups/update", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/groups/update", [ ], json_encode( $json ) );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot update group. HTTP error occurred.", null, $e );

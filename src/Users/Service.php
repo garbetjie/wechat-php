@@ -53,7 +53,7 @@ class Service
                 'to_groupid' => $group,
             ] );
 
-            $request = new Request( 'POST', 'https://api.wechat.com/cgi-bin/groups/members/update', [ ], $json );
+            $request = new Request( 'POST', 'https://api.weixin.qq.com/cgi-bin/groups/members/update', [ ], $json );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot change group. HTTP error occurred.", null, $e );
@@ -72,7 +72,7 @@ class Service
     {
         try {
             $json = json_encode( [ 'openid' => $user ] );
-            $request = new Request( 'POST', 'https://api.wechat.com/cgi-bin/groups/getid', [ ], $json );
+            $request = new Request( 'POST', 'https://api.weixin.qq.com/cgi-bin/groups/getid', [ ], $json );
             $response = $this->client->send( $request );
             $json = json_decode( (string) $response->getBody(), true );
 
@@ -95,7 +95,7 @@ class Service
     public function get ( $user )
     {
         try {
-            $request = new Request( 'POST', "https://api.wechat.com/cgi-bin/user/info?openid={$user}" );
+            $request = new Request( 'POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}" );
             $response = $this->client->send( $request );
             $json = json_decode( (string) $response->getBody(), true );
 
@@ -149,7 +149,7 @@ class Service
         }
 
         // Build the URI
-        $uri = new Uri( 'https://api.wechat.com/cgi-bin/user/get' );
+        $uri = new Uri( 'https://api.weixin.qq.com/cgi-bin/user/get' );
         if ( $next !== null ) {
             $uri = Uri::withQueryValue( $uri, 'next_openid', $next );
         }

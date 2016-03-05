@@ -35,7 +35,7 @@ class Service
         $json = ( new PushMessageFormatter() )->format( $message, $recipient );
 
         try {
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/custom/send", [ ], $json );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/custom/send", [ ], $json );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot send push message. HTTP error occurred.", null, $e );

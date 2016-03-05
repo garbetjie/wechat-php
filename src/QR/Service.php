@@ -136,7 +136,7 @@ class Service
     protected function createCode (array $body)
     {
         try {
-            $request = new Request('POST', 'https://api.wechat.com/cgi-bin/qrcode/create', [], json_encode($body));
+            $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/qrcode/create', [], json_encode($body));
             $response = $this->client->send($request);
 
 

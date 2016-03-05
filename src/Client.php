@@ -135,8 +135,7 @@ class Client extends GuzzleClient
             return function ( RequestInterface $request, array $options = [ ] ) use ( $handler, &$developerMode ) {
                 if ( $developerMode ) {
                     $mapping = [
-                        'api.wechat.com'      => 'api.devcentral.co.za',
-                        'file.api.wechat.com' => 'file.api.devcentral.co.za',
+                        'api.weixin.qq.com' => 'api.devcentral.co.za',
                     ];
 
                     $uri = $request->getUri();

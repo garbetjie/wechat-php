@@ -44,7 +44,7 @@ class BroadcastService
             $json = ( new BroadcastMessageFormatter() )->format( $message );
             $json[ 'touser' ] = array_values( $users );
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/mass/send", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/mass/send", [ ], json_encode( $json ) );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 
@@ -69,7 +69,7 @@ class BroadcastService
             $json = ( new BroadcastMessageFormatter() )->format( $message );
             $json[ 'filter' ][ 'group_id' ] = (int) $group;
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/mass/sendall", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/mass/sendall", [ ], json_encode( $json ) );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 
@@ -94,7 +94,7 @@ class BroadcastService
             $json = ( new BroadcastMessageFormatter() )->format( $message );
             $json[ "touser" ] = (string) $user;
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/mass/preview", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/mass/preview", [ ], json_encode( $json ) );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot send preview message. HTTP error occurred.", null, $e );
@@ -113,7 +113,7 @@ class BroadcastService
         try {
             $json = [ "msg_id" => (int) $messageId ];
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/mass/delete", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/mass/delete", [ ], json_encode( $json ) );
             $this->client->send( $request );
         } catch ( GuzzleException $e ) {
             throw new Exception( "Cannot delete broadcast message. HTTP error occurred.", null, $e );
@@ -136,7 +136,7 @@ class BroadcastService
         try {
             $json = [ "msg_id" => (int) $messageId ];
 
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/mass/get", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/mass/get", [ ], json_encode( $json ) );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 

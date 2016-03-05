@@ -66,7 +66,7 @@ class Service
 
         $request = new Request(
             'POST',
-            "http://file.api.wechat.com/cgi-bin/media/upload?type={$media->getType()}",
+            "http://api.weixin.qq.com/cgi-bin/media/upload?type={$media->getType()}",
             [ ],
             new MultipartStream ( [
                 [
@@ -143,7 +143,7 @@ class Service
         }
 
         try {
-            $request = new Request( 'GET', "http://file.api.wechat.com/cgi-bin/media/get?media_id={$media->getId()}" );
+            $request = new Request( 'GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$media->getId()}" );
             $response = $this->client->send( $request, [ RequestOptions::SINK => $stream ] );
             $stream = $response->getBody()->detach();
 

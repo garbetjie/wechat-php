@@ -37,7 +37,7 @@ class TemplatesService
     {
         try {
             $json = json_encode( [ "template_id_short" => $short ] );
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/template/api_add_template", [ ], $json );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/template/api_add_template", [ ], $json );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 
@@ -92,7 +92,7 @@ class TemplatesService
         }
 
         try {
-            $request = new Request( "POST", "https://api.wechat.com/cgi-bin/message/template/send", [ ], json_encode( $json ) );
+            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/template/send", [ ], json_encode( $json ) );
             $response = $this->client->send( $request );
             $json = json_decode( $response->getBody(), true );
 
