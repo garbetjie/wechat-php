@@ -25,9 +25,9 @@ class Responder
     protected $params = [];
 
     /**
-     * @var SimpleXMLElement
+     * @var string|null
      */
-    protected $xml;
+    protected $input;
 
     /**
      * Responder constructor.
@@ -39,12 +39,7 @@ class Responder
     {
         $this->on = new Dispatcher();
         $this->params = (func_num_args() <= 0 && isset($_GET)) ? $_GET : $params;
-
-        try {
-            $this->xml = new SimpleXMLElement(func_num_args() < 2 ? file_get_contents('php://input') : $input);
-        } catch (\Exception $e) {
-            throw new Exception("Unable to parse input as XML.", null, $e);
-        }
+        $this->input = $input;
     }
 
     /**
@@ -76,7 +71,14 @@ class Responder
         }
 
         // Extract input, and create XML object from it.
-        $input = AbstractInput::create($this->xml);
+        try {
+            $input = $this->input === null ? file_get_contents('php://input') : $this->input;
+            $xml = new SimpleXMLElement($input);
+        } catch (\Exception $e) {
+            throw new Exception("Unable to parse input as XML.", null, $e);
+        }
+
+        $input = AbstractInput::create($xml);
         $reply = $this->on->handle($input);
         $formatter = new ReplyFormatter();
         
