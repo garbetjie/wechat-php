@@ -5,9 +5,11 @@ namespace Garbetjie\WeChatClient\Messaging\Type;
 class Video extends AbstractMediaType
 {
     /**
+     * The media ID of the thumbnail image to use for this video.
+     * 
      * @var string
      */
-    protected $thumbnailId = '';
+    public $thumbnailID;
 
     /**
      * @var string
@@ -18,18 +20,9 @@ class Video extends AbstractMediaType
      * @param string $mediaId
      * @param string $thumbnailId
      */
-    public function __construct ( $mediaId, $thumbnailId )
+    public function __construct ($mediaId, $thumbnailId)
     {
-        parent::__construct( $mediaId );
-
-        $this->thumbnailId = $thumbnailId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getThumbnailId ()
-    {
-        return $this->thumbnailId;
+        parent::__construct($mediaId);
+        $this->thumbnailID = $thumbnailId;
     }
 }

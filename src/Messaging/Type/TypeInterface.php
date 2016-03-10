@@ -9,5 +9,5 @@ interface TypeInterface
      *
      * @return string
      */
-    public function getType ();
+    public function type ();
 }

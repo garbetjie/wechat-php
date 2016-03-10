@@ -10,9 +10,11 @@ class Text extends AbstractType
     protected $type = 'text';
 
     /**
+     * The contents of the text message.
+     * 
      * @var string
      */
-    protected $content = '';
+    public $content;
 
     /**
      * @param string $content
@@ -21,13 +23,4 @@ class Text extends AbstractType
     {
         $this->content = $content;
     }
-
-    /**
-     * @return string
-     */
-    public function getContent ()
-    {
-        return $this->content;
-    }
-
 }

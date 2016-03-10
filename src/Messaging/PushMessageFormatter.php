@@ -2,8 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging;
 
-use Garbetjie\WeChatClient\Messaging\Type\Audio;
-use Garbetjie\WeChatClient\Messaging\Type\Image;
+use Garbetjie\WeChatClient\Messaging\Type\AbstractMediaType;
 use Garbetjie\WeChatClient\Messaging\Type\Music;
 use Garbetjie\WeChatClient\Messaging\Type\RichMedia;
 use Garbetjie\WeChatClient\Messaging\Type\Text;
@@ -20,38 +19,21 @@ class PushMessageFormatter
      *
      * @return string
      */
-    public function format ( TypeInterface $message, $recipient )
+    public function format (TypeInterface $message, $recipient)
     {
-        $json = [ ];
-        $json[ 'touser' ] = $recipient;
-        $json[ 'msgtype' ] = $message->getType();
+        
+        $json = [];
+        $json['touser'] = $recipient;
+        $json['msgtype'] = $message->type();
 
-        $methodName = 'format' . ucfirst( $message->getType() ) . 'Message';
-        if ( method_exists( $this, $methodName ) ) {
-            $json[ $message->getType() ] = call_user_func( [ $this, $methodName ], $message );
+        $methodName = 'format' . ucfirst($message->type());
+        if (method_exists($this, $methodName)) {
+            $json[$message->type()] = $this->$methodName($message);
+        } elseif ($message instanceof AbstractMediaType) {
+            $json[$message->type()] = ['media_id' => $message->id];
         }
 
-        return json_encode( $json );
-    }
-
-    /**
-     * @param Image $message
-     *
-     * @return array
-     */
-    protected function formatImageMessage ( Image $message )
-    {
-        return [ 'media_id' => $message->getMediaId() ];
-    }
-
-    /**
-     * @param Audio $message
-     *
-     * @return array
-     */
-    protected function formatVoiceMessage ( Audio $message )
-    {
-        return [ 'media_id' => $message->getMediaId() ];
+        return json_encode($json);
     }
 
     /**
@@ -59,9 +41,9 @@ class PushMessageFormatter
      *
      * @return array
      */
-    protected function formatTextMessage ( Text $message )
+    private function formatText (Text $message)
     {
-        return [ 'content' => $message->getContent() ];
+        return ['content' => $message->content];
     }
 
     /**
@@ -69,19 +51,19 @@ class PushMessageFormatter
      *
      * @return array
      */
-    protected function formatMusicMessage ( Music $message )
+    private function formatMusic (Music $message)
     {
-        $out = [ ];
-        $out[ 'musicurl' ] = $message->getUrl();
-        $out[ 'hqmusicurl' ] = $message->getHighQualityUrl();
-        $out[ 'thumb_media_id' ] = $message->getThumbnail();
+        $out = [];
+        $out['musicurl'] = $message->url;
+        $out['hqmusicurl'] = $message->highQualityUrl;
+        $out['thumb_media_id'] = $message->thumbnailID;
 
-        if ( $message->getTitle() !== null ) {
-            $out[ 'title' ] = $message->getTitle();
+        if ($message->title !== null) {
+            $out['title'] = $message->title;
         }
 
-        if ( $message->getDescription() !== null ) {
-            $out[ 'description' ] = $message->getDescription();
+        if ($message->description !== null) {
+            $out['description'] = $message->description;
         }
 
         return $out;
@@ -92,11 +74,11 @@ class PushMessageFormatter
      *
      * @return array
      */
-    protected function formatVideoMessage ( Video $message )
+    private function formatVideo (Video $message)
     {
         return [
-            'media_id'       => $message->getMediaId(),
-            'thumb_media_id' => $message->getThumbnailId(),
+            'media_id'       => $message->id,
+            'thumb_media_id' => $message->thumbnailID,
         ];
     }
 
@@ -105,19 +87,19 @@ class PushMessageFormatter
      *
      * @return array
      */
-    protected function formatNewsMessage ( RichMedia $message )
+    private function formatNews (RichMedia $message)
     {
-        $articles = [ ];
+        $articles = [];
 
-        foreach ( $message->getItems() as $item ) {
+        foreach ($message->items() as $item) {
             $articles[] = [
-                'title'       => $item[ 'title' ],
-                'description' => $item[ 'description' ],
-                'url'         => $item[ 'url' ],
-                'picurl'      => $item[ 'image' ],
+                'title'       => $item['title'],
+                'description' => $item['description'],
+                'url'         => $item['url'],
+                'picurl'      => $item['image'],
             ];
         }
 
-        return [ 'articles' => $articles ];
+        return ['articles' => $articles];
     }
 }

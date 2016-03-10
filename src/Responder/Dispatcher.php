@@ -2,11 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Responder;
 
-use InvalidArgumentException;
 use League\Event\Emitter;
 use League\Event\EventInterface;
 use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
-use Garbetjie\WeChatClient\Responder\Input\Audio;
 use Garbetjie\WeChatClient\Responder\Input\Event;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 

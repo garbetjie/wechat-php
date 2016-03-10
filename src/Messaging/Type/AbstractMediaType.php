@@ -5,23 +5,17 @@ namespace Garbetjie\WeChatClient\Messaging\Type;
 abstract class AbstractMediaType extends AbstractType
 {
     /**
+     * The ID of the media item to be sent (as given when uploading to WeChat).
+     * 
      * @var string
      */
-    protected $mediaId = '';
+    public $id;
 
     /**
-     * @return string
+     * @param string $id
      */
-    public function getMediaId ()
+    public function __construct ( $id )
     {
-        return $this->mediaId;
-    }
-
-    /**
-     * @param string $mediaId
-     */
-    public function __construct ( $mediaId )
-    {
-        $this->mediaId = $mediaId;
+        $this->id = $id;
     }
 }

@@ -2,8 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-use DomainException;
-
 abstract class AbstractType implements TypeInterface
 {
     /**
@@ -14,12 +12,8 @@ abstract class AbstractType implements TypeInterface
     /**
      * @return string
      */
-    public function getType ()
+    public function type ()
     {
-        if ( $this->type === null ) {
-            throw new DomainException( "Unset type." );
-        }
-
         return $this->type;
     }
 }

@@ -2,54 +2,30 @@
 
 namespace Garbetjie\WeChatClient\Messaging;
 
-use Garbetjie\WeChatClient\Groups\Group;
-use Garbetjie\WeChatClient\Messaging\Type\Article;
-use Garbetjie\WeChatClient\Messaging\Type\Audio;
-use Garbetjie\WeChatClient\Messaging\Type\Image;
+use Garbetjie\WeChatClient\Messaging\Type\AbstractMediaType;
 use Garbetjie\WeChatClient\Messaging\Type\Music;
-use Garbetjie\WeChatClient\Messaging\Type\RichMedia;
 use Garbetjie\WeChatClient\Messaging\Type\Text;
 use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
-use Garbetjie\WeChatClient\Messaging\Type\Video;
 
 class BroadcastMessageFormatter
 {
     /**
-     * @param TypeInterface      $type
-     * @param Group|array|string $recipient
+     * @param TypeInterface $type
      *
      * @return array
      */
-    public function format ( TypeInterface $type )
+    public function format (TypeInterface $type)
     {
-        $json = [ 'msgtype' => $type->getType() ];
+        $json = ['msgtype' => $type->type()];
 
-        $method = 'format' . ucfirst( $type->getType() ) . 'Message';
-        if ( method_exists( $this, $method ) ) {
-            $json[ $type->getType() ] = $this->$method( $type );
+        $method = 'format' . ucfirst($type->type());
+        if (method_exists($this, $method)) {
+            $json[$type->type()] = $this->$method($type);
+        } elseif ($type instanceof AbstractMediaType) {
+            $json[$type->type()] = ['media_id' => $type->id];
         }
 
         return $json;
-    }
-
-    /**
-     * @param Image $message
-     *
-     * @return array
-     */
-    protected function formatImageMessage ( Image $message )
-    {
-        return [ 'media_id' => $message->getMediaId() ];
-    }
-
-    /**
-     * @param Audio $message
-     *
-     * @return array
-     */
-    protected function formatVoiceMessage ( Audio $message )
-    {
-        return [ 'media_id' => $message->getMediaId() ];
     }
 
     /**
@@ -57,9 +33,9 @@ class BroadcastMessageFormatter
      *
      * @return array
      */
-    protected function formatTextMessage ( Text $message )
+    private function formatText (Text $message)
     {
-        return [ 'content' => $message->getContent() ];
+        return ['content' => $message->content];
     }
 
     /**
@@ -67,41 +43,21 @@ class BroadcastMessageFormatter
      *
      * @return array
      */
-    protected function formatMusicMessage ( Music $message )
+    private function formatMusic (Music $message)
     {
-        $out = [ ];
-        $out[ 'musicurl' ] = $message->getUrl();
-        $out[ 'hqmusicurl' ] = $message->getHighQualityUrl();
-        $out[ 'thumb_media_id' ] = $message->getThumbnail();
+        $out = [];
+        $out['musicurl'] = $message->url;
+        $out['hqmusicurl'] = $message->highQualityUrl;
+        $out['thumb_media_id'] = $message->thumbnailID;
 
-        if ( $message->getTitle() !== null ) {
-            $out[ 'title' ] = $message->getTitle();
+        if ($message->title !== null) {
+            $out['title'] = $message->title;
         }
 
-        if ( $message->getDescription() !== null ) {
-            $out[ 'description' ] = $message->getDescription();
+        if ($message->description !== null) {
+            $out['description'] = $message->description;
         }
 
         return $out;
-    }
-
-    /**
-     * @param Video $message
-     *
-     * @return array
-     */
-    protected function formatVideoMessage ( Video $message )
-    {
-        return [ 'media_id' => $message->getMediaId() ];
-    }
-
-    /**
-     * @param RichMedia $message
-     *
-     * @return array
-     */
-    protected function formatMpnewsMessage ( Article $message )
-    {
-        return [ 'media_id' => $message->getMediaId() ];
     }
 }

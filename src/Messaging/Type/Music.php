@@ -4,7 +4,14 @@ namespace Garbetjie\WeChatClient\Messaging\Type;
 
 use InvalidArgumentException;
 
-class Music
+/**
+ * @property string $title
+ * @property string $description
+ * @property string $url
+ * @property string $highQualityUrl
+ * @property string $thumbnailID
+ */
+class Music extends AbstractType
 {
     /**
      * @var string
@@ -14,27 +21,27 @@ class Music
     /**
      * @var string
      */
-    protected $title;
+    public $title;
 
     /**
      * @var string
      */
-    protected $description;
+    public $description;
 
     /**
      * @var string
      */
-    protected $url;
+    public $url;
 
     /**
      * @var string
      */
-    protected $highQualityUrl;
+    public $highQualityUrl;
 
     /**
      * @var string
      */
-    protected $thumbnailId;
+    public $thumbnailID;
 
     /**
      * @param string $url
@@ -60,50 +67,10 @@ class Music
         }
 
         // Set thumbnail id.
-        $this->thumbnailId = $thumbnailId;
+        $this->thumbnailID = $thumbnailId;
 
         // Set title & description.
         $this->title = (string) $title;
         $this->description = (string) $description;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTitle ()
-    {
-        return $this->title;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDescription ()
-    {
-        return $this->description;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrl ()
-    {
-        return $this->url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getThumbnail ()
-    {
-        return $this->thumbnailId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHighQualityUrl ()
-    {
-        return $this->highQualityUrl;
     }
 }

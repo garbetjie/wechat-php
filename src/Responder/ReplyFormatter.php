@@ -37,10 +37,10 @@ class ReplyFormatter
             'FromUserName' => $input->recipient(),
             'ToUserName'   => $input->sender(),
             'CreateTime'   => time(),
-            'MsgType'      => $message->getType(),
+            'MsgType'      => $message->type(),
         ]);
 
-        $method = 'fill' . ucfirst($message->getType()) . 'Message';
+        $method = 'fill' . ucfirst($message->type()) . 'Message';
         if (method_exists($this, $method) && is_callable([$this, $method])) {
             call_user_func([$this, $method], $root, $message);
         }
@@ -81,7 +81,7 @@ class ReplyFormatter
      */
     protected function fillTextMessage (DOMElement $root, Text $message)
     {
-        $this->fill($root, ['Content' => $message->getContent()]);
+        $this->fill($root, ['Content' => $message->content]);
     }
 
     /**
@@ -96,7 +96,7 @@ class ReplyFormatter
             $root,
             [
                 'Image' => [
-                    'MediaId' => $message->getMediaId(),
+                    'MediaId' => $message->id,
                 ],
             ]
         );
@@ -113,7 +113,7 @@ class ReplyFormatter
         $this->fill($root,
             [
                 'Voice' => [
-                    'MediaId' => $message->getMediaId(),
+                    'MediaId' => $message->id,
                 ],
             ]
         );
@@ -130,8 +130,8 @@ class ReplyFormatter
         $this->fill($root,
             [
                 'Video' => [
-                    'MediaId'      => $message->getMediaId(),
-                    'ThumbMediaId' => $message->getThumbnailId(),
+                    'MediaId'      => $message->id,
+                    'ThumbMediaId' => $message->thumbnailID,
                 ],
             ]
         );
@@ -146,16 +146,16 @@ class ReplyFormatter
     protected function fillMusicMessage (DOMElement $root, Music $message)
     {
         $append = [];
-        $append['MusicUrl'] = $message->getUrl();
-        $append['HQMusicUrl'] = $message->getHighQualityUrl();
-        $append['ThumbMediaId'] = $message->getThumbnail();
+        $append['MusicUrl'] = $message->url;
+        $append['HQMusicUrl'] = $message->highQualityUrl;
+        $append['ThumbMediaId'] = $message->thumbnailID;
 
-        if ($message->getTitle()) {
-            $append['Title'] = $message->getTitle();
+        if ($message->title) {
+            $append['Title'] = $message->title;
         }
 
-        if ($message->getDescription()) {
-            $append['Description'] = $message->getDescription();
+        if ($message->description) {
+            $append['Description'] = $message->description;
         }
 
         $this->fill($root, ['Music' => $append]);
@@ -171,7 +171,7 @@ class ReplyFormatter
     {
         $articleElement = $this->doc->createElement('Articles');
 
-        foreach ($message->getItems() as $item) {
+        foreach ($message->items() as $item) {
             $itemElement = $this->doc->createElement('item');
 
             $this->fill($itemElement, [
