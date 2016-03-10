@@ -3,14 +3,10 @@
 namespace Garbetjie\WeChatClient\Users;
 
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
-use Psr\Http\Message\ResponseInterface;
 use Garbetjie\WeChatClient\Client;
-use Garbetjie\WeChatClient\Groups\Group;
 
 class Service
 {

@@ -3,7 +3,6 @@
 namespace Garbetjie\WeChatClient\Users;
 
 use DateTime;
-use GuzzleHttp\Psr7\Uri;
 
 /**
  * @method string nickname()

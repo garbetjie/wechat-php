@@ -4,12 +4,10 @@ namespace Garbetjie\WeChatClient\Urls;
 
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use Garbetjie\WeChatClient\Auth\AccessToken;
 use Garbetjie\WeChatClient\Client;
 
 class BulkService

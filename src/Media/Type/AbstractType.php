@@ -3,7 +3,6 @@
 namespace Garbetjie\WeChatClient\Media\Type;
 
 use DateTime;
-use InvalidArgumentException;
 
 abstract class AbstractType implements TypeInterface
 {

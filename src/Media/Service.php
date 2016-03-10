@@ -37,7 +37,6 @@ class Service
      *
      * @param TypeInterface $media
      *
-     * @return string The media ID of the uploaded media item.
      * @throws Exception
      */
     public function upload (TypeInterface $media)
@@ -48,8 +47,6 @@ class Service
             } else {
                 $this->uploadFile($media);
             }
-
-            return $media->id;
         } catch (GuzzleException $e) {
             throw new Exception("Unable to upload media. HTTP error occurred.", null, $e);
         }
