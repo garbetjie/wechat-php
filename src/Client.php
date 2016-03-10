@@ -67,10 +67,11 @@ class Client extends GuzzleClient
                         // Non-success page, so we won't attempt to parse.
                         if ( $response->getStatusCode() >= 300 ) {
                             return $response;
-                        } 
+                        }
                         
-                        // Non-JSON response - do not parse.
-                        if (preg_match('/(application|text)\/json/', $response->getHeaderLine('Content-Type')) < 1) {
+                        // Check if the response should be JSON decoded
+                        $parse = ['application/json', 'text/json', 'text/plain'];
+                        if (preg_match('#'. implode('|', $parse) .'#', $response->getHeaderLine('Content-Type')) < 1) {
                             return $response;
                         }
                         

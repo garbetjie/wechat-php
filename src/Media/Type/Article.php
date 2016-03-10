@@ -14,29 +14,29 @@ class Article extends AbstractType
     /**
      * @var array
      */
-    protected $items = [ ];
+    private $items = [];
 
     /**
      * Adds a new item to the article.
      *
      * @param array $item
      */
-    public function addItem ( array $item )
+    public function addItem (array $item)
     {
-        $formatted = [ ];
+        $formatted = [];
 
         // Check required keys.
-        foreach ( [ 'title', 'content', 'thumbnail' ] as $key ) {
-            if ( ! isset( $item[ $key ] ) ) {
-                throw new InvalidArgumentException( "Item key '{$key}' is required." );
+        foreach (['title', 'content', 'thumbnail'] as $key) {
+            if (! isset($item[$key])) {
+                throw new InvalidArgumentException("Item key '{$key}' is required.");
             } else {
-                $formatted[ $key ] = $item[ $key ];
+                $formatted[$key] = $item[$key];
             }
         }
 
         // Add additional keys.
-        foreach ( [ 'author', 'url', 'summary', 'cover' ] as $key ) {
-            $formatted[ $key ] = isset( $item[ $key ] ) ? $item[ $key ] : null;
+        foreach (['author', 'url', 'summary', 'cover'] as $key) {
+            $formatted[$key] = isset($item[$key]) ? $item[$key] : null;
         }
 
         $this->items[] = $formatted;
@@ -45,7 +45,7 @@ class Article extends AbstractType
     /**
      * @return array
      */
-    public function getItems ()
+    public function items ()
     {
         return $this->items;
     }

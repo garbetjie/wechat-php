@@ -3,7 +3,6 @@
 namespace Garbetjie\WeChatClient\Media\Type;
 
 use DateTime;
-use DomainException;
 use InvalidArgumentException;
 
 abstract class AbstractType implements TypeInterface
@@ -11,96 +10,36 @@ abstract class AbstractType implements TypeInterface
     /**
      * @var string
      */
-    protected $type;
+    protected $type = null;
 
     /**
+     * The path to where this media item is stored on disk.
+     *
      * @var null|string
      */
-    protected $path;
+    public $path;
 
     /**
-     * @var DateTime
+     * The DateTime at which this media item was created. Is NULL if it hasn't been uploaded/created yet.
+     *
+     * @var DateTime|null
      */
-    protected $created;
+    public $created;
 
     /**
+     * The media ID of this item.
+     *
      * @var null|string
      */
-    protected $id;
+    public $id;
 
     /**
-     * AbstractMessageType constructor.
-     */
-    public function __construct ()
-    {
-        $this->created = DateTime::createFromFormat( 'U', 0 );
-    }
-
-    /**
+     * Returns the type of this media item for use in the WeChat API.
+     *
      * @return string
      */
-    public function getType ()
+    public function type ()
     {
-        if ( $this->type === null ) {
-            throw new DomainException( "Unset type." );
-        }
-
         return $this->type;
-    }
-
-    /**
-     * @return DateTime
-     */
-    public function getCreated ()
-    {
-        return clone $this->created;
-    }
-
-    /**
-     * @param DateTime $created
-     */
-    public function setCreated ( DateTime $created )
-    {
-        $this->created = $created;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getId ()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Sets the media item's media id.
-     *
-     * @param string $id
-     */
-    public function setId ( $id )
-    {
-        $this->id = (string) $id;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getPath ()
-    {
-        return $this->path;
-    }
-
-    /**
-     * Sets the path to the file on disk that contains the media item's contents.
-     *
-     * @param string $path
-     */
-    public function setPath ( $path )
-    {
-        if ( is_file( $path ) ) {
-            $this->path = $path;
-        } else {
-            throw new InvalidArgumentException( "Path '{$path}' does not exist." );
-        }
     }
 }
