@@ -1,7 +1,7 @@
 {
     "name": "garbetjie/wechat",
     "description": "PHP client library for interacting with the WeChat API",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "authors": [
         {
             "name": "Geoff Garbers",
