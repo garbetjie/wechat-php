@@ -147,7 +147,8 @@ class Service
         }
 
         // Build the URI
-        $uri = new Uri('https://api.weixin.qq.com/cgi-bin/user/get');
+        $limit = (int)$limit;
+        $uri = new Uri("https://api.weixin.qq.com/cgi-bin/user/get?count={$limit}");
         if ($next !== null) {
             $uri = Uri::withQueryValue($uri, 'next_openid', $next);
         }
