@@ -131,24 +131,13 @@ class Service
      * </pre>
      *
      * @param string $next  Optional ID of the next user to paginate from.
-     * @param int    $limit Optional limit on the number of users returned. Cannot be higher than 10,000.
      *
      * @return array
      */
-    public function paginate ($next = null, $limit = 500)
+    public function paginate ($next = null)
     {
-        // Ensure the limit is correct.
-        if ($limit < 1) {
-            throw new InvalidArgumentException("Limit cannot be less than 1.");
-        } else {
-            if ($limit > 10000) {
-                throw new InvalidArgumentException("Limit cannot be greater than 10,000.");
-            }
-        }
-
         // Build the URI
-        $limit = (int)$limit;
-        $uri = new Uri("https://api.weixin.qq.com/cgi-bin/user/get?count={$limit}");
+        $uri = new Uri("https://api.weixin.qq.com/cgi-bin/user/get");
         if ($next !== null) {
             $uri = Uri::withQueryValue($uri, 'next_openid', $next);
         }
@@ -160,9 +149,9 @@ class Service
         } catch (GuzzleException $e) {
             throw new Exception("Cannot fetch follower list. HTTP error occurred.", null, $e);
         }
-
+        
         // Calculate total pages.
-        $pages = ceil($json['total'] / $limit);
+        $pages = ceil($json['total'] / 10000);
         if ($pages == 0) {
             $pages = 1;
         }
