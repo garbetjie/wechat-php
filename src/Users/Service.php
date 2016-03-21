@@ -84,14 +84,15 @@ class Service
      * Throws an exception if the profile cannot be fetched.
      *
      * @param string $user The WeChat ID of the user to fetch.
+     * @param string $lang The language to retrieve city/province/country in. Defaults to "en" (English).
      *
      * @return User
      * @throws Exception
      */
-    public function get ($user)
+    public function get ($user, $lang = 'en')
     {
         try {
-            $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}");
+            $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?lang={$lang}&openid={$user}");
             $response = $this->client->send($request);
             $json = json_decode((string)$response->getBody(), true);
 
