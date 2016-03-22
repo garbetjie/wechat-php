@@ -88,7 +88,7 @@ class Dispatcher
                 if ($reply === false || $reply instanceof TypeInterface) {
                     $stop = true;
                 } else {
-                    throw new \RuntimeException('$reply must be an instance of ' . TypeInterface::class);
+                    throw new Exception('$reply must be an instance of ' . TypeInterface::class);
                 }
             }
 

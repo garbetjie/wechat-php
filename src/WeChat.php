@@ -3,7 +3,7 @@
 namespace Garbetjie\WeChatClient;
 
 use DateTime;
-use Garbetjie\WeChat\Client\Exception\ApiFormatException;
+use Garbetjie\WeChatClient\Exception\ApiFormatException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use Garbetjie\WeChatClient\Auth\AccessToken;

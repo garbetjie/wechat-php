@@ -36,7 +36,7 @@ class BulkService
      * @param int   $group The ID of the group to move the users to.
      *
      * @return array
-     * 
+     *
      * @throws InvalidArgumentException
      */
     public function changeGroup (array $users, $group)
@@ -93,28 +93,29 @@ class BulkService
      * For failed profile retrievals, the User object will be NULL.
      *
      * <pre>
-     * $callback = function ( User $user, string $userId ) { };
+     * $callback = function (RequestException $error = null, User $user = null) { };
      * </pre>
      *
      * @param array    $users    The IDs of the users to fetch profiles for.
      * @param callable $callback Optional callback to execute on each profile retrieval.
+     * @param string   $lang     The language to retrieve the user's details in.
      *
      * @return array
-     * 
+     *
      * @throws InvalidArgumentException
      */
-    public function get (array $users, callable $callback = null)
+    public function get (array $users, callable $callback = null, $lang = 'en')
     {
         if (count($users) < 1) {
             throw new InvalidArgumentException("At least one user is required.");
         } else {
-            $users = array_unique($users);
+            $users = array_unique(array_values($users));
         }
 
         // Build requests.
-        $requests = function ($users) {
+        $requests = function ($users) use ($lang) {
             foreach ($users as $user) {
-                yield new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}");
+                yield new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}&lang={$lang}");
             }
         };
 
@@ -122,8 +123,11 @@ class BulkService
 
         // Set default callback.
         if (! isset($callback)) {
-            $callback = function (User $user = null, $id) use (&$profiles) {
-                $profiles[$id] = $user;
+            $profiles = array_combine($users, array_pad([], count($users), null));
+            $callback = function (RequestException $error = null, User $user = null) use (&$profiles) {
+                if ($error !== null) {
+                    $profiles[$user->id] = $user;
+                }
             };
         }
 
@@ -132,16 +136,14 @@ class BulkService
             $this->client,
             $requests($users),
             [
-                'fulfilled' => function (ResponseInterface $response, $index) use (&$profiles, $callback) {
+                'fulfilled' => function (ResponseInterface $response, $index) use ($callback) {
                     $json = json_decode($response->getBody(), true);
                     $user = new User($json);
 
-                    call_user_func($callback, $user, $user->id);
+                    call_user_func($callback, null, $user);
                 },
-                'rejected'  => function (RequestException $reason, $index) use (&$profiles, $callback) {
-                    parse_str($reason->getRequest()->getUri()->getQuery(), $query);
-
-                    call_user_func($callback, null, $query['openid']);
+                'rejected'  => function (RequestException $reason, $index) use ($callback) {
+                    call_user_func($callback, $reason, null);
                 },
             ]
         ))->promise()->wait();

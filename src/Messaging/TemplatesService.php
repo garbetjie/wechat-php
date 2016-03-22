@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging;
 
-use Garbetjie\WeChat\Client\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\ApiErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;

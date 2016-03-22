@@ -3,6 +3,7 @@
 namespace Garbetjie\WeChatClient\QR;
 
 use DateTime;
+use Garbetjie\WeChatClient\Exception\ApiErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
@@ -37,6 +38,10 @@ class Service
      *                              code should expire.
      *
      * @return TemporaryCode
+     *
+     * @throws InvalidArgumentException
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function temporary ($value, $expires = 1800)
     {
@@ -72,7 +77,9 @@ class Service
      * @param string|int $value
      *
      * @return PermanentCode
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function permanent ($value)
     {
@@ -98,6 +105,10 @@ class Service
      * @param string        $into The path in which to save the QR code.
      *
      * @return resource
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
+     * @throws Exception
      */
     public function download (CodeInterface $code, $into = null)
     {
@@ -106,21 +117,17 @@ class Service
         } elseif (is_string($into)) {
             $stream = fopen($into, 'wb');
             if (! $stream) {
-                throw new Exception("Can't open file '{$into}' for writing.");
+                throw new Exception("Can't open file `{$into}` for writing.");
             }
         } else {
             $stream = tmpfile();
         }
 
-        try {
-            $request = new Request('GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->ticket()}");
-            $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
-            $stream = $response->getBody()->detach();
+        $request = new Request('GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->ticket()}");
+        $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
+        $stream = $response->getBody()->detach();
 
-            return $stream;
-        } catch (GuzzleException $e) {
-            throw new Exception("Can't download QR code. HTTP error occurred.", null, $e);
-        }
+        return $stream;
     }
 
     /**
@@ -130,26 +137,23 @@ class Service
      * @param array $body
      *
      * @return array
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     protected function createCode (array $body)
     {
-        try {
-            $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/qrcode/create', [], json_encode($body));
-            $response = $this->client->send($request);
+        $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/qrcode/create', [], json_encode($body));
+        $response = $this->client->send($request);
 
+        $json = json_decode($response->getBody(), true);
+        $ticket = $json['ticket'];
+        $url = $json['url'];
 
-            $json = json_decode($response->getBody(), true);
-            $ticket = $json['ticket'];
-            $url = $json['url'];
-
-            if ($body['action_name'] === 'QR_LIMIT_SCENE' || $body['action_name'] === 'QR_LIMIT_STR_SCENE') {
-                return [$ticket, $url];
-            } else {
-                return [$ticket, $url, DateTime::createFromFormat('U', time() + $json['expire_seconds'])];
-            }
-        } catch (GuzzleException $e) {
-            throw new Exception("Unable to create QR code. HTTP error occurred.", null, $e);
+        if ($body['action_name'] === 'QR_LIMIT_SCENE' || $body['action_name'] === 'QR_LIMIT_STR_SCENE') {
+            return [$ticket, $url];
+        } else {
+            return [$ticket, $url, DateTime::createFromFormat('U', time() + $json['expire_seconds'])];
         }
     }
 }

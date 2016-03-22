@@ -3,7 +3,7 @@
 namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
-use Garbetjie\WeChat\Client\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\ApiErrorException;
 use Garbetjie\WeChatClient\Media\Type\AbstractType;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;

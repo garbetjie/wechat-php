@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChat\Client\Exception;
+namespace Garbetjie\WeChatClient\Exception;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;

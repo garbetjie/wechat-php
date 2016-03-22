@@ -2,8 +2,8 @@
 
 namespace Garbetjie\WeChatClient\Groups;
 
-use Garbetjie\WeChat\Client\Exception\ApiErrorException;
-use Garbetjie\WeChat\Client\Exception\ApiFormatException;
+use Garbetjie\WeChatClient\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\ApiFormatException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use Garbetjie\WeChatClient\Client;

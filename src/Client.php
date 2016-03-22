@@ -2,10 +2,9 @@
 
 namespace Garbetjie\WeChatClient;
 
-use Garbetjie\WeChat\Client\Exception\ApiErrorException;
-use Garbetjie\WeChat\Client\Exception\ApiFormatException;
+use Garbetjie\WeChatClient\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\ApiFormatException;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
