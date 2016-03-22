@@ -3,6 +3,7 @@
 namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
+use Garbetjie\WeChat\Client\Exception\ApiErrorException;
 use Garbetjie\WeChatClient\Media\Type\AbstractType;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
@@ -41,14 +42,10 @@ class Service
      */
     public function upload (TypeInterface $media)
     {
-        try {
-            if ($media->type() === 'news') {
-                $this->uploadArticle($media);
-            } else {
-                $this->uploadFile($media);
-            }
-        } catch (GuzzleException $e) {
-            throw new Exception("Unable to upload media. HTTP error occurred.", null, $e);
+        if ($media->type() === 'news') {
+            $this->uploadArticle($media);
+        } else {
+            $this->uploadFile($media);
         }
     }
 
@@ -56,6 +53,10 @@ class Service
      * Uploads the given media file to the WeChat content servers, and populates the item's ID and created date.
      * 
      * @param TypeInterface $media
+     * 
+     * @throws GuzzleException
+     * @throws ApiErrorException
+     * @throws Exception
      */
     protected function uploadFile (TypeInterface $media)
     {
@@ -63,13 +64,11 @@ class Service
 
         if (! property_exists($media, 'path')) {
             throw new Exception("Property `path` not found on media item. Cannot upload.");
-        } elseif (! is_file($media->path)) {
-            throw new Exception("Path not found. Cannot upload.");
         }
 
         $stream = fopen($media->path, 'rb');
         if (! $stream) {
-            throw new Exception("Unable to open '{$media->path}' for reading.");
+            throw new Exception("Unable to open `{$media->path}` for reading.");
         }
 
         $request = new Request(
@@ -96,6 +95,9 @@ class Service
      * date.
      * 
      * @param Article $media
+     * 
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     protected function uploadArticle (Article $media)
     {
@@ -142,6 +144,9 @@ class Service
      * @param resource|string $into  Optional file or file resource to download the media item into.
      *
      * @return resource
+     * 
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function download (TypeInterface $media, $into = null)
     {
@@ -158,20 +163,16 @@ class Service
         } elseif (is_string($into)) {
             $stream = fopen($into, 'wb');
             if (! $stream) {
-                throw new Exception("Can't open file '{$into}' for writing.");
+                throw new Exception("Can't open file `{$into}` for writing.");
             }
         } else {
             $stream = tmpfile();
         }
 
-        try {
-            $request = new Request('GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$media->id}");
-            $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
-            $stream = $response->getBody()->detach();
+        $request = new Request('GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$media->id}");
+        $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
+        $stream = $response->getBody()->detach();
 
-            return $stream;
-        } catch (GuzzleException $e) {
-            throw new Exception("Unable to download media. HTTP error occurred.", null, $e);
-        }
+        return $stream;
     }
 }

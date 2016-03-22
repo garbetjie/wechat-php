@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Media;
 
-class Exception extends \RuntimeException
+class Exception extends \DomainException
 {
 
 }
