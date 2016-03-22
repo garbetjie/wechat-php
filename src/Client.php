@@ -2,6 +2,8 @@
 
 namespace Garbetjie\WeChatClient;
 
+use Garbetjie\WeChat\Client\Exception\ApiErrorException;
+use Garbetjie\WeChat\Client\Exception\ApiFormatException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\HandlerStack;
@@ -25,32 +27,32 @@ class Client extends GuzzleClient
     /**
      * {@inheritdoc}
      */
-    public function __construct ( array $config = [ ] )
+    public function __construct (array $config = [])
     {
         // Enable developer mode.
-        if ( isset( $config[ 'developerMode' ] ) ) {
-            $this->developerMode = ! ! $config[ 'developerMode' ];
-            unset( $config[ 'developerMode' ] );
+        if (isset($config['developerMode'])) {
+            $this->developerMode = !! $config['developerMode'];
+            unset($config['developerMode']);
         }
 
-        if ( ! isset( $config[ 'handler' ] ) ) {
-            $config[ 'handler' ] = HandlerStack::create();
+        if (! isset($config['handler'])) {
+            $config['handler'] = HandlerStack::create();
         }
 
         // Set the response filter.
-        $config[ 'handler' ]->remove( 'wechat.response' );
-        $config[ 'handler' ]->push( $this->createResponseHandler(), 'wechat.response' );
+        $config['handler']->remove('wechat.response');
+        $config['handler']->push($this->createResponseHandler(), 'wechat.response');
 
         // Set the authentication.
-        $config[ 'handler' ]->remove( 'wechat.authentication' );
-        $config[ 'handler' ]->unshift( $this->createAuthenticationHandler(), 'wechat.authentication' );
+        $config['handler']->remove('wechat.authentication');
+        $config['handler']->unshift($this->createAuthenticationHandler(), 'wechat.authentication');
 
         // Set the WeChat developer middleware.
-        $config[ 'handler' ]->remove( 'wechat.developerMode' );
-        $config[ 'handler' ]->unshift( $this->createDeveloperModelHandler(), 'wechat.developerMode' );
+        $config['handler']->remove('wechat.developerMode');
+        $config['handler']->unshift($this->createDeveloperModelHandler(), 'wechat.developerMode');
 
         // Call the parent's constructor.
-        parent::__construct( $config );
+        parent::__construct($config);
     }
 
     /**
@@ -60,38 +62,37 @@ class Client extends GuzzleClient
      */
     private function createResponseHandler ()
     {
-        return function ( callable $handler ) {
-            return function ( RequestInterface $request, array $options = [ ] ) use ( $handler ) {
-                return $handler( $request, $options )->then(
-                    function ( ResponseInterface $response ) use ( $request ) {
+        return function (callable $handler) {
+            return function (RequestInterface $request, array $options = []) use ($handler) {
+                return $handler($request, $options)->then(
+                    function (ResponseInterface $response) use ($request) {
                         // Non-success page, so we won't attempt to parse.
-                        if ( $response->getStatusCode() >= 300 ) {
+                        if ($response->getStatusCode() >= 300) {
                             return $response;
                         }
-                        
+
                         // Check if the response should be JSON decoded
                         $parse = ['application/json', 'text/json', 'text/plain'];
-                        if (preg_match('#'. implode('|', $parse) .'#', $response->getHeaderLine('Content-Type')) < 1) {
+                        if (preg_match('#' . implode('|', $parse) . '#',
+                                $response->getHeaderLine('Content-Type')) < 1
+                        ) {
                             return $response;
                         }
-                        
+
                         // Begin parsing JSON body.
-                        $body = (string) $response->getBody();
-                        $json = json_decode( $body, true );
+                        $body = (string)$response->getBody();
+                        $json = json_decode($body, true);
                         $errorCode = json_last_error();
 
-                        if ( $errorCode !== JSON_ERROR_NONE ) {
-                            $previous = new \RuntimeException( json_last_error_msg(), json_last_error() );
-
-                            throw new BadResponseException( "Invalid JSON.", $request, $response, $previous );
+                        if ($errorCode !== JSON_ERROR_NONE) {
+                            throw new ApiFormatException(json_last_error_msg(), json_last_error());
                         }
 
-                        if ( isset( $json[ 'errcode' ] ) && $json[ 'errcode' ] != 0 ) {
-                            $message = isset( $json[ 'errmsg' ] ) ? $json[ 'errmsg' ] : null;
-                            $code = $json[ 'errcode' ];
-                            $previous = new \RuntimeException( $message, $code );
-
-                            throw new BadResponseException( "API error: {$message}", $request, $response, $previous );
+                        if (isset($json['errcode']) && $json['errcode'] != 0) {
+                            $message = isset($json['errmsg']) ? $json['errmsg'] : null;
+                            $code = $json['errcode'];
+                            
+                            throw new ApiErrorException($message, $code, $request, $response);
                         }
 
                         return $response;
@@ -110,14 +111,14 @@ class Client extends GuzzleClient
     {
         $token = &$this->token;
 
-        return function ( callable $handler ) use ( &$token ) {
-            return function ( RequestInterface $request, array $options = [ ] ) use ( $handler, &$token ) {
-                if ( $token ) {
-                    $newUri = Uri::withQueryValue( $request->getUri(), 'access_token', (string) $token );
-                    $request = $request->withUri( $newUri );
+        return function (callable $handler) use (&$token) {
+            return function (RequestInterface $request, array $options = []) use ($handler, &$token) {
+                if ($token) {
+                    $newUri = Uri::withQueryValue($request->getUri(), 'access_token', (string)$token);
+                    $request = $request->withUri($newUri);
                 }
 
-                return $handler( $request, $options );
+                return $handler($request, $options);
             };
         };
     }
@@ -132,23 +133,23 @@ class Client extends GuzzleClient
     {
         $developerMode = &$this->developerMode;
 
-        return function ( callable $handler ) use ( &$developerMode ) {
-            return function ( RequestInterface $request, array $options = [ ] ) use ( $handler, &$developerMode ) {
-                if ( $developerMode ) {
+        return function (callable $handler) use (&$developerMode) {
+            return function (RequestInterface $request, array $options = []) use ($handler, &$developerMode) {
+                if ($developerMode) {
                     $mapping = [
                         'api.weixin.qq.com' => 'api.devcentral.co.za',
                     ];
 
                     $uri = $request->getUri();
 
-                    if ( isset( $mapping[ $uri->getHost() ] ) ) {
-                        $uri = $uri->withHost( $mapping[ $uri->getHost() ] );
+                    if (isset($mapping[$uri->getHost()])) {
+                        $uri = $uri->withHost($mapping[$uri->getHost()]);
                     }
 
-                    $request = $request->withUri( $uri );
+                    $request = $request->withUri($uri);
                 }
 
-                return $handler ( $request, $options );
+                return $handler ($request, $options);
             };
         };
     }
@@ -160,7 +161,7 @@ class Client extends GuzzleClient
      *
      * @param AccessToken $token
      */
-    public function useToken ( AccessToken $token = null )
+    public function useToken (AccessToken $token = null)
     {
         $this->token = $token;
     }
