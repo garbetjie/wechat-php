@@ -36,6 +36,8 @@ class BulkService
      * @param int   $group The ID of the group to move the users to.
      *
      * @return array
+     * 
+     * @throws InvalidArgumentException
      */
     public function changeGroup (array $users, $group)
     {
@@ -98,6 +100,8 @@ class BulkService
      * @param callable $callback Optional callback to execute on each profile retrieval.
      *
      * @return array
+     * 
+     * @throws InvalidArgumentException
      */
     public function get (array $users, callable $callback = null)
     {

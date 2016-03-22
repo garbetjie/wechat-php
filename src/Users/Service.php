@@ -2,10 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Users;
 
+use Garbetjie\WeChat\Client\Exception\ApiErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
-use InvalidArgumentException;
 use Garbetjie\WeChatClient\Client;
 
 class Service
@@ -39,21 +39,18 @@ class Service
      * @param string $user  The user's WeChat ID.
      * @param int    $group The ID of the group to move the user to.
      *
-     * @throws Exception
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function changeGroup ($user, $group)
     {
-        try {
-            $json = json_encode([
-                'openid'     => $user,
-                'to_groupid' => $group,
-            ]);
+        $json = json_encode([
+            'openid'     => $user,
+            'to_groupid' => $group,
+        ]);
 
-            $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/groups/members/update', [], $json);
-            $this->client->send($request);
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot change group. HTTP error occurred.", null, $e);
-        }
+        $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/groups/members/update', [], $json);
+        $this->client->send($request);
     }
 
     /**
@@ -62,20 +59,22 @@ class Service
      * @param int $user The WeChat ID of the user to fetch the group ID for.
      *
      * @return int
-     * @throws Exception
+     * 
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function group ($user)
     {
-        try {
-            $json = json_encode(['openid' => $user]);
-            $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/groups/getid', [], $json);
-            $response = $this->client->send($request);
-            $json = json_decode((string)$response->getBody(), true);
+        $request = new Request(
+            'POST',
+            'https://api.weixin.qq.com/cgi-bin/groups/getid',
+            [],
+            json_encode(['openid' => $user])
+        );
+        $response = $this->client->send($request);
+        $json = json_decode((string)$response->getBody(), true);
 
-            return $json['groupid'];
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot fetch group ID. HTTP error occurred.", null, $e);
-        }
+        return $json['groupid'];
     }
 
     /**
@@ -87,19 +86,17 @@ class Service
      * @param string $lang The language to retrieve city/province/country in. Defaults to "en" (English).
      *
      * @return User
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function get ($user, $lang = 'en')
     {
-        try {
-            $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?lang={$lang}&openid={$user}");
-            $response = $this->client->send($request);
-            $json = json_decode((string)$response->getBody(), true);
+        $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?lang={$lang}&openid={$user}");
+        $response = $this->client->send($request);
+        $json = json_decode((string)$response->getBody(), true);
 
-            return new User($json);
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot fetch user profile. HTTP error occurred.", null, $e);
-        }
+        return new User($json);
     }
 
     /**
@@ -109,7 +106,7 @@ class Service
      */
     public function count ()
     {
-        $followers = $this->paginate(null, 1);
+        $followers = $this->paginate(null);
 
         return (int)$followers['total'];
     }
@@ -134,6 +131,9 @@ class Service
      * @param string $next  Optional ID of the next user to paginate from.
      *
      * @return array
+     * 
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function paginate ($next = null)
     {
@@ -143,13 +143,9 @@ class Service
             $uri = Uri::withQueryValue($uri, 'next_openid', $next);
         }
 
-        try {
-            $request = new Request('GET', $uri);
-            $response = $this->client->send($request);
-            $json = json_decode($response->getBody(), true);
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot fetch follower list. HTTP error occurred.", null, $e);
-        }
+        $request = new Request('GET', $uri);
+        $response = $this->client->send($request);
+        $json = json_decode($response->getBody(), true);
         
         // Calculate total pages.
         $pages = ceil($json['total'] / 10000);
