@@ -2,6 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging;
 
+use Garbetjie\WeChat\Client\Exception\ApiErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
@@ -32,31 +33,30 @@ class BroadcastService
      * @param array         $users
      *
      * @return int
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
+     * @throws InvalidArgumentException
      */
     public function users (TypeInterface $message, array $users)
     {
-        try {
-            if (count($users) > 10000) {
-                throw new InvalidArgumentException("Cannot send broadcast to more than 10,000 users.");
-            }
-
-            $json = (new BroadcastMessageFormatter())->format($message);
-            $json['touser'] = array_values($users);
-
-            $request = new Request(
-                "POST",
-                "https://api.weixin.qq.com/cgi-bin/message/mass/send",
-                [],
-                json_encode($json)
-            );
-            $response = $this->client->send($request);
-            $json = json_decode($response->getBody(), true);
-
-            return $json['msg_id'];
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot send broadcast message to users. HTTP error occurred.", null, $e);
+        if (count($users) > 10000) {
+            throw new InvalidArgumentException("Cannot send broadcast to more than 10,000 users.");
         }
+
+        $json = (new BroadcastMessageFormatter())->format($message);
+        $json['touser'] = array_values($users);
+
+        $request = new Request(
+            "POST",
+            "https://api.weixin.qq.com/cgi-bin/message/mass/send",
+            [],
+            json_encode($json)
+        );
+        $response = $this->client->send($request);
+        $json = json_decode($response->getBody(), true);
+
+        return $json['msg_id'];
     }
 
     /**
@@ -66,27 +66,25 @@ class BroadcastService
      * @param int           $group
      *
      * @return int
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function group (TypeInterface $message, $group)
     {
-        try {
-            $json = (new BroadcastMessageFormatter())->format($message);
-            $json['filter']['group_id'] = (int)$group;
+        $json = (new BroadcastMessageFormatter())->format($message);
+        $json['filter']['group_id'] = (int)$group;
 
-            $request = new Request(
-                "POST",
-                "https://api.weixin.qq.com/cgi-bin/message/mass/sendall",
-                [],
-                json_encode($json)
-            );
-            $response = $this->client->send($request);
-            $json = json_decode($response->getBody(), true);
+        $request = new Request(
+            "POST",
+            "https://api.weixin.qq.com/cgi-bin/message/mass/sendall",
+            [],
+            json_encode($json)
+        );
+        $response = $this->client->send($request);
+        $json = json_decode($response->getBody(), true);
 
-            return $json['msg_id'];
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot send group broadcast message. HTTP error occurred.", null, $e);
-        }
+        return $json['msg_id'];
     }
 
     /**
@@ -96,24 +94,22 @@ class BroadcastService
      * @param string        $user
      *
      * @return int
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function preview (TypeInterface $message, $user)
     {
-        try {
-            $json = (new BroadcastMessageFormatter())->format($message);
-            $json["touser"] = (string)$user;
+        $json = (new BroadcastMessageFormatter())->format($message);
+        $json["touser"] = (string)$user;
 
-            $request = new Request(
-                "POST",
-                "https://api.weixin.qq.com/cgi-bin/message/mass/preview",
-                [],
-                json_encode($json)
-            );
-            $this->client->send($request);
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot send preview message. HTTP error occurred.", null, $e);
-        }
+        $request = new Request(
+            "POST",
+            "https://api.weixin.qq.com/cgi-bin/message/mass/preview",
+            [],
+            json_encode($json)
+        );
+        $this->client->send($request);
     }
 
     /**
@@ -121,23 +117,20 @@ class BroadcastService
      *
      * @param int $messageId
      *
-     * @throws Exception
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function delete ($messageId)
     {
-        try {
-            $json = ["msg_id" => (int)$messageId];
+        $json = ["msg_id" => (int)$messageId];
 
-            $request = new Request(
-                "POST",
-                "https://api.weixin.qq.com/cgi-bin/message/mass/delete",
-                [],
-                json_encode($json)
-            );
-            $this->client->send($request);
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot delete broadcast message. HTTP error occurred.", null, $e);
-        }
+        $request = new Request(
+            "POST",
+            "https://api.weixin.qq.com/cgi-bin/message/mass/delete",
+            [],
+            json_encode($json)
+        );
+        $this->client->send($request);
     }
 
     /**
@@ -149,28 +142,26 @@ class BroadcastService
      * @param int $messageId The id of the broadcast message to query.
      *
      * @return array
-     * @throws Exception
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
     public function query ($messageId)
     {
-        try {
-            $json = ["msg_id" => (int)$messageId];
+        $json = ["msg_id" => (int)$messageId];
 
-            $request = new Request(
-                "POST",
-                "https://api.weixin.qq.com/cgi-bin/message/mass/get",
-                [],
-                json_encode($json)
-            );
-            $response = $this->client->send($request);
-            $json = json_decode($response->getBody(), true);
+        $request = new Request(
+            "POST",
+            "https://api.weixin.qq.com/cgi-bin/message/mass/get",
+            [],
+            json_encode($json)
+        );
+        $response = $this->client->send($request);
+        $json = json_decode($response->getBody(), true);
 
-            $result = [];
-            $result['sent'] = (strtoupper($json['msg_status']) === 'SEND_SUCCESS');
+        $result = [];
+        $result['sent'] = (strtoupper($json['msg_status']) === 'SEND_SUCCESS');
 
-            return $result;
-        } catch (GuzzleException $e) {
-            throw new Exception("Cannot query broadcast message. HTTP error occurred.", null, $e);
-        }
+        return $result;
     }
 }

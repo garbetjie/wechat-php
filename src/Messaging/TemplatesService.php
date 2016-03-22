@@ -2,6 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging;
 
+use Garbetjie\WeChat\Client\Exception\ApiErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
@@ -19,7 +20,7 @@ class TemplatesService
      *
      * @param Client $client
      */
-    public function __construct ( Client $client )
+    public function __construct (Client $client)
     {
         $this->client = $client;
     }
@@ -32,19 +33,18 @@ class TemplatesService
      * @param string $short The short ID of the template to convert.
      *
      * @return int
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
-    public function convert ( $short )
+    public function convert ($short)
     {
-        try {
-            $json = json_encode( [ "template_id_short" => $short ] );
-            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/template/api_add_template", [ ], $json );
-            $response = $this->client->send( $request );
-            $json = json_decode( $response->getBody(), true );
+        $json = json_encode(["template_id_short" => $short]);
+        $request = new Request("POST", "https://api.weixin.qq.com/cgi-bin/template/api_add_template", [], $json);
+        $response = $this->client->send($request);
+        $json = json_decode($response->getBody(), true);
 
-            return $json[ 'template_id' ];
-        } catch ( GuzzleException $e ) {
-            throw new Exception( "Cannot fetch templated message id. HTTP error occurred.", null, $e );
-        }
+        return $json['template_id'];
     }
 
     /**
@@ -59,51 +59,52 @@ class TemplatesService
      * @param array $options
      *
      * @return mixed
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
+     * @throws InvalidArgumentException
      */
-    public function send ( $template, $recipient, $url, array $data, array $options = [ ] )
+    public function send ($template, $recipient, $url, array $data, array $options = [])
     {
-        if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-            throw new InvalidArgumentException( '$url must be a valid URL.' );
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new InvalidArgumentException('$url must be a valid URL.');
         }
 
         $json = [
-            'touser'      => (string) $recipient,
-            'template_id' => (string) $template,
-            'url'         => (string) $url,
-            'data'        => [ ],
+            'touser'      => (string)$recipient,
+            'template_id' => (string)$template,
+            'url'         => (string)$url,
+            'data'        => [],
         ];
 
-        if ( isset( $options[ 'color' ] ) && static::validateColor( $options[ 'color' ] ) ) {
-            $json[ 'topcolor' ] = '#' . strtoupper( ltrim( $options[ 'color' ], '#' ) );
+        if (isset($options['color']) && static::validateColor($options['color'])) {
+            $json['topcolor'] = '#' . strtoupper(ltrim($options['color'], '#'));
         }
 
-        foreach ( $data as $fieldName => $fieldValue ) {
-            if ( ! is_array( $fieldValue ) ) {
-                $json[ 'data' ][ $fieldName ] = [ 'value' => $fieldValue ];
+        foreach ($data as $fieldName => $fieldValue) {
+            if (! is_array($fieldValue)) {
+                $json['data'][$fieldName] = ['value' => $fieldValue];
             } else {
-                $json[ 'data' ][ $fieldName ] = [
-                    'value' => $fieldValue[ 'value' ],
+                $json['data'][$fieldName] = [
+                    'value' => $fieldValue['value'],
                 ];
 
-                if ( isset( $fieldValue[ 'color' ] ) && static::validateColor( $fieldValue[ 'color' ] ) ) {
-                    $json[ 'data' ][ $fieldName ][ 'color' ] = '#' . strtoupper( ltrim( $fieldValue[ 'color' ], '#' ) );
+                if (isset($fieldValue['color']) && static::validateColor($fieldValue['color'])) {
+                    $json['data'][$fieldName]['color'] = '#' . strtoupper(ltrim($fieldValue['color'], '#'));
                 }
             }
         }
 
-        try {
-            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/template/send", [ ], json_encode( $json ) );
-            $response = $this->client->send( $request );
-            $json = json_decode( $response->getBody(), true );
+        $request = new Request("POST", "https://api.weixin.qq.com/cgi-bin/message/template/send", [],
+            json_encode($json));
+        $response = $this->client->send($request);
+        $json = json_decode($response->getBody(), true);
 
-            return $json[ 'msgid' ];
-        } catch ( GuzzleException $e ) {
-            throw new Exception( "Cannot send templated message. HTTP error occurred.", null, $e );
-        }
+        return $json['msgid'];
     }
 
-    static protected function validateColor ( $color )
+    static protected function validateColor ($color)
     {
-        return preg_match( '/^(#)?([a-f0-9]{3}|[a-f0-9]{6})$/i', $color );
+        return preg_match('/^(#)?([a-f0-9]{3}|[a-f0-9]{6})$/i', $color);
     }
 }

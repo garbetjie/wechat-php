@@ -4,13 +4,6 @@ namespace Garbetjie\WeChatClient\Messaging\Type;
 
 use InvalidArgumentException;
 
-/**
- * @property string $title
- * @property string $description
- * @property string $url
- * @property string $highQualityUrl
- * @property string $thumbnailID
- */
 class Music extends AbstractType
 {
     /**

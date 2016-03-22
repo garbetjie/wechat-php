@@ -2,6 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging;
 
+use Garbetjie\WeChat\Client\Exception\ApiErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use Garbetjie\WeChatClient\Client;
@@ -19,7 +20,7 @@ class Service
      *
      * @param Client $client
      */
-    public function __construct ( Client $client )
+    public function __construct (Client $client)
     {
         $this->client = $client;
     }
@@ -29,17 +30,15 @@ class Service
      *
      * @param TypeInterface $message
      * @param string        $recipient
+     *
+     * @throws GuzzleException
+     * @throws ApiErrorException
      */
-    public function push ( TypeInterface $message, $recipient )
+    public function push (TypeInterface $message, $recipient)
     {
-        $json = ( new PushMessageFormatter() )->format( $message, $recipient );
-
-        try {
-            $request = new Request( "POST", "https://api.weixin.qq.com/cgi-bin/message/custom/send", [ ], $json );
-            $this->client->send( $request );
-        } catch ( GuzzleException $e ) {
-            throw new Exception( "Cannot send push message. HTTP error occurred.", null, $e );
-        }
+        $json = (new PushMessageFormatter())->format($message, $recipient);
+        $request = new Request("POST", "https://api.weixin.qq.com/cgi-bin/message/custom/send", [], $json);
+        $this->client->send($request);
     }
 
     /**
@@ -49,11 +48,14 @@ class Service
      */
     public function broadcast ()
     {
-        return new BroadcastService( $this->client );
+        return new BroadcastService($this->client);
     }
 
+    /**
+     * @return TemplatesService
+     */
     public function templates ()
     {
-        return new TemplatesService( $this->client );
+        return new TemplatesService($this->client);
     }
 }
