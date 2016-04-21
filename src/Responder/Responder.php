@@ -59,9 +59,10 @@ class Responder
         // Handle debugging.
         if (isset($this->params['echostr'])) {
             if ($forResponse !== null) {
-                return $forResponse
-                    ->withHeader('Content-Type', 'text/plain')
-                    ->withBody(\GuzzleHttp\Psr7\stream_for($this->params['echostr']));
+                $forResponse = $forResponse->withHeader('Content-Type', 'text/plain');
+                $forResponse->getBody()->write($this->params['echostr']);
+                
+                return $forResponse;
             } else {
                 header('Content-Type: text/plain');
                 echo $this->params['echostr'];
@@ -123,7 +124,9 @@ class Responder
                 $forResponse = $forResponse->withHeader($name, $value);
             }
             
-            return $forResponse->withBody(\GuzzleHttp\Psr7\stream_for($reply));
+            $forResponse->getBody()->write($reply);
+            
+            return $forResponse;
         }
         
         // Sending directly.
