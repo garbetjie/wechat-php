@@ -11,7 +11,7 @@ class MySQL extends AbstractDatabaseStorage
     /**
      * Responsible for retrieving the authentication token from which persistent storage is in use.
      *
-     * @return AccessToken|void
+     * @return AccessToken|null
      */
     public function retrieve ($hash)
     {
@@ -21,12 +21,14 @@ class MySQL extends AbstractDatabaseStorage
 
         $sql = "SELECT `{$colToken}`, `{$colExpires}` FROM `{$this->table}` WHERE `{$colHash}` = ? LIMIT 1";
         $st = $this->pdo->prepare($sql);
-        $st->execute([$hash]);
+        $st->execute([hex2bin($hash)]);
         $row = $st->fetch(PDO::FETCH_ASSOC);
         $st->closeCursor();
 
         if (is_array($row)) {
             return new AccessToken($row[$colToken], DateTime::createFromFormat('U', $row[$colExpires]));
+        } else {
+            return null;
         }
     }
 
