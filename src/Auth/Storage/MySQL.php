@@ -13,20 +13,20 @@ class MySQL extends AbstractDatabaseStorage
      *
      * @return AccessToken|void
      */
-    public function retrieve ( $hash )
+    public function retrieve ($hash)
     {
-        $colHash = $this->columns[ 'hash' ];
-        $colExpires = $this->columns[ 'expires' ];
-        $colToken = $this->columns[ 'token' ];
+        $colHash = $this->columns['hash'];
+        $colExpires = $this->columns['expires'];
+        $colToken = $this->columns['token'];
 
         $sql = "SELECT `{$colToken}`, `{$colExpires}` FROM `{$this->table}` WHERE `{$colHash}` = ? LIMIT 1";
-        $st = $this->pdo->prepare( $sql );
-        $st->execute( [ $hash ] );
-        $row = $st->fetch( PDO::FETCH_ASSOC );
+        $st = $this->pdo->prepare($sql);
+        $st->execute([$hash]);
+        $row = $st->fetch(PDO::FETCH_ASSOC);
         $st->closeCursor();
 
-        if ( is_array( $row ) ) {
-            return new AccessToken( $row[ $colToken ], DateTime::createFromFormat( 'U', $row[ $colExpires ] ) );
+        if (is_array($row)) {
+            return new AccessToken($row[$colToken], DateTime::createFromFormat('U', $row[$colExpires]));
         }
     }
 
@@ -38,14 +38,14 @@ class MySQL extends AbstractDatabaseStorage
      *
      * @return void
      */
-    public function store ( $hash, AccessToken $accessToken )
+    public function store ($hash, AccessToken $accessToken)
     {
-        $colHash = $this->columns[ 'hash' ];
-        $colExpires = $this->columns[ 'expires' ];
-        $colToken = $this->columns[ 'token' ];
+        $colHash = $this->columns['hash'];
+        $colExpires = $this->columns['expires'];
+        $colToken = $this->columns['token'];
 
         $sql = "REPLACE INTO `{$this->table}` ( `{$colHash}`, `{$colToken}`, `{$colExpires}` ) VALUES ( ?, ?, ? )";
-        $st = $this->pdo->prepare( $sql );
-        $st->execute( [ hex2bin( $hash ), (string) $accessToken, $accessToken->expires()->getTimestamp() ] );
+        $st = $this->pdo->prepare($sql);
+        $st->execute([hex2bin($hash), (string)$accessToken, $accessToken->expires()->getTimestamp()]);
     }
 }

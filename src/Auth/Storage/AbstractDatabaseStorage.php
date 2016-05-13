@@ -32,22 +32,22 @@ abstract class AbstractDatabaseStorage implements StorageInterface
      * @param null  $table
      * @param array $columns
      */
-    public function __construct ( PDO $pdo, $table = null, array $columns = [ ] )
+    public function __construct (PDO $pdo, $table = null, array $columns = [])
     {
         $this->pdo = $pdo;
-        
+
         // If only an array is given, then assume the table stays the same, and different columns are given.
-        if ( is_array( $table ) ) {
+        if (is_array($table)) {
             $columns = $table;
             $table = null;
         }
 
-        if ( $table ) {
+        if ($table) {
             $this->table = $table;
         }
 
-        if ( $columns ) {
-            $this->columns = array_merge( $this->columns, $columns );
+        if ($columns) {
+            $this->columns = array_merge($this->columns, $columns);
         }
     }
 
@@ -61,8 +61,8 @@ abstract class AbstractDatabaseStorage implements StorageInterface
      *
      * @return string
      */
-    public function hash ( $appId, $secretKey )
+    public function hash ($appId, $secretKey)
     {
-        return hash( 'sha256', $appId . $secretKey );
+        return hash('sha256', $appId . $secretKey);
     }
 }

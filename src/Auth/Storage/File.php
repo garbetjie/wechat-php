@@ -17,10 +17,10 @@ class File implements StorageInterface
      *
      * @param string $base The base directory in which all access tokens will be stored.
      */
-    public function __construct ( $base )
+    public function __construct ($base)
     {
-        $base = str_replace( '\\', '/', $base );
-        $base = rtrim( (string) $base, '/' );
+        $base = str_replace('\\', '/', $base);
+        $base = rtrim((string)$base, '/');
 
         $this->base = $base;
     }
@@ -30,16 +30,16 @@ class File implements StorageInterface
      *
      * @return AccessToken|void
      */
-    public function retrieve ( $hash )
+    public function retrieve ($hash)
     {
         $cacheFile = $this->base . "/{$hash}.token";
 
         // Read the access token from cache.
-        if ( is_file( $cacheFile ) && is_readable( $cacheFile ) ) {
-            $json = json_decode( file_get_contents( $cacheFile ), true );
+        if (is_file($cacheFile) && is_readable($cacheFile)) {
+            $json = json_decode(file_get_contents($cacheFile), true);
 
-            if ( isset( $json[ 'token' ], $json[ 'expires' ] ) ) {
-                return new AccessToken( $json[ 'token' ], DateTime::createFromFormat( 'U', $json[ 'expires' ] ) );
+            if (isset($json['token'], $json['expires'])) {
+                return new AccessToken($json['token'], DateTime::createFromFormat('U', $json['expires']));
             }
         }
     }
@@ -52,12 +52,12 @@ class File implements StorageInterface
      *
      * @return void
      */
-    public function store ( $hash, AccessToken $accessToken )
+    public function store ($hash, AccessToken $accessToken)
     {
         $cacheFile = $this->base . "/{$hash}.token";
-        $contents = json_encode( $accessToken );
+        $contents = json_encode($accessToken);
 
-        file_put_contents( $cacheFile, $contents );
+        file_put_contents($cacheFile, $contents);
     }
 
     /**
@@ -70,9 +70,9 @@ class File implements StorageInterface
      *
      * @return string
      */
-    public function hash ( $appId, $secretKey )
+    public function hash ($appId, $secretKey)
     {
-        return hash( 'sha256', $appId . $secretKey );
+        return hash('sha256', $appId . $secretKey);
     }
 
 

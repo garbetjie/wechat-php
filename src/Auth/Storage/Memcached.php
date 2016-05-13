@@ -23,10 +23,10 @@ class Memcached implements StorageInterface
      * @param Memcached $memcached
      * @param string    $prefix
      */
-    public function __construct ( \Memcached $memcached, $prefix = 'wechatToken:' )
+    public function __construct (\Memcached $memcached, $prefix = 'wechatToken:')
     {
         $this->memcached = $memcached;
-        $this->prefix = (string) $prefix;
+        $this->prefix = (string)$prefix;
     }
 
     /**
@@ -34,15 +34,15 @@ class Memcached implements StorageInterface
      *
      * @return AccessToken|void
      */
-    public function retrieve ( $hash )
+    public function retrieve ($hash)
     {
-        $cached = $this->memcached->get( $this->prefix . $hash );
+        $cached = $this->memcached->get($this->prefix . $hash);
 
-        if ( $this->memcached->getResultCode() === \Memcached::RES_SUCCESS ) {
-            $json = json_decode( $cached, true );
+        if ($this->memcached->getResultCode() === \Memcached::RES_SUCCESS) {
+            $json = json_decode($cached, true);
 
-            if ( isset( $json[ 'token' ], $json[ 'expires' ] ) ) {
-                return new AccessToken( $json[ 'token' ], DateTime::createFromFormat( 'U', $json[ 'expires' ] ) );
+            if (isset($json['token'], $json['expires'])) {
+                return new AccessToken($json['token'], DateTime::createFromFormat('U', $json['expires']));
             }
         }
     }
@@ -55,12 +55,12 @@ class Memcached implements StorageInterface
      *
      * @return void
      */
-    public function store ( $hash, AccessToken $accessToken )
+    public function store ($hash, AccessToken $accessToken)
     {
         $key = $this->prefix . $hash;
-        $contents = json_encode( $accessToken );
+        $contents = json_encode($accessToken);
 
-        $this->memcached->set( $key, $contents );
+        $this->memcached->set($key, $contents);
     }
 
     /**
@@ -73,8 +73,8 @@ class Memcached implements StorageInterface
      *
      * @return string
      */
-    public function hash ( $appId, $secretKey )
+    public function hash ($appId, $secretKey)
     {
-        return hash( 'sha256', $appId . $secretKey );
+        return hash('sha256', $appId . $secretKey);
     }
 }

@@ -11,7 +11,7 @@ interface StorageInterface
      *
      * @return AccessToken|void
      */
-    public function retrieve ( $hash );
+    public function retrieve ($hash);
 
     /**
      * Stores the given token to the persistent storage with the given hash.
@@ -21,7 +21,7 @@ interface StorageInterface
      *
      * @return void
      */
-    public function store ( $hash, AccessToken $accessToken );
+    public function store ($hash, AccessToken $accessToken);
 
     /**
      * Generates a unique hash for the given application ID and secret key combination.
@@ -33,5 +33,5 @@ interface StorageInterface
      *
      * @return string
      */
-    public function hash ( $appId, $secretKey );
+    public function hash ($appId, $secretKey);
 }
