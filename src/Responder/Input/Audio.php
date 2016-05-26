@@ -22,7 +22,7 @@ class Audio extends AbstractInput
     private $recognition;
 
     /**
-     * Audio constructor.
+     * AudioMediaType constructor.
      *
      * @param SimpleXMLElement $xml
      */

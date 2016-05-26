@@ -3,12 +3,13 @@
 namespace Garbetjie\WeChatClient;
 
 use DateTime;
-use Garbetjie\WeChatClient\Exception\ApiFormatException;
+use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
+use Garbetjie\WeChatClient\Exception\WeChatClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use Garbetjie\WeChatClient\Auth\AccessToken;
-use Garbetjie\WeChatClient\Auth\Storage\File;
-use Garbetjie\WeChatClient\Auth\Storage\StorageInterface;
+use Garbetjie\WeChatClient\Service\Authentication\AccessToken;
+use Garbetjie\WeChatClient\Service\Authentication\Storage\FileStorage;
+use Garbetjie\WeChatClient\Service\Authentication\Storage\StorageInterface;
 
 class WeChat
 {
@@ -28,80 +29,83 @@ class WeChat
     }
 
     /**
-     * @return QR\Service
+     * @return \Garbetjie\WeChatClient\Service\QR\QRCodeService
      */
     public function qr ()
     {
-        return new QR\Service($this->client);
+        return new Service\QR\QRCodeService($this->client);
     }
 
     /**
-     * @return Menu\Service
+     * @return \Garbetjie\WeChatClient\Service\Menu\MenuService
      */
     public function menu ()
     {
-        return new Menu\Service($this->client);
+        return new Service\Menu\MenuService($this->client);
     }
 
     /**
-     * @return Media\Service
+     * @return \Garbetjie\WeChatClient\Service\Media\MediaService
      */
     public function media ()
     {
-        return new Media\Service($this->client);
+        return new Service\Media\MediaService($this->client);
     }
 
     /**
-     * @return Messaging\Service
+     * @return \Garbetjie\WeChatClient\Service\Messaging\PushMessageService
      */
     public function messaging ()
     {
-        return new Messaging\Service($this->client);
+        return new Service\Messaging\PushMessageService($this->client);
     }
 
     /**
-     * @return Groups\Service
+     * @return \Garbetjie\WeChatClient\Service\Groups\GroupsService
      */
     public function groups ()
     {
-        return new Groups\Service($this->client);
+        return new Service\Groups\GroupsService($this->client);
     }
 
     /**
-     * @return Users\Service
+     * @return \Garbetjie\WeChatClient\Service\Users\UserService
      */
     public function users ()
     {
-        return new Users\Service($this->client);
+        return new Service\Users\UserService($this->client);
     }
 
     /**
-     * @return Urls\Service
+     * @return \Garbetjie\WeChatClient\Service\URL\URLService
      */
     public function urls ()
     {
-        return new Urls\Service($this->client);
+        return new Service\URL\URLService($this->client);
     }
 
     /**
-     * Setter/getter for setting or retrieving the client to use.
+     * Sets the client to use. Returns the current WeChat instance for chaining.
      *
-     * If a client is supplied, this instance of `WeChat\WeChat` is returned for chaining. Otherwise, the client
-     * instance is returned.
+     * @param Client $client
      *
-     * @param Client|null $client
-     *
-     * @return Client|WeChat
+     * @return $this
      */
-    public function client (Client $client = null)
+    public function setClient (Client $client)
     {
-        if ($client === null) {
-            return $this->client;
-        } else {
-            $this->client = $client;
+        $this->client = $client;
+        
+        return $this;
+    }
 
-            return $this;
-        }
+    /**
+     * Returns the client used by this WeChat instance.
+     * 
+     * @return Client
+     */
+    public function getClient ()
+    {
+        return $this->client;
     }
 
     /**
@@ -113,14 +117,14 @@ class WeChat
      *
      * @return AccessToken
      * 
-     * @throws GuzzleException
-     * @throws ApiFormatException
+     * @throws WeChatClientException
+     * @throws BadResponseFormatException
      */
     public function authenticate ($appId, $secretKey, StorageInterface $storage = null)
     {
         // Default to file storage.
         if (! $storage) {
-            $storage = new File(sys_get_temp_dir());
+            $storage = new FileStorage(sys_get_temp_dir());
         }
 
         $hash = $storage->hash($appId, $secretKey);
@@ -128,7 +132,7 @@ class WeChat
 
         // Cached access token is still valid. Return it.
         if ($cached instanceof AccessToken && $cached->valid()) {
-            $this->client->useToken($cached);
+            $this->client->setAccessToken($cached);
 
             return $cached;
         }
@@ -141,15 +145,18 @@ class WeChat
         $json = json_decode((string)$response->getBody(), true);
 
         if (isset($json['access_token'], $json['expires_in'])) {
-            $token = new AccessToken($json['access_token'],
-                DateTime::createFromFormat('U', time() + $json['expires_in']));
+            $token = new AccessToken(
+                $json['access_token'],
+                DateTime::createFromFormat('U', time() + $json['expires_in'])
+            );
+            
             $storage->store($hash, $token);
-            $this->client->useToken($token);
+            $this->client->setAccessToken($token);
 
             return $token;
         }
         
-        throw new ApiFormatException("unexpected JSON response: " . json_encode($json));
+        throw new BadResponseFormatException("unexpected JSON response: " . json_encode($json));
     }
 
     /**

@@ -5,13 +5,13 @@ namespace Garbetjie\WeChatClient\Responder;
 use DOMCdataSection;
 use DOMDocument;
 use DOMElement;
-use Garbetjie\WeChatClient\Messaging\Type\Audio;
-use Garbetjie\WeChatClient\Messaging\Type\Image;
-use Garbetjie\WeChatClient\Messaging\Type\Music;
-use Garbetjie\WeChatClient\Messaging\Type\RichMedia;
-use Garbetjie\WeChatClient\Messaging\Type\Text;
-use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
-use Garbetjie\WeChatClient\Messaging\Type\Video;
+use Garbetjie\WeChatClient\Service\Messaging\Type\AudioMessageMessageType;
+use Garbetjie\WeChatClient\Service\Messaging\Type\ImageMessageMessageType;
+use Garbetjie\WeChatClient\Service\Messaging\Type\MusicMessageType;
+use Garbetjie\WeChatClient\Service\Messaging\Type\RichMediaMessageType;
+use Garbetjie\WeChatClient\Service\Messaging\Type\TextMessageType;
+use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
+use Garbetjie\WeChatClient\Service\Messaging\Type\VideoMessageMessageType;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class ReplyFormatter
@@ -22,12 +22,12 @@ class ReplyFormatter
     private $doc;
 
     /**
-     * @param InputInterface $input
-     * @param TypeInterface  $message
+     * @param InputInterface       $input
+     * @param MessageTypeInterface $message
      *
      * @return string
      */
-    public function format (InputInterface $input, TypeInterface $message)
+    public function format (InputInterface $input, MessageTypeInterface $message)
     {
         $this->doc = new DOMDocument();
         $root = $this->doc->createElement('xml');
@@ -76,10 +76,10 @@ class ReplyFormatter
     /**
      * Fill a text message.
      *
-     * @param DOMElement $root
-     * @param Text       $message
+     * @param DOMElement      $root
+     * @param TextMessageType $message
      */
-    protected function fillTextMessage (DOMElement $root, Text $message)
+    protected function fillTextMessage (DOMElement $root, TextMessageType $message)
     {
         $this->fill($root, ['Content' => $message->content]);
     }
@@ -87,15 +87,15 @@ class ReplyFormatter
     /**
      * Fill an image message.
      *
-     * @param DOMElement $root
-     * @param Image      $message
+     * @param DOMElement              $root
+     * @param ImageMessageMessageType $message
      */
-    protected function fillImageMessage (DOMElement $root, Image $message)
+    protected function fillImageMessage (DOMElement $root, ImageMessageMessageType $message)
     {
         $this->fill(
             $root,
             [
-                'Image' => [
+                'ImageMediaType' => [
                     'MediaId' => $message->id,
                 ],
             ]
@@ -105,10 +105,10 @@ class ReplyFormatter
     /**
      * Fill an audio message.
      *
-     * @param DOMElement $root
-     * @param Audio      $message
+     * @param DOMElement              $root
+     * @param AudioMessageMessageType $message
      */
-    protected function fillVoiceMessage (DOMElement $root, Audio $message)
+    protected function fillVoiceMessage (DOMElement $root, AudioMessageMessageType $message)
     {
         $this->fill($root,
             [
@@ -122,14 +122,14 @@ class ReplyFormatter
     /**
      * Fill a video message.
      *
-     * @param DOMElement $root
-     * @param Video      $message
+     * @param DOMElement              $root
+     * @param VideoMessageMessageType $message
      */
-    protected function fillVideoMessage (DOMElement $root, Video $message)
+    protected function fillVideoMessage (DOMElement $root, VideoMessageMessageType $message)
     {
         $this->fill($root,
             [
-                'Video' => [
+                'VideoMediaType' => [
                     'MediaId'      => $message->id,
                     'ThumbMediaId' => $message->thumbnailID,
                 ],
@@ -140,10 +140,10 @@ class ReplyFormatter
     /**
      * Fill a music message.
      *
-     * @param DOMElement $root
-     * @param Music      $message
+     * @param DOMElement       $root
+     * @param MusicMessageType $message
      */
-    protected function fillMusicMessage (DOMElement $root, Music $message)
+    protected function fillMusicMessage (DOMElement $root, MusicMessageType $message)
     {
         $append = [];
         $append['MusicUrl'] = $message->url;
@@ -158,16 +158,16 @@ class ReplyFormatter
             $append['Description'] = $message->description;
         }
 
-        $this->fill($root, ['Music' => $append]);
+        $this->fill($root, ['MusicMessageType' => $append]);
     }
 
     /**
      * Fill a rich media message.
      *
-     * @param DOMElement $root
-     * @param RichMedia  $message
+     * @param DOMElement           $root
+     * @param RichMediaMessageType $message
      */
-    protected function fillNewsMessage (DOMElement $root, RichMedia $message)
+    protected function fillNewsMessage (DOMElement $root, RichMediaMessageType $message)
     {
         $articleElement = $this->doc->createElement('Articles');
 

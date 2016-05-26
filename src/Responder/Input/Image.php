@@ -17,7 +17,7 @@ class Image extends AbstractInput
     private $url;
 
     /**
-     * Image constructor.
+     * ImageMediaType constructor.
      *
      * @param SimpleXMLElement $xml
      */
@@ -28,7 +28,7 @@ class Image extends AbstractInput
     }
 
     /**
-     * Image's media ID.
+     * ImageMediaType's media ID.
      *
      * @return string
      */

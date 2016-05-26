@@ -3,13 +3,13 @@
 namespace Garbetjie\WeChatClient;
 
 use Garbetjie\WeChatClient\Exception\ApiErrorException;
-use Garbetjie\WeChatClient\Exception\ApiFormatException;
+use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Garbetjie\WeChatClient\Auth\AccessToken;
+use Garbetjie\WeChatClient\Service\Authentication\AccessToken;
 
 class Client extends GuzzleClient
 {
@@ -39,16 +39,16 @@ class Client extends GuzzleClient
         }
 
         // Set the response filter.
-        $config['handler']->remove('wechat.response');
-        $config['handler']->push($this->createResponseHandler(), 'wechat.response');
+        $config['handler']->remove('wechatClient:response');
+        $config['handler']->push($this->createResponseHandler(), 'wechatClient:response');
 
         // Set the authentication.
-        $config['handler']->remove('wechat.authentication');
-        $config['handler']->unshift($this->createAuthenticationHandler(), 'wechat.authentication');
+        $config['handler']->remove('wechatClient:authentication');
+        $config['handler']->unshift($this->createAuthenticationHandler(), 'wechatClient:authentication');
 
         // Set the WeChat developer middleware.
-        $config['handler']->remove('wechat.developerMode');
-        $config['handler']->unshift($this->createDeveloperModelHandler(), 'wechat.developerMode');
+        $config['handler']->remove('wechatClient:developerMode');
+        $config['handler']->unshift($this->createDeveloperModeHandler(), 'wechatClient:developerMode');
 
         // Call the parent's constructor.
         parent::__construct($config);
@@ -72,23 +72,20 @@ class Client extends GuzzleClient
 
                         // Check if the response should be JSON decoded
                         $parse = ['application/json', 'text/json', 'text/plain'];
-                        if (preg_match('#' . implode('|', $parse) . '#',
-                                $response->getHeaderLine('Content-Type')) < 1
-                        ) {
+                        if (preg_match('#' . implode('|', $parse) . '#', $response->getHeaderLine('Content-Type')) < 1) {
                             return $response;
                         }
 
                         // Begin parsing JSON body.
                         $body = (string)$response->getBody();
                         $json = json_decode($body, true);
-                        $errorCode = json_last_error();
 
-                        if ($errorCode !== JSON_ERROR_NONE) {
-                            throw new ApiFormatException(json_last_error_msg(), json_last_error());
+                        if (json_last_error() !== JSON_ERROR_NONE) {
+                            throw new BadResponseFormatException(json_last_error_msg(), json_last_error());
                         }
 
                         if (isset($json['errcode']) && $json['errcode'] != 0) {
-                            $message = isset($json['errmsg']) ? $json['errmsg'] : null;
+                            $message = isset($json['errmsg']) ? $json['errmsg'] : '';
                             $code = $json['errcode'];
                             
                             throw new ApiErrorException($message, $code, $request, $response);
@@ -128,7 +125,7 @@ class Client extends GuzzleClient
      *
      * @return \Closure
      */
-    private function createDeveloperModelHandler ()
+    private function createDeveloperModeHandler ()
     {
         $developerMode = &$this->developerMode;
 
@@ -160,18 +157,20 @@ class Client extends GuzzleClient
      *
      * @param AccessToken $token
      */
-    public function useToken (AccessToken $token = null)
+    public function setAccessToken (AccessToken $token = null)
     {
         $this->token = $token;
     }
 
     /**
      * Indicate whether or not we're using the WeChat developer portal as a proxy.
+     * 
+     * *** PLEASE NOTE: THIS HAS NOT YET BEEN IMPLEMENTED. ***
      *
-     * @param bool $enabled
+     * @param bool $developerMode
      */
-    public function useDeveloperMode ()
+    public function setDeveloperMode ($developerMode)
     {
-        $this->developerMode = true;
+        $this->developerMode = !! $developerMode;
     }
 }

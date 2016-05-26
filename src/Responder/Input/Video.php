@@ -22,7 +22,7 @@ class Video extends AbstractInput
     private $thumbnailID;
 
     /**
-     * Video constructor.
+     * VideoMediaType constructor.
      *
      * @param SimpleXMLElement $xml
      * @param bool             $sight
