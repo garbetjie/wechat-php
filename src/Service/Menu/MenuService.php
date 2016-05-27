@@ -22,11 +22,16 @@ class MenuService extends Service
      * @throws GuzzleException
      * @throws ApiErrorException
      */
-    public function create (Menu $menu)
+    public function createMenu (Menu $menu)
     {
-        $json = json_encode($this->reduceMenu($menu));
-        $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/menu/create", [], $json);
-        $this->client->send($request);
+        $this->client->send(
+            new Request(
+                'POST',
+                "https://api.weixin.qq.com/cgi-bin/menu/create",
+                [],
+                json_encode($this->reduceMenu($menu))
+            )
+        );
     }
 
     /**
@@ -35,7 +40,7 @@ class MenuService extends Service
      * @throws GuzzleException
      * @throws ApiErrorException
      */
-    public function delete ()
+    public function deleteMenu ()
     {
         $request = new Request('GET', "https://api.weixin.qq.com/cgi-bin/menu/delete");
         $this->client->send($request);
@@ -50,7 +55,7 @@ class MenuService extends Service
      * @throws ApiErrorException
      * @throws Exception
      */
-    public function fetch ()
+    public function getCurrentMenu ()
     {
         try {
             $request = new Request("GET", "https://api.weixin.qq.com/cgi-bin/menu/get");
@@ -71,7 +76,7 @@ class MenuService extends Service
      *
      * @return bool
      */
-    public function validates (Menu $menu)
+    public function validateMenu (Menu $menu)
     {
         foreach ($menu->items() as $item) {
             if (! $this->validateItem($item)) {
@@ -100,7 +105,7 @@ class MenuService extends Service
             }
 
             // If there are children, the title cannot be longer than 16 characters.
-            if (strlen($item->title()) > 16) {
+            if (strlen($item->getTitle()) > 16) {
                 return false;
             }
             
@@ -108,16 +113,16 @@ class MenuService extends Service
         }
 
         // Title cannot be longer than 40 characters.
-        if (strlen($item->title()) > 40) {
+        if (strlen($item->getTitle()) > 40) {
             return false;
         }
 
         // URLs cannot be longer than 256 characters.
-        if ($item->type() == MenuItem::URL && strlen($item->key()) > 256) {
+        if ($item->getType() == MenuItem::URL && strlen($item->getKey()) > 256) {
             return false;
-        } elseif (strlen($item->key()) > 128) {
+        } elseif (strlen($item->getKey()) > 128) {
             return false;
-        } elseif (strlen($item->key()) < 1) {
+        } elseif (strlen($item->getKey()) < 1) {
             return false;
         }
 
@@ -151,7 +156,7 @@ class MenuService extends Service
      */
     protected function reduceItem (MenuItem $item)
     {
-        $reduced = ['name' => $item->title()];
+        $reduced = ['name' => $item->getTitle()];
 
         // Has children.
         if (count($item->children()) > 0) {
@@ -161,8 +166,8 @@ class MenuService extends Service
             }
         } // No children.
         else {
-            $reduced['type'] = $item->type();
-            $reduced[$item->type() === MenuItem::URL ? 'url' : 'key'] = $item->key();
+            $reduced['type'] = $item->getType();
+            $reduced[$item->getType() === MenuItem::URL ? 'url' : 'key'] = $item->getKey();
         }
 
         return $reduced;
@@ -186,7 +191,7 @@ class MenuService extends Service
         $menu = new Menu();
 
         foreach ($deflated['menu']['button'] as $item) {
-            $menu->add($this->inflateItem($item));
+            $menu->addItem($this->inflateItem($item));
         }
 
         return $menu;
@@ -204,7 +209,7 @@ class MenuService extends Service
         if (isset($item['sub_button']) & count($item['sub_button']) > 0) {
             $object = new MenuItem($item['name'], MenuItem::KEYWORD);
             foreach ($item['sub_button'] as $subItem) {
-                $object->add($this->inflateItem($subItem));
+                $object->addItem($this->inflateItem($subItem));
             }
         } else {
             if (isset($item['url'])) {

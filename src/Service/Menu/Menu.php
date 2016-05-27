@@ -10,12 +10,12 @@ class Menu
     /**
      * @var array
      */
-    protected $items = [ ];
+    protected $items = [];
 
     /**
      * @return array
      */
-    public function items ()
+    public function getItems ()
     {
         return $this->items;
     }
@@ -27,10 +27,10 @@ class Menu
      *
      * @return MenuItem
      */
-    public function add ( MenuItem $item )
+    public function addItem (MenuItem $item)
     {
-        if ( count( $this->items ) >= 3 ) {
-            throw new LengthException( "Maximum of 3 items allowed in a menu." );
+        if (count($this->items) >= 3) {
+            throw new LengthException("Maximum of 3 items allowed in a menu.");
         }
 
         $this->items[] = $item;
@@ -43,11 +43,11 @@ class Menu
      *
      * @param MenuItem $item
      */
-    public function remove ( MenuItem $item )
+    public function removeItem (MenuItem $item)
     {
-        foreach ( $this->items as $storedIndex => $storedItem ) {
-            if ( $storedItem === $item ) {
-                unset( $this->items[ $storedIndex ] );
+        foreach ($this->items as $storedIndex => $storedItem) {
+            if ($storedItem === $item) {
+                unset($this->items[$storedIndex]);
                 break;
             }
         }
