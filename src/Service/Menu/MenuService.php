@@ -2,15 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Service\Menu;
 
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Service\Menu\Exception;
-use Garbetjie\WeChatClient\Service\Menu\Menu;
-use Garbetjie\WeChatClient\Service\Menu\MenuItem;
+use Garbetjie\WeChatClient\Service\Menu\Exception\BadMenuResponseFormatException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use InvalidArgumentException;
-use Garbetjie\WeChatClient\Client;
 
 class MenuService extends Service
 {
@@ -18,9 +13,6 @@ class MenuService extends Service
      * Creates a menu for the OA.
      *
      * @param Menu $menu
-     *
-     * @throws GuzzleException
-     * @throws ApiErrorException
      */
     public function createMenu (Menu $menu)
     {
@@ -35,10 +27,8 @@ class MenuService extends Service
     }
 
     /**
-     * Deletes the current menu in the OA.
-     *
-     * @throws GuzzleException
-     * @throws ApiErrorException
+     * Deletes the current menu from the OA.
+     * 
      */
     public function deleteMenu ()
     {
@@ -51,21 +41,25 @@ class MenuService extends Service
      *
      * @return Menu
      * 
-     * @throws GuzzleException
-     * @throws ApiErrorException
-     * @throws Exception
+     * @throws BadMenuResponseFormatException
      */
     public function getCurrentMenu ()
     {
-        try {
-            $request = new Request("GET", "https://api.weixin.qq.com/cgi-bin/menu/get");
-            $response = $this->client->send($request);
-            $json = json_decode((string)$response->getBody(), true);
+        $request = new Request("GET", "https://api.weixin.qq.com/cgi-bin/menu/get");
+        $response = $this->client->send($request);
+        $json = json_decode((string)$response->getBody());
 
-            return $this->inflateMenu($json);
-        } catch (InvalidArgumentException $e) {
-            throw new Exception("cannot build fetched menu. invalid JSON.", null, $e);
+        if (! isset($json->menu->button)) {
+            throw new BadMenuResponseFormatException('Unexpected menu JSON structure: `menu.button` not found', $response);
         }
+
+        $menu = new Menu();
+
+        foreach ($json->menu->button as $item) {
+            $menu->addItem($this->inflateItem($item));
+        }
+
+        return $menu;
     }
 
     /**
@@ -78,7 +72,7 @@ class MenuService extends Service
      */
     public function validateMenu (Menu $menu)
     {
-        foreach ($menu->items() as $item) {
+        foreach ($menu->getItems() as $item) {
             if (! $this->validateItem($item)) {
                 return false;
             }
@@ -97,8 +91,8 @@ class MenuService extends Service
     protected function validateItem (MenuItem $item)
     {
         // MenuItem has children.
-        if (count($item->children()) > 0) {
-            foreach ($item->children() as $childItem) {
+        if (count($item->getChildren()) > 0) {
+            foreach ($item->getChildren() as $childItem) {
                 if (! $this->validateItem($childItem)) {
                     return false;
                 }
@@ -140,7 +134,7 @@ class MenuService extends Service
     {
         $reduced = ['button' => []];
 
-        foreach ($menu->items() as $menuItem) {
+        foreach ($menu->getItems() as $menuItem) {
             $reduced['button'][] = $this->reduceItem($menuItem);
         }
 
@@ -159,9 +153,9 @@ class MenuService extends Service
         $reduced = ['name' => $item->getTitle()];
 
         // Has children.
-        if (count($item->children()) > 0) {
+        if (count($item->getChildren()) > 0) {
             $reduced['sub_button'] = [];
-            foreach ($item->children() as $childItem) {
+            foreach ($item->getChildren() as $childItem) {
                 $reduced['sub_button'][] = $this->reduceItem($childItem);
             }
         } // No children.
@@ -174,50 +168,26 @@ class MenuService extends Service
     }
 
     /**
-     * Receives an array representation of a menu, and returns it as an instance of `WeChat\Menu\Menu`.
-     *
-     * @param array $deflated
-     *
-     * @return Menu
-     * 
-     * @throws InvalidArgumentException
-     */
-    protected function inflateMenu ($deflated)
-    {
-        if (! isset($deflated['menu']['button'])) {
-            throw new InvalidArgumentException('Unexpected menu JSON structure: `menu.button` not found');
-        }
-
-        $menu = new Menu();
-
-        foreach ($deflated['menu']['button'] as $item) {
-            $menu->addItem($this->inflateItem($item));
-        }
-
-        return $menu;
-    }
-
-    /**
      * Inflate the given array representation of an item, and return it as an instance of `Garbetjie\WeChatClient\Menu\MenuItem`.
      *
-     * @param array $item
+     * @param \stdClass $item
      *
      * @return MenuItem
      */
-    protected function inflateItem (array $item)
+    protected function inflateItem ($item)
     {
-        if (isset($item['sub_button']) & count($item['sub_button']) > 0) {
-            $object = new MenuItem($item['name'], MenuItem::KEYWORD);
-            foreach ($item['sub_button'] as $subItem) {
+        if (isset($item->sub_button) & count($item->sub_button) > 0) {
+            $object = new MenuItem($item->name, MenuItem::KEYWORD);
+            foreach ($item->sub_button as $subItem) {
                 $object->addItem($this->inflateItem($subItem));
             }
         } else {
-            if (isset($item['url'])) {
-                $object = new MenuItem($item['name'], $item['type'], $item['url']);
-            } elseif (isset($item['key'])) {
-                $object = new MenuItem($item['name'], $item['type'], $item['key']);
+            if (isset($item->url)) {
+                $object = new MenuItem($item->name, $item->type, $item->url);
+            } elseif (isset($item->key)) {
+                $object = new MenuItem($item->name, $item->type, $item->key);
             } else {
-                $object = new MenuItem($item['name'], $item['type']);
+                $object = new MenuItem($item->name, $item->type);
             }
         }
 
