@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient;
 
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\APIErrorException;
 use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
@@ -32,7 +32,7 @@ class Client extends GuzzleClient
         if (isset($config['developerMode'])) {
             $this->developerMode = !! $config['developerMode'];
             unset($config['developerMode']);
-        }
+        }   
 
         if (! isset($config['handler'])) {
             $config['handler'] = HandlerStack::create();
@@ -47,8 +47,8 @@ class Client extends GuzzleClient
         $config['handler']->unshift($this->createAuthenticationHandler(), 'wechatClient:authentication');
 
         // Set the WeChat developer middleware.
-        $config['handler']->remove('wechatClient:developerMode');
-        $config['handler']->unshift($this->createDeveloperModeHandler(), 'wechatClient:developerMode');
+//        $config['handler']->remove('wechatClient:developerMode');
+//        $config['handler']->unshift($this->createDeveloperModeHandler(), 'wechatClient:developerMode');
 
         // Call the parent's constructor.
         parent::__construct($config);
@@ -78,17 +78,17 @@ class Client extends GuzzleClient
 
                         // Begin parsing JSON body.
                         $body = (string)$response->getBody();
-                        $json = json_decode($body, true);
+                        $json = json_decode($body);
 
                         if (json_last_error() !== JSON_ERROR_NONE) {
                             throw new BadResponseFormatException(json_last_error_msg(), json_last_error());
                         }
 
-                        if (isset($json['errcode']) && $json['errcode'] != 0) {
-                            $message = isset($json['errmsg']) ? $json['errmsg'] : '';
-                            $code = $json['errcode'];
+                        if (isset($json->errcode) && $json->errcode != 0) {
+                            $message = isset($json->errmsg) ? $json->errmsg : '';
+                            $code = $json->errcode;
                             
-                            throw new ApiErrorException($message, $code, $request, $response);
+                            throw new APIErrorException($message, $code, $request, $response);
                         }
 
                         return $response;
@@ -169,8 +169,8 @@ class Client extends GuzzleClient
      *
      * @param bool $developerMode
      */
-    public function setDeveloperMode ($developerMode)
-    {
-        $this->developerMode = !! $developerMode;
-    }
+//    public function setDeveloperMode ($developerMode)
+//    {
+//        $this->developerMode = !! $developerMode;
+//    }
 }
