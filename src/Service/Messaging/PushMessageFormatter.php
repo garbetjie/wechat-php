@@ -24,11 +24,11 @@ class PushMessageFormatter
         
         $json = [];
         $json['touser'] = $recipient;
-        $json['msgtype'] = $message->type();
+        $json['msgtype'] = $message->getType();
 
-        $methodName = 'format' . ucfirst($message->type());
+        $methodName = 'format' . ucfirst($message->getType());
         if (method_exists($this, $methodName)) {
-            $json[$message->type()] = $this->$methodName($message);
+            $json[$message->getType()] = $this->$methodName($message);
         } elseif ($message instanceof AbstractMediaMessageType) {
             $json[$message->type()] = ['media_id' => $message->id];
         }
@@ -91,7 +91,7 @@ class PushMessageFormatter
     {
         $articles = [];
 
-        foreach ($message->items() as $item) {
+        foreach ($message->getItems() as $item) {
             $articles[] = [
                 'title'       => $item['title'],
                 'description' => $item['description'],

@@ -2,16 +2,14 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging\Type;
 
-use Garbetjie\WeChatClient\Service\Messaging\Type\AbstractMediaMessageType;
-
-class VideoMessageMessageType extends AbstractMediaMessageType
+class VideoMessageType extends AbstractMediaMessageType
 {
     /**
      * The media ID of the thumbnail image to use for this video.
      * 
      * @var string
      */
-    public $thumbnailID;
+    private $thumbnailID;
 
     /**
      * @var string
@@ -25,6 +23,15 @@ class VideoMessageMessageType extends AbstractMediaMessageType
     public function __construct ($mediaId, $thumbnailId)
     {
         parent::__construct($mediaId);
+        
         $this->thumbnailID = $thumbnailId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getThumbnailID ()
+    {
+        return $this->thumbnailID;
     }
 }

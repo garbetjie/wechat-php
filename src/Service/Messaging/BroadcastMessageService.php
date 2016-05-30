@@ -2,8 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging;
 
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\APIErrorException;
 use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Service\Messaging\Exception\BadMessagingResponseFormatException;
 use Garbetjie\WeChatClient\Service\Messaging\BroadcastMessageFormatter;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
@@ -15,24 +16,20 @@ class BroadcastMessageService extends Service
 {
     /**
      * Sends a broadcast message to the specified users of the OA.
+     * 
+     * Be careful - you are currently unable to send a broadcast message to more than 10,000 users.
      *
      * @param MessageTypeInterface $message
-     * @param array                $users
+     * @param array                $userOpenIDs
      *
      * @return int
-     *
-     * @throws GuzzleException
-     * @throws ApiErrorException
-     * @throws InvalidArgumentException
+     * 
+     * @throws BadMessagingResponseFormatException
      */
-    public function users (MessageTypeInterface $message, array $users)
+    public function sendToUsers (MessageTypeInterface $message, array $userOpenIDs)
     {
-        if (count($users) > 10000) {
-            throw new InvalidArgumentException("Cannot send broadcast to more than 10,000 users.");
-        }
-
         $json = (new BroadcastMessageFormatter())->format($message);
-        $json['touser'] = array_values($users);
+        $json['touser'] = array_values($userOpenIDs);
 
         $request = new Request(
             "POST",
@@ -41,26 +38,30 @@ class BroadcastMessageService extends Service
             json_encode($json)
         );
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
+        $json = json_decode($response->getBody());
 
-        return $json['msg_id'];
+        if (! isset($json->msg_id)) {
+            throw new BadMessagingResponseFormatException("expected property: `msg_id`", $response);
+        }
+
+        return $json->msg_id;
     }
 
     /**
      * Send the supplied message to all users that belong to the specified group id.
      *
      * @param MessageTypeInterface $message
-     * @param int                  $group
+     * @param int                  $groupID
      *
      * @return int
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
-    public function group (MessageTypeInterface $message, $group)
+    public function sendToGroup (MessageTypeInterface $message, $groupID)
     {
         $json = (new BroadcastMessageFormatter())->format($message);
-        $json['filter']['group_id'] = (int)$group;
+        $json['filter']['group_id'] = (int)$groupID;
 
         $request = new Request(
             "POST",
@@ -69,26 +70,30 @@ class BroadcastMessageService extends Service
             json_encode($json)
         );
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
+        $json = json_decode($response->getBody());
 
-        return $json['msg_id'];
+        if (! isset($json->msg_id)) {
+            throw new BadMessagingResponseFormatException("expected property: `msg_id`", $response);
+        }
+
+        return $json->msg_id;
     }
 
     /**
      * Send a preview of the broadcast message to the specified OA user.
      *
      * @param MessageTypeInterface $message
-     * @param string               $user
+     * @param string               $userOpenID
      *
      * @return int
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
-    public function preview (MessageTypeInterface $message, $user)
+    public function sendPreview (MessageTypeInterface $message, $userOpenID)
     {
         $json = (new BroadcastMessageFormatter())->format($message);
-        $json["touser"] = (string)$user;
+        $json["touser"] = (string)$userOpenID;
 
         $request = new Request(
             "POST",
@@ -102,22 +107,21 @@ class BroadcastMessageService extends Service
     /**
      * Deletes the broadcast with the given message id.
      *
-     * @param int $messageId
+     * @param int $broadcastMessageID
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
-    public function delete ($messageId)
+    public function deleteMessage ($broadcastMessageID)
     {
-        $json = ["msg_id" => (int)$messageId];
-
-        $request = new Request(
-            "POST",
-            "https://api.weixin.qq.com/cgi-bin/message/mass/delete",
-            [],
-            json_encode($json)
+        $this->client->send(
+            new Request(
+                "POST",
+                "https://api.weixin.qq.com/cgi-bin/message/mass/delete",
+                [],
+                json_encode(['msg_id' => (int)$broadcastMessageID])
+            )
         );
-        $this->client->send($request);
     }
 
     /**
@@ -126,16 +130,16 @@ class BroadcastMessageService extends Service
      *
      * As more information becomes available through the API, it will be added in the result.
      *
-     * @param int $messageId The id of the broadcast message to query.
+     * @param int $broadcastMessageID - The ID of the broadcast message to query.
      *
      * @return array
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
-    public function query ($messageId)
+    public function queryStatus ($broadcastMessageID)
     {
-        $json = ["msg_id" => (int)$messageId];
+        $json = ["msg_id" => (int)$broadcastMessageID];
 
         $request = new Request(
             "POST",
@@ -146,9 +150,8 @@ class BroadcastMessageService extends Service
         $response = $this->client->send($request);
         $json = json_decode($response->getBody(), true);
 
-        $result = [];
-        $result['sent'] = (strtoupper($json['msg_status']) === 'SEND_SUCCESS');
-
-        return $result;
+        return [
+            'status' => strtolower($json['msg_status']),
+        ];
     }
 }

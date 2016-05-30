@@ -2,9 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging\Type;
 
-use Garbetjie\WeChatClient\Service\Messaging\Type\AbstractMediaMessageType;
-
-class ImageMessageMessageType extends AbstractMediaMessageType
+class ImageMessageType extends AbstractMediaMessageType
 {
     protected $type = 'image';
 }

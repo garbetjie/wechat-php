@@ -2,9 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging\Type;
 
-use Garbetjie\WeChatClient\Service\Messaging\Type\AbstractMediaMessageType;
-
-class ArticleMessageMessageType extends AbstractMediaMessageType
+class ArticleMessageType extends AbstractMediaMessageType
 {
     protected $type = 'mpnews';
 }

@@ -9,5 +9,5 @@ interface MessageTypeInterface
      *
      * @return string
      */
-    public function type ();
+    public function getType ();
 }

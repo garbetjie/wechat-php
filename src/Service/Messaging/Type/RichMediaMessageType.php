@@ -2,7 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging\Type;
 
-use Garbetjie\WeChatClient\Service\Messaging\Type\AbstractMessageType;
 use InvalidArgumentException;
 
 class RichMediaMessageType extends AbstractMessageType
@@ -30,36 +29,46 @@ class RichMediaMessageType extends AbstractMessageType
                 $args[] = isset($item[$key]) ? $item[$key] : null;
             }
 
-            call_user_func_array([$this, 'addItem'], $item);
+            $self = call_user_func_array([$this, 'withItem'], $item);
+        }
+
+        // Set items.
+        if (isset($self)) {
+            $this->items = $self->items;
         }
     }
 
     /**
-     * Adds a new item to the rich media message.
+     * Adds a new item to the rich media message. Messaging type is immutable, so a cloned instance will be returned.
      *
      * @param string $title
      * @param string $description
      * @param string $url
      * @param string $image
+     *
+     * @return RichMediaMessageType
      */
-    public function addItem ($title, $description, $url, $image)
+    public function withItem ($title, $description, $url, $image)
     {
         // Basic validation.
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('Invalid URL for \'$url\'');
         }
 
-        if (filter_Var($image, FILTER_VALIDATE_URL) === false) {
+        if (filter_var($image, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('Invalid URL for \'$image\'');
         }
 
-        $this->items[] = compact('title', 'description', 'url', 'image');
+        $cloned = clone $this;
+        $cloned->items[] = compact('title', 'description', 'url', 'image');
+
+        return $cloned;
     }
 
     /**
      * @return array
      */
-    public function items ()
+    public function getItems ()
     {
         return $this->items;
     }

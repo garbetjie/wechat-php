@@ -16,11 +16,11 @@ class BroadcastMessageFormatter
      */
     public function format (MessageTypeInterface $type)
     {
-        $json = ['msgtype' => $type->type()];
+        $json = ['msgtype' => $type->getType()];
 
-        $method = 'format' . ucfirst($type->type());
+        $method = 'format' . ucfirst($type->getType());
         if (method_exists($this, $method)) {
-            $json[$type->type()] = $this->$method($type);
+            $json[$type->getType()] = $this->$method($type);
         } elseif ($type instanceof AbstractMediaMessageType) {
             $json[$type->type()] = ['media_id' => $type->id];
         }

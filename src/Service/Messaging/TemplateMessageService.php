@@ -2,8 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging;
 
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\APIErrorException;
 use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Service\Messaging\Exception\BadMessagingResponseFormatException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
@@ -21,7 +22,7 @@ class TemplateMessageService extends Service
      * @return int
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
     public function convert ($short)
     {
@@ -38,59 +39,44 @@ class TemplateMessageService extends Service
      *
      * Returns a message ID that can be used to query the send status of the message at a later stage.
      *
-     * @param       $template
-     * @param       $recipient
-     * @param       $url
-     * @param array $data
-     * @param array $options
+     * @param string $templateID
+     * @param string $recipientOpenID
+     * @param string $url
+     * @param array  $data
+     * @param array  $options
      *
-     * @return mixed
+     * @return string
      *
-     * @throws GuzzleException
-     * @throws ApiErrorException
      * @throws InvalidArgumentException
      */
-    public function send ($template, $recipient, $url, array $data, array $options = [])
+    public function send ($templateID, $recipientOpenID, $url, array $data, array $options = [])
     {
         if (! filter_var($url, FILTER_VALIDATE_URL)) {
             throw new InvalidArgumentException('$url must be a valid URL.');
         }
 
-        $json = [
-            'touser'      => (string)$recipient,
-            'template_id' => (string)$template,
-            'url'         => (string)$url,
-            'data'        => [],
-        ];
-
-        if (isset($options['color']) && static::validateColor($options['color'])) {
-            $json['topcolor'] = '#' . strtoupper(ltrim($options['color'], '#'));
-        }
-
-        foreach ($data as $fieldName => $fieldValue) {
-            if (! is_array($fieldValue)) {
-                $json['data'][$fieldName] = ['value' => $fieldValue];
-            } else {
-                $json['data'][$fieldName] = [
-                    'value' => $fieldValue['value'],
-                ];
-
-                if (isset($fieldValue['color']) && static::validateColor($fieldValue['color'])) {
-                    $json['data'][$fieldName]['color'] = '#' . strtoupper(ltrim($fieldValue['color'], '#'));
-                }
-            }
-        }
-
-        $request = new Request("POST", "https://api.weixin.qq.com/cgi-bin/message/template/send", [],
-            json_encode($json));
+        $request = new Request(
+            "POST",
+            "https://api.weixin.qq.com/cgi-bin/message/template/send",
+            [],
+            json_encode(
+                (new TemplateMessageFormatter())->format(
+                    $templateID,
+                    $recipientOpenID,
+                    $url,
+                    $data,
+                    $options
+                )
+            )
+        );
+        
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
+        $json = json_decode($response->getBody());
 
-        return $json['msgid'];
-    }
+        if (! isset($json->msgid)) {
+            throw new BadMessagingResponseFormatException("expected property: `msgid`", $response);
+        }
 
-    static protected function validateColor ($color)
-    {
-        return preg_match('/^(#)?([a-f0-9]{3}|[a-f0-9]{6})$/i', $color);
+        return $json->msgid;
     }
 }

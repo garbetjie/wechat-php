@@ -2,8 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging\Type;
 
-use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
-
 abstract class AbstractMessageType implements MessageTypeInterface
 {
     /**
@@ -14,7 +12,7 @@ abstract class AbstractMessageType implements MessageTypeInterface
     /**
      * @return string
      */
-    public function type ()
+    public function getType ()
     {
         return $this->type;
     }

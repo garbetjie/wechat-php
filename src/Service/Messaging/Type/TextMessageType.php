@@ -2,8 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Service\Messaging\Type;
 
-use Garbetjie\WeChatClient\Service\Messaging\Type\AbstractMessageType;
-
 class TextMessageType extends AbstractMessageType
 {
     /**
@@ -16,7 +14,7 @@ class TextMessageType extends AbstractMessageType
      * 
      * @var string
      */
-    public $content;
+    private $content;
 
     /**
      * @param string $content
@@ -24,5 +22,13 @@ class TextMessageType extends AbstractMessageType
     public function __construct ( $content )
     {
         $this->content = $content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContent ()
+    {
+        return $this->content;
     }
 }
