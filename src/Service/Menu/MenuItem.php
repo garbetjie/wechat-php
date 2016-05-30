@@ -130,36 +130,43 @@ class MenuItem
     }
 
     /**
-     * Adds a new item to the menu.
+     * Adds a new item to the menu. Ensures the menu item remains immutable.
      *
      * @param MenuItem $item
      *
      * @return MenuItem
      */
-    public function addItem (MenuItem $item)
+    public function withItem (MenuItem $item)
     {
         if (count($this->items) >= 5) {
             throw new LengthException("Maximum of 5 items allowed in a sub-menu.");
         }
 
-        $this->items[] = $item;
-
-        return $item;
+        $cloned = clone $this;
+        $cloned->items[] = $item;
+        
+        return $cloned;
     }
 
     /**
-     * Removes the specified item from the menu.
+     * Removes the specified item from the menu. Ensures the menu item remains immutable.
      *
      * @param MenuItem $item
+     * 
+     * @return MenuItem
      */
-    public function removeItem (MenuItem $item)
+    public function withoutItem (MenuItem $item)
     {
-        foreach ($this->items as $storedIndex => $storedItem) {
+        $cloned = clone $this;
+        
+        foreach ($cloned->items as $storedIndex => $storedItem) {
             if ($storedItem === $item) {
-                unset($this->items[$storedIndex]);
+                unset($cloned->items[$storedIndex]);
                 break;
             }
         }
+        
+        return $cloned;
     }
 
     /**

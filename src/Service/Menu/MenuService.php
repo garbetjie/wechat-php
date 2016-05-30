@@ -56,7 +56,7 @@ class MenuService extends Service
         $menu = new Menu();
 
         foreach ($json->menu->button as $item) {
-            $menu->addItem($this->inflateItem($item));
+            $menu = $menu->withItem($this->inflateItem($item));
         }
 
         return $menu;
@@ -179,7 +179,7 @@ class MenuService extends Service
         if (isset($item->sub_button) & count($item->sub_button) > 0) {
             $object = new MenuItem($item->name, MenuItem::KEYWORD);
             foreach ($item->sub_button as $subItem) {
-                $object->addItem($this->inflateItem($subItem));
+                $object = $object->withItem($this->inflateItem($subItem));
             }
         } else {
             if (isset($item->url)) {

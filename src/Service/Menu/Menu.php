@@ -21,35 +21,42 @@ class Menu
     }
 
     /**
-     * Adds a new item to the menu.
+     * Adds a new item to the menu. Ensures the menu remains immutable.
      *
      * @param MenuItem $item
      *
-     * @return MenuItem
+     * @return Menu
      */
-    public function addItem (MenuItem $item)
+    public function withItem (MenuItem $item)
     {
         if (count($this->items) >= 3) {
             throw new LengthException("Maximum of 3 items allowed in a menu.");
         }
 
-        $this->items[] = $item;
+        $cloned = clone $this;
+        $cloned->items[] = $item;
 
-        return $item;
+        return $cloned;
     }
 
     /**
      * Removes the specified item from the menu.
      *
      * @param MenuItem $item
+     * 
+     * @return Menu
      */
-    public function removeItem (MenuItem $item)
+    public function withoutItem (MenuItem $item)
     {
-        foreach ($this->items as $storedIndex => $storedItem) {
+        $cloned = clone $this;
+        
+        foreach ($cloned->items as $storedIndex => $storedItem) {
             if ($storedItem === $item) {
-                unset($this->items[$storedIndex]);
+                unset($cloned->items[$storedIndex]);
                 break;
             }
         }
+        
+        return $cloned;
     }
 }
