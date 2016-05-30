@@ -5,7 +5,7 @@ namespace Garbetjie\WeChatClient\Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
 
-class ApiErrorException extends \RuntimeException implements WeChatClientException
+class APIErrorException extends \RuntimeException implements WeChatClientException
 {
     /**
      * @var RequestInterface

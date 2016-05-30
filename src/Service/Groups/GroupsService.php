@@ -2,9 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Service\Groups;
 
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
+use Garbetjie\WeChatClient\Exception\APIErrorException;
 use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
 use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Service\Groups\Exception\BadGroupsResponseFormatException;
 use Garbetjie\WeChatClient\Service\Groups\Group;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
@@ -21,7 +22,7 @@ class GroupsService extends Service
      *
      * @throws GuzzleException
      * @throws BadResponseFormatException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
     public function createGroup ($name)
     {
@@ -33,12 +34,12 @@ class GroupsService extends Service
 
         $request = new Request("POST", "https://api.weixin.qq.com/cgi-bin/groups/create", [], $json);
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
-
-        if (isset($json['group']['id'], $json['group']['name'])) {
-            return new Group($json['group']['id'], $json['group']['name']);
+        $json = json_decode($response->getBody());
+        
+        if (isset($json->group->id, $json->group->name)) {
+            return new Group($json->group->id, $json->group->name);
         } else {
-            throw new BadResponseFormatException("unexpected JSON response: " . json_encode($json));
+            throw new BadGroupsResponseFormatException("expected properties :`id`, `name`", $response);
         }
     }
 
@@ -48,19 +49,21 @@ class GroupsService extends Service
      * @return Group[]
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
     public function getAllGroups ()
     {
         $request = new Request("GET", "https://api.weixin.qq.com/cgi-bin/groups/get");
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
+        $json = json_decode($response->getBody());
         $groups = [];
 
-        if (isset($json['groups'])) {
-            foreach ($json['groups'] as $group) {
-                $groups[] = new Group($group['id'], $group['name'], $group['count']);
+        if (isset($json->groups)) {
+            foreach ($json->groups as $group) {
+                $groups[] = new Group($group->id, $group->name, $group->count);
             }
+        } else {
+            throw new BadGroupsResponseFormatException("expected property: `groups`", $response);
         }
 
         return $groups;
@@ -72,7 +75,7 @@ class GroupsService extends Service
      * @param Group $group
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
     public function updateGroup (Group $group)
     {
