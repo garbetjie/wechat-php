@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class Event extends AbstractInput
+class EventInput extends AbstractInput
 {
     /**
      * @var string
@@ -17,12 +17,14 @@ class Event extends AbstractInput
     private $params = [];
 
     /**
-     * Event constructor.
+     * EventInput constructor.
      *
      * @param SimpleXMLElement $xml
      */
     public function __construct (SimpleXMLElement $xml)
     {
+        parent::__construct($xml);
+        
         $this->event = strtolower($xml->Event);
         $method = sprintf('parseEvent_%s', ucfirst($this->event));
 
@@ -34,7 +36,7 @@ class Event extends AbstractInput
     /**
      * @return string
      */
-    public function event ()
+    public function getEventName ()
     {
         return $this->event;
     }
@@ -42,7 +44,7 @@ class Event extends AbstractInput
     /**
      * @return array
      */
-    public function params ()
+    public function getEventAttributes ()
     {
         return $this->params;
     }
@@ -50,7 +52,7 @@ class Event extends AbstractInput
     /**
      * @return string
      */
-    public function emits ()
+    public function getEmittedEvent ()
     {
         return 'event';
     }
@@ -61,7 +63,7 @@ class Event extends AbstractInput
      *
      * @return mixed
      */
-    public function param ($param, $default = null)
+    public function getEventAttribute ($param, $default = null)
     {
         return array_key_exists($param, $this->params) ? $this->params[$param] : $default;
     }

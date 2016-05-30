@@ -2,10 +2,11 @@
 
 namespace Garbetjie\WeChatClient\Responder;
 
+use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
 use League\Event\Emitter;
 use League\Event\EventInterface;
 use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
-use Garbetjie\WeChatClient\Responder\Input\Event;
+use Garbetjie\WeChatClient\Responder\Input\EventInput;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class Dispatcher
@@ -52,11 +53,11 @@ class Dispatcher
      */
     public function handle (InputInterface $input)
     {
-        $emits = $input->emits();
+        $emits = $input->getEmittedEvent();
 
         // Check if the event is a mapped event.
-        if ($input->emits() === 'event' && $input instanceof Event) {
-            $event = $input->event();
+        if ($input->getEmittedEvent() === 'event' && $input instanceof EventInput) {
+            $event = $input->getEventName();
             if (isset($this->eventEmitterMapping[$event])) {
                 $emits = $this->eventEmitterMapping[$event];
             }
@@ -87,8 +88,6 @@ class Dispatcher
             if ($reply !== null) {
                 if ($reply === false || $reply instanceof MessageTypeInterface) {
                     $stop = true;
-                } else {
-                    throw new Exception('$reply must be an instance of ' . MessageTypeInterface::class);
                 }
             }
 
@@ -171,17 +170,6 @@ class Dispatcher
      * @param array $args Additional arguments to be passed to the handler.
      */
     public function unsubscribe (callable $handler, array $args = [])
-    {
-        $this->emitter->addListener(__FUNCTION__, $this->wrap($handler, $args));
-    }
-
-    /**
-     * Handle incoming QR code scan events.
-     *
-     * @param callable $handler
-     * @param array $args Additional arguments to be passed to the handler.
-     */
-    public function scan (callable $handler, array $args = [])
     {
         $this->emitter->addListener(__FUNCTION__, $this->wrap($handler, $args));
     }

@@ -2,6 +2,8 @@
 
 namespace Garbetjie\WeChatClient\Responder;
 
+use Garbetjie\WeChatClient\Responder\Exception\BadInputFormatException;
+use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
 use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
 use Garbetjie\WeChatClient\Responder\Input\AbstractInput;
 use Psr\Http\Message\ResponseInterface;
@@ -76,10 +78,10 @@ class Responder
             $input = $this->input === null ? file_get_contents('php://input') : $this->input;
             $xml = new SimpleXMLElement($input);
         } catch (\Exception $e) {
-            throw new Exception("Unable to parse input as XML.", null, $e);
+            throw new BadInputFormatException("cannot parse input as XML.", null, $e);
         }
 
-        $input = AbstractInput::create($xml);
+        $input = (new InputBuilder())->build($xml);
         $reply = $this->on->handle($input);
         $formatter = new ReplyFormatter();
         
@@ -156,7 +158,7 @@ class Responder
      *
      * @param MessageTypeInterface $message
      */
-    public function defaultReply (MessageTypeInterface $message)
+    public function setDefaultReply (MessageTypeInterface $message)
     {
         $this->defaultReply = $message;
     }

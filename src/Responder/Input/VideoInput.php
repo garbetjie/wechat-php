@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class Video extends AbstractInput
+class VideoInput extends AbstractInput
 {
     /**
      * @var bool
@@ -29,6 +29,8 @@ class Video extends AbstractInput
      */
     public function __construct (SimpleXMLElement $xml, $sight)
     {
+        parent::__construct($xml);
+
         $this->sight = (bool)$sight;
         $this->mediaID = (string)$xml->MediaId;
         $this->thumbnailID = (string)$xml->ThumbnailId;
@@ -67,7 +69,7 @@ class Video extends AbstractInput
     /**
      * @return string
      */
-    public function emits ()
+    public function getEmittedEvent ()
     {
         return 'video';
     }

@@ -10,30 +10,30 @@ interface InputInterface
     /**
      * @return string
      */
-    public function sender ();
+    public function getSender ();
 
     /**
      * @return string
      */
-    public function recipient ();
+    public function getRecipient ();
 
     /**
      * @return DateTime
      */
-    public function created ();
+    public function getCreatedDate ();
 
     /**
      * @return string
      */
-    public function id ();
+    public function getID ();
 
     /**
      * @return string
      */
-    public function unique ();
+    public function getUniqueHash ();
 
     /**
      * @return string
      */
-    public function emits ();
+    public function getEmittedEvent ();
 }

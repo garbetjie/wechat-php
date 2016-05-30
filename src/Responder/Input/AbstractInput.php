@@ -29,36 +29,22 @@ abstract class AbstractInput implements InputInterface
     private $id;
 
     /**
-     * @param SimpleXMLElement $xml
+     * AbstractInput constructor.
      *
-     * @return InputInterface
+     * @param SimpleXMLElement $xml
      */
-    static public function create (SimpleXMLElement $xml)
+    public function __construct (\SimpleXMLElement $xml)
     {
-        // Start parsing the input.
-        $type = strtolower($xml->MsgType);
-        $function = 'parseInput_' . ucfirst($type);
-        $method = static::class . '::' . $function;
-
-        if (is_callable($method)) {
-            $input = call_user_func($method, $xml);
-        } else {
-            // @todo: implement unexpected input handling.
-        }
-
-        /* @var AbstractInput $input */
-        $input->sender = (string)$xml->FromUserName;
-        $input->recipient = (string)$xml->ToUserName;
-        $input->created = DateTime::createFromFormat('U', (int)$xml->CreateTime);
-        $input->id = (int)$xml->MsgId;
-
-        return $input;
+        $this->sender = (string)$xml->FromUserName;
+        $this->recipient = (string)$xml->ToUserName;
+        $this->created = DateTime::createFromFormat('U', (int)$xml->CreateTime);
+        $this->id = (int)$xml->MsgId;
     }
 
     /**
      * @return string
      */
-    public function sender ()
+    public function getSender ()
     {
         return $this->sender;
     }
@@ -66,7 +52,7 @@ abstract class AbstractInput implements InputInterface
     /**
      * @return string
      */
-    public function recipient ()
+    public function getRecipient ()
     {
         return $this->recipient;
     }
@@ -74,7 +60,7 @@ abstract class AbstractInput implements InputInterface
     /**
      * @return DateTime
      */
-    public function created ()
+    public function getCreatedDate ()
     {
         return $this->created;
     }
@@ -82,7 +68,7 @@ abstract class AbstractInput implements InputInterface
     /**
      * @return string
      */
-    public function id ()
+    public function getID ()
     {
         return $this->id;
     }
@@ -90,88 +76,8 @@ abstract class AbstractInput implements InputInterface
     /**
      * @return string
      */
-    public function unique ()
+    public function getUniqueHash ()
     {
-        return hash('sha1', $this->id() . $this->created()->format('U'));
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Text
-     */
-    static private function parseInput_Text (SimpleXMLElement $xml)
-    {
-        return new Input\Text($xml, false);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Image
-     */
-    static private function parseInput_Image (SimpleXMLElement $xml)
-    {
-        return new Input\Image($xml);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Audio
-     */
-    static private function parseInput_Voice (SimpleXMLElement $xml)
-    {
-        return new Input\Audio($xml);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Video
-     */
-    static private function parseInput_Shortvideo (SimpleXMLElement $xml)
-    {
-        return new Input\Video($xml, true);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Video
-     */
-    static private function parseInput_Video (SimpleXMLElement $xml)
-    {
-        return new Input\Video($xml, false);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Location
-     */
-    static private function parseInput_Location (SimpleXMLElement $xml)
-    {
-        return new Input\Location($xml);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Link
-     */
-    static private function parseInput_Link (SimpleXMLElement $xml)
-    {
-        return new Input\Link($xml);
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     *
-     * @return Event
-     */
-    static private function parseInput_Event (SimpleXMLElement $xml)
-    {
-        return new Input\Event($xml);
+        return hash('sha1', $this->getID() . $this->getCreatedDate()->format('U'));
     }
 }
