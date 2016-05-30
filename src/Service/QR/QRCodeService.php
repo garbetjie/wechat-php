@@ -3,17 +3,12 @@
 namespace Garbetjie\WeChatClient\Service\QR;
 
 use DateTime;
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Service\QR\CodeInterface;
-use Garbetjie\WeChatClient\Service\QR\Exception;
-use Garbetjie\WeChatClient\Service\QR\PermanentCode;
-use Garbetjie\WeChatClient\Service\QR\TemporaryCode;
-use GuzzleHttp\Exception\GuzzleException;
+use Garbetjie\WeChatClient\Service\QR\Exception\IOException;
+use Garbetjie\WeChatClient\Service\QR\Exception\BadQRCodeResponseFormatException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
-use Garbetjie\WeChatClient\Client;
 
 class QRCodeService extends Service
 {
@@ -28,10 +23,9 @@ class QRCodeService extends Service
      *                              code should expire.
      *
      * @return TemporaryCode
-     *
+     * 
      * @throws InvalidArgumentException
-     * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws BadQRCodeResponseFormatException
      */
     public function temporary ($value, $expires = 1800)
     {
@@ -41,10 +35,8 @@ class QRCodeService extends Service
 
         if ($expires > 1800) {
             $expires = 1800;
-        } else {
-            if ($expires < 1) {
-                throw new InvalidArgumentException("Code expiry can not be less than 1 second.");
-            }
+        } elseif ($expires < 1) {
+            throw new InvalidArgumentException("Code expiry can not be less than 1 second.");
         }
 
         $args = $this->createCode([
@@ -67,9 +59,8 @@ class QRCodeService extends Service
      * @param string|int $value
      *
      * @return PermanentCode
-     *
-     * @throws GuzzleException
-     * @throws ApiErrorException
+     * 
+     * @throws BadQRCodeResponseFormatException
      */
     public function permanent ($value)
     {
@@ -96,9 +87,7 @@ class QRCodeService extends Service
      *
      * @return resource
      *
-     * @throws GuzzleException
-     * @throws ApiErrorException
-     * @throws Exception
+     * @throws IOException
      */
     public function download (CodeInterface $code, $into = null)
     {
@@ -107,7 +96,7 @@ class QRCodeService extends Service
         } elseif (is_string($into)) {
             $stream = fopen($into, 'wb');
             if (! $stream) {
-                throw new Exception("Can't open file `{$into}` for writing.");
+                throw new IOException("Can't open file `{$into}` for writing.");
             }
         } else {
             $stream = tmpfile();
@@ -127,23 +116,28 @@ class QRCodeService extends Service
      * @param array $body
      *
      * @return array
-     *
-     * @throws GuzzleException
-     * @throws ApiErrorException
      */
     protected function createCode (array $body)
     {
         $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/qrcode/create', [], json_encode($body));
         $response = $this->client->send($request);
+        $json = json_decode($response->getBody());
+        
+        // Permanent QR code.
+        if (in_array($body['action_name'], ['QR_LIMIT_SCENE', 'QR_LIMIT_STR_SCENE'])) {
+            if (!isset($json->ticket, $json->url)) {
+                throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`", $response);
+            }
 
-        $json = json_decode($response->getBody(), true);
-        $ticket = $json['ticket'];
-        $url = $json['url'];
-
-        if ($body['action_name'] === 'QR_LIMIT_SCENE' || $body['action_name'] === 'QR_LIMIT_STR_SCENE') {
-            return [$ticket, $url];
-        } else {
-            return [$ticket, $url, DateTime::createFromFormat('U', time() + $json['expire_seconds'])];
+            return [$json->ticket, $json->url];
+        }
+        // Temporary QR code.
+        else {
+            if (!isset($json->ticket, $json->url, $json->expire_seconds)) {
+                throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`, `expire_seconds`", $response);
+            }
+            
+            return [$json->ticket, $json->url, DateTime::createFromFormat('U', time() + $json->expire_seconds)];
         }
     }
 }
