@@ -16,13 +16,13 @@ class BulkURLService extends Service
 {
     /**
      * Shortens all the given URLs.
-     * 
+     *
      * If a callback is given, it needs to have the following signature:
      * `function (RequestException $error = null, $short = '', $long = '')`
-     * 
+     *
      * If an error occurs attempting to shorten a URL, the $error parameter will be populated with an instance of
-     * `GuzzleHttp\Exception\RequestException`.
-     * 
+     * `GuzzleHttp\MenuException\RequestException`.
+     *
      * If no callback is given, an array containing a long => short URL mapping is returned.
      *
      * @param array    $urls
@@ -51,7 +51,7 @@ class BulkURLService extends Service
             }
         };
 
-        if (! isset($callback)) {
+        if (! is_callable($callback)) {
             $shortened = array_combine($urls, array_pad([], count($urls), null));
             $callback = function ($error, $short, $long) use (&$shortened) {
                 if ($error === null) {
@@ -66,9 +66,11 @@ class BulkURLService extends Service
             $requests($urls),
             [
                 'fulfilled' => function (ResponseInterface $response, $index) use ($urls, $callback) {
-                    $json = json_decode((string)$response->getBody(), true);
+                    $json = json_decode((string)$response->getBody());
                     $long = $urls[$index];
-                    call_user_func($callback, null, $json['short_url'], $long);
+                    $short = isset($json->short_url) ? $json->short_url : null;
+
+                    call_user_func($callback, null, $short, $long);
                 },
                 'rejected'  => function (RequestException $reason) use (&$failed, $callback) {
                     call_user_func($callback, $reason, null, null);
@@ -106,7 +108,7 @@ class BulkURLService extends Service
             }
         };
 
-        if (! isset($callback)) {
+        if (! is_callable($callback)) {
             $expanded = array_combine($urls, array_pad([], count($urls), null));
             $callback = function ($long, $short) use (&$expanded) {
                 $expanded[$short] = $long;
@@ -122,7 +124,7 @@ class BulkURLService extends Service
             [
                 'options' => [
                     RequestOptions::ALLOW_REDIRECTS => [
-                        'max'         => 5,
+                        'max'         => 10,
                         'strict'      => true,
                         'on_redirect' => function (
                             RequestInterface $request,

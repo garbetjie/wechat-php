@@ -5,6 +5,7 @@ namespace Garbetjie\WeChatClient\Service\URL;
 use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
 use Garbetjie\WeChatClient\Service;
 use Garbetjie\WeChatClient\Service\URL\BulkURLService;
+use Garbetjie\WeChatClient\Service\URL\Exception\BadURLResponseFormatException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
@@ -22,8 +23,7 @@ class URLService extends Service
      *
      * @return string
      *
-     * @throws GuzzleException
-     * @throws BadResponseFormatException
+     * @throws BadURLResponseFormatException
      */
     public function shorten ($url)
     {
@@ -34,19 +34,22 @@ class URLService extends Service
 
         $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/shorturl', [], $json);
         $response = $this->client->send($request);
-        $json = json_decode((string)$response->getBody(), true);
+        $json = json_decode((string)$response->getBody());
 
-        return $json['short_url'];
+        if (! isset($json->short_url)) {
+            throw new BadURLResponseFormatException("expected property: `short_url`", $response);
+        } else {
+            return $json->short_url;
+        }
     }
 
     /**
-     * Expands the given URL, and will return the long version of the provided shortened URL.
+     * Expands the given URL, and will return the long version of the provided shortened URL. This is done by issuing
+     * a HEAD request on the given URL.
      *
      * @param string $url
      *
      * @return string|null
-     * 
-     * @throws GuzzleException
      */
     public function expand ($url)
     {
@@ -55,10 +58,10 @@ class URLService extends Service
 
         $destination = null;
         $request = new Request("HEAD", $url);
-        
+
         $client->send($request, [
             RequestOptions::ALLOW_REDIRECTS => [
-                'max'         => 5,
+                'max'         => 10,
                 'strict'      => true,
                 'on_redirect' => function (
                     RequestInterface $request,
