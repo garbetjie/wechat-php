@@ -2,53 +2,26 @@
 
 namespace Garbetjie\WeChatClient\Service\Users;
 
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
-use Garbetjie\WeChatClient\Service\Users\User;
-use Garbetjie\WeChatClient\Service\Users\BulkUserService;
+use Garbetjie\WeChatClient\Exception\APIErrorException;
+use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Service\Users\Exception\BadUserResponseFormatException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
-use Garbetjie\WeChatClient\Client;
 
-class UserService
+class UserService extends Service
 {
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * GroupsService constructor.
-     *
-     * @param Client $client
-     */
-    public function __construct (Client $client)
-    {
-        $this->client = $client;
-    }
-
-    /**
-     * @return BulkUserService
-     */
-    public function bulk ()
-    {
-        return new BulkUserService($this->client);
-    }
-
     /**
      * Changes the group for the specified user to the specified group's ID.
      *
-     * @param string $user  The user's WeChat ID.
-     * @param int    $group The ID of the group to move the user to.
-     *
-     * @throws GuzzleException
-     * @throws ApiErrorException
+     * @param string $userOpenID - The user's WeChat ID.
+     * @param int    $groupID    - The ID of the group to move the user to.
      */
-    public function changeGroup ($user, $group)
+    public function changeGroup ($userOpenID, $groupID)
     {
         $json = json_encode([
-            'openid'     => $user,
-            'to_groupid' => $group,
+            'openid'     => $userOpenID,
+            'to_groupid' => $groupID,
         ]);
 
         $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/groups/members/update', [], $json);
@@ -58,25 +31,27 @@ class UserService
     /**
      * Retrieves the group ID of the specified user.
      *
-     * @param int $user The WeChat ID of the user to fetch the group ID for.
+     * @param int $userOpenID The WeChat ID of the user to fetch the group ID for.
      *
      * @return int
-     * 
-     * @throws GuzzleException
-     * @throws ApiErrorException
      */
-    public function group ($user)
+    public function getGroupID ($userOpenID)
     {
         $request = new Request(
             'POST',
             'https://api.weixin.qq.com/cgi-bin/groups/getid',
             [],
-            json_encode(['openid' => $user])
+            json_encode(['openid' => $userOpenID])
         );
-        $response = $this->client->send($request);
-        $json = json_decode((string)$response->getBody(), true);
 
-        return $json['groupid'];
+        $response = $this->client->send($request);
+        $json = json_decode((string)$response->getBody());
+
+        if (! isset($json->groupid)) {
+            throw new BadUserResponseFormatException("expected property: `groupid`", $response);
+        } else {
+            return $json->groupid;
+        }
     }
 
     /**
@@ -90,7 +65,7 @@ class UserService
      * @return User
      *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
     public function get ($user, $lang = 'en')
     {
@@ -106,7 +81,7 @@ class UserService
      *
      * @return int
      */
-    public function count ()
+    public function countAllUsers ()
     {
         $followers = $this->paginate(null);
 
@@ -130,12 +105,12 @@ class UserService
      * ]
      * </pre>
      *
-     * @param string $next  Optional ID of the next user to paginate from.
+     * @param string $next Optional ID of the next user to paginate from.
      *
      * @return array
-     * 
+     *
      * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws APIErrorException
      */
     public function paginate ($next = null)
     {
@@ -147,18 +122,22 @@ class UserService
 
         $request = new Request('GET', $uri);
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
-        
+        $json = json_decode($response->getBody());
+
+        if (! isset($json->total, $json->data) || ! property_exists($json, 'next_openid')) {
+            throw new BadUserResponseFormatException("expected properties: `total`, `data`, `next_openid`", $response);
+        }
+
         // Calculate total pages.
-        $pages = ceil($json['total'] / 10000);
-        if ($pages == 0) {
+        $pages = ceil($json->total / 10000);
+        if ($pages < 1) {
             $pages = 1;
         }
 
         return [
-            'next'  => $json['next_openid'] ?: null,
-            'users' => isset($json['data']['openid']) ? $json['data']['openid'] : [],
-            'total' => $json['total'],
+            'next'  => $json->next_openid ?: null,
+            'users' => isset($json->data->openid) ? $json->data->openid : [],
+            'total' => $json->total,
             'pages' => $pages,
         ];
     }

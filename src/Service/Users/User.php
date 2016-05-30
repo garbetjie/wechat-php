@@ -3,6 +3,7 @@
 namespace Garbetjie\WeChatClient\Service\Users;
 
 use DateTime;
+use DateTimeZone;
 
 /**
  * @method string nickname()
@@ -19,106 +20,119 @@ class User
     const FEMALE = 2;
     const UNKNOWN = 0;
 
+    const PROFILE_IMAGE_FULL = 0;
+    const PROFILE_IMAGE_46 = 46;
+    const PROFILE_IMAGE_64 = 64;
+    const PROFILE_IMAGE_96 = 96;
+    const PROFILE_IMAGE_132 = 132;
+
     /**
      * The ID of this user.
-     * 
+     *
      * @var string
      */
-    public $id;
+    protected $openID;
 
     /**
      * The nickname this user has given themselves.
-     * 
+     *
      * @var string
      */
-    public $nickname;
+    protected $nickname;
 
     /**
      * An integer designating the user's gender. Refer to the User::MALE, User::FEMALE, and User::UNKNOWN constants.
+     *
      * @var int
      */
-    public $gender;
+    protected $gender;
 
     /**
      * The language this user speaks.
-     * 
+     *
      * @var string
      */
-    public $language;
+    protected $language;
 
     /**
      * The city from which this user is from.
-     * 
+     *
      * @var string
      */
-    public $city;
+    protected $city;
 
     /**
      * The province from which this user is from.
-     * 
+     *
      * @var string
      */
-    public $province;
+    protected $province;
 
     /**
      * The name of the country where this user is from.
-     * 
+     *
      * @var string
      */
-    public $country;
+    protected $country;
 
     /**
      * An array containing the profile image sizes that are available for this user. The default (and biggest) size is
      * indexed 0.
-     * 
+     *
      * The available sizes are:
-     * 
+     *
      * - 0   => The biggest size (max of 640x640)
      * - 46  => 46x46 square
      * - 64  => 64x64 square
      * - 96  => 96x96 square
      * - 132 => 132x132 square
-     * 
+     *
      * @var array
      */
-    public $profileImages = [];
+    protected $profileImages = [];
 
     /**
      * If the user is currently subscribed, this will be an instance of the DateTime at which they subscribed.
-     * 
+     *
      * Otherwise, if the user is not subscribed, this will be NULL.
-     * 
+     *
      * @var DateTime|null
      */
-    public $subscribed = null;
+    protected $subscribed = null;
 
     /**
      * Any custom remarks that have been stored against this user.
-     * 
+     *
      * @var string
      */
-    public $remark;
+    protected $remark;
 
     /**
      * The ID of the group this user belongs to.
-     * 
+     *
      * @var int
      */
-    public $groupID;
+    protected $groupID;
 
     /**
      * User constructor.
      *
-     * @param array $attributes The attributes that make up the user profile.
+     * @param array|object $attributes The attributes that make up the user profile.
      */
-    public function __construct (array $attributes)
+    public function __construct ($attributes)
     {
-        if (empty($attributes['subscribe'])) {
+        // Ensure we can handle objects or arrays.
+        $attributes = new \ArrayObject($attributes);
+        
+        // Need to set the OpenID at least.
+        $this->openID = (string)$attributes['openid'];
+
+        // User is not subscribed. Do nothing.
+        if (! $attributes['subscribe']) {
             return;
         }
 
-        $this->subscribed = DateTime::createFromFormat('U', $attributes['subscribe_time'], new \DateTimeZone('UTC'));
-        $this->id = (string)$attributes['openid'];
+        $this->subscribed = new DateTime("@{$attributes['subscribe_time']}", new DateTimeZone('UTC'));
         $this->nickname = (string)$attributes['nickname'];
         $this->gender = (int)$attributes['sex'];
         $this->language = (string)$attributes['language'];
@@ -127,82 +141,146 @@ class User
         $this->country = (string)$attributes['country'];
         $this->groupID = (string)$attributes['groupid'];
         $this->remark = (string)$attributes['remark'];
-        
-        if (!empty($attributes['headimgurl'])) {
-            $this->profileImages[0] = $attributes['headimgurl']; // Biggest image.
-            
+
+        if (! empty($attributes['headimgurl'])) {
+            $this->profileImages[static::PROFILE_IMAGE_FULL] = $attributes['headimgurl']; // Biggest image.
+
             // Add additional image sizes.
-            foreach ([46, 64, 96, 132] as $size) {
-                $this->profileImages[$size] = substr($attributes['headimgurl'], 0, strrpos($attributes['headimgurl'], '/')) . '/' . $size;
+            foreach ([
+                 static::PROFILE_IMAGE_46,
+                 static::PROFILE_IMAGE_64,
+                 static::PROFILE_IMAGE_96,
+                 static::PROFILE_IMAGE_132,
+            ] as $size) {
+                $this->profileImages[$size] = substr(
+                    $attributes['headimgurl'],
+                    0,
+                    strrpos($attributes['headimgurl'], '/')
+                ) . '/' . $size;
             }
         }
     }
 
     /**
-     * Magic method to provide backwards-compatible access to the user's properties.
-     * 
-     * @param string $name
-     * @param array $arguments
-     * 
-     * @throws \BadMethodCallException
-     */
-    public function __call ($name, $arguments)
-    {
-        if (isset($this->{$name})) {
-            return $this->{$name};
-        }
-        
-        throw new \BadMethodCallException("Unknown method '{$name}'");
-    }
-
-    /**
-     * Backwards-compatible accessor for the user's group.
+     * Returns the user's group ID.
      *
-     * @deprecated
      * @return int
      */
-    public function group ()
+    public function getGroupID ()
     {
         return $this->groupID;
     }
 
     /**
-     * Backwards-compatible accessor for returning the gender as a string. Ideally, it should be using the class constants.
+     * Returns the user's gender. The gender will be returned as one of the User::MALE, User::FEMALE or User::UNKNOWN
+     * constants.
      *
-     * @deprecated
      * @return string
      */
-    public function gender ()
+    public function getGender ()
     {
-        switch ($this->gender) {
-            case self::MALE:
-                return 'male';
-            
-            case self::FEMALE:
-                return 'female';
-            
-            default:
-                return 'unknown';
-        }
+        return $this->gender;
     }
 
     /**
-     * Backwards-compatible accessor for returning whether the subscriber is subscribed or not.
+     * Returns a boolean value indicating whether or not the user is subscribed.
      *
-     * @deprecated
      * @return bool
      */
-    public function subscribed ()
+    public function isSubscribed ()
     {
         return $this->subscribed instanceof DateTime;
     }
 
     /**
-     * @deprecated 
-     * @return DateTime
+     * Returns the `DateTime` at which the user was subscribed.
+     * Returns NULL if the user is not subscribed.
+     *
+     * @return null|DateTime
      */
-    public function created ()
+    public function getSubscribedDate ()
     {
-        return $this->subscribed ?: new DateTime(0);
+        return $this->subscribed ?: null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOpenID ()
+    {
+        return $this->openID;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNickname ()
+    {
+        return $this->nickname;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLanguage ()
+    {
+        return $this->language;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCity ()
+    {
+        return $this->city;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProvince ()
+    {
+        return $this->province;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCountry ()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRemark ()
+    {
+        return $this->remark;
+    }
+
+    /**
+     * Returns the profile image(s) for the user. The sizes need to be one of the User::PROFILE_IMAGE_* constants.
+     * 
+     * Can supply an array of sizes (an array of size => URL will be returned), or a single size (will return the URL as
+     * a string).
+     * 
+     * @param array|int $size
+     *
+     * @return array|string
+     */
+    public function getProfileImage ($size = User::PROFILE_IMAGE_FULL)
+    {
+        $returnArray = is_array($size);
+        $size = array_values((array)$size);
+        $values = array_combine($size, array_pad([], count($size), null));
+
+        foreach ($size as $s) {
+            if (array_key_exists($s, $this->profileImages)) {
+                $values[$s] = $this->profileImages[$s];
+            }
+        }
+        
+        return $returnArray ? $values : $values[$size[0]];
     }
 }

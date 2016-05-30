@@ -2,47 +2,31 @@
 
 namespace Garbetjie\WeChatClient\Service\Users;
 
-use Garbetjie\WeChatClient\Service\Users\User;
+use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
-use Garbetjie\WeChatClient\Client;
 
-class BulkUserService
+class BulkUserService extends Service
 {
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * BulkURLService constructor.
-     *
-     * @param Client $client
-     */
-    public function __construct (Client $client)
-    {
-        $this->client = $client;
-    }
-
     /**
      * Changes the group for the specified users.
      *
      * Returns an array containing the WeChat IDs of any moves that failed. This means that an empty array will be
      * returned on a successful move of all users.
      *
-     * @param array $users The IDs of the users to move.
-     * @param int   $group The ID of the group to move the users to.
+     * @param array $userOpenIDs The IDs of the users to move.
+     * @param int   $group       The ID of the group to move the users to.
      *
      * @return array
      *
      * @throws InvalidArgumentException
      */
-    public function changeGroup (array $users, $group)
+    public function changeGroup (array $userOpenIDs, $group)
     {
-        if (count($users) < 1) {
+        if (count($userOpenIDs) < 1) {
             throw new InvalidArgumentException("At least one user is required.");
         }
 
@@ -65,11 +49,14 @@ class BulkUserService
 
         (new Pool(
             $this->client,
-            $requests($users),
+            $requests($userOpenIDs),
             [
                 'rejected' => function (RequestException $reason) use (&$failed) {
-                    $json = json_decode((string)$reason->getRequest()->getBody(), true);
-                    $failed = array_merge($failed, $json['openid_list']);
+                    $json = json_decode((string)$reason->getRequest()->getBody());
+
+                    if (isset($json->openid_list)) {
+                        $failed = array_merge($failed, $json->openid_list);
+                    }
                 },
             ]
         ))->promise()->wait();
@@ -97,25 +84,25 @@ class BulkUserService
      * $callback = function (RequestException $error = null, User $user = null) { };
      * </pre>
      *
-     * @param array    $users    The IDs of the users to fetch profiles for.
-     * @param callable $callback Optional callback to execute on each profile retrieval.
-     * @param string   $lang     The language to retrieve the user's details in.
+     * @param array    $userOpenIDs The IDs of the users to fetch profiles for.
+     * @param callable $callback    Optional callback to execute on each profile retrieval.
+     * @param string   $lang        The language to retrieve the user's details in.
      *
      * @return array
      *
      * @throws InvalidArgumentException
      */
-    public function get (array $users, callable $callback = null, $lang = 'en')
+    public function get (array $userOpenIDs, callable $callback = null, $lang = 'en')
     {
-        if (count($users) < 1) {
+        if (count($userOpenIDs) < 1) {
             throw new InvalidArgumentException("At least one user is required.");
         } else {
-            $users = array_unique(array_values($users));
+            $userOpenIDs = array_unique(array_values($userOpenIDs));
         }
 
         // Build requests.
-        $requests = function ($users) use ($lang) {
-            foreach ($users as $user) {
+        $requestBuilder = function ($openIDs) use ($lang) {
+            foreach ($openIDs as $user) {
                 yield new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}&lang={$lang}");
             }
         };
@@ -124,10 +111,10 @@ class BulkUserService
 
         // Set default callback.
         if (! isset($callback)) {
-            $profiles = array_combine($users, array_pad([], count($users), null));
+            $profiles = array_combine($userOpenIDs, array_pad([], count($userOpenIDs), null));
             $callback = function (RequestException $error = null, User $user = null) use (&$profiles) {
                 if ($error !== null) {
-                    $profiles[$user->id] = $user;
+                    $profiles[$user->getOpenID()] = $user;
                 }
             };
         }
@@ -135,7 +122,7 @@ class BulkUserService
         // Send requests.
         (new Pool(
             $this->client,
-            $requests($users),
+            $requestBuilder($userOpenIDs),
             [
                 'fulfilled' => function (ResponseInterface $response, $index) use ($callback) {
                     $json = json_decode($response->getBody(), true);
