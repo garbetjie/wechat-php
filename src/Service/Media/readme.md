@@ -44,7 +44,7 @@ Articles represent news articles that can be delivered to users. Each news artic
 * **author:** The name of the article's author (free text)
 * **url:** A URL at which the full version of the news article can be found.
 * **summary:** A short summary of the article message.
-* **cover:** Boolean value, indicating whether or not to show the thumbnail image.
+* **showImage:** Boolean value, indicating whether or not to show the thumbnail image.
 
 
     // Upload thumbnail first.

@@ -17,29 +17,94 @@ abstract class AbstractMediaType implements MediaTypeInterface
      *
      * @var null|string
      */
-    public $path;
+    private $path;
 
     /**
      * The DateTime at which this media item was created. Is NULL if it hasn't been uploaded/created yet.
      *
      * @var DateTime|null
      */
-    public $created;
+    private $uploaded;
 
     /**
      * The media ID of this item.
      *
      * @var null|string
      */
-    public $id;
+    private $id;
 
     /**
-     * Returns the type of this media item for use in the WeChat API.
+     * AbstractMediaType constructor.
      *
-     * @return string
+     * @param string $path - The path to the media item on the local file system.
      */
-    public function type ()
+    public function __construct ($path)
+    {
+        $this->path = $path;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getType ()
     {
         return $this->type;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getID ()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getPath ()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getUploadDate ()
+    {
+        return $this->uploaded;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setID ($id)
+    {
+        $cloned = clone $this;
+        $cloned->id = $id;
+        
+        return $cloned;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setPath ($path)
+    {
+        $cloned = clone $this;
+        $cloned->path = $path;
+        
+        return $cloned;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setUploadDate (\DateTime $uploaded)
+    {
+        $cloned = clone $this;
+        $cloned->uploaded = clone $uploaded;
+        
+        return $cloned;
     }
 }

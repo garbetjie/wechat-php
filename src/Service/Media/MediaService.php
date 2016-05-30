@@ -3,15 +3,14 @@
 namespace Garbetjie\WeChatClient\Service\Media;
 
 use DateTime;
-use Garbetjie\WeChatClient\Exception\ApiErrorException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Service\Media\Exception;
+use Garbetjie\WeChatClient\Service\Media\Exception\IOException;
+use Garbetjie\WeChatClient\Service\Media\Exception\BadMediaResponseFormatException;
+use Garbetjie\WeChatClient\Service\Media\Exception\BadMediaItemException;
 use Garbetjie\WeChatClient\Service\Media\Type\AbstractMediaType;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
-use Garbetjie\WeChatClient\Client;
 use Garbetjie\WeChatClient\Service\Media\Type\ArticleMediaType;
 use Garbetjie\WeChatClient\Service\Media\Type\MediaTypeInterface;
 
@@ -24,12 +23,13 @@ class MediaService extends Service
      * date and media id that has been set. The supplied media item will be modified.
      *
      * @param MediaTypeInterface $media
-     *
-     * @throws Exception
+     * 
+     * @throws BadMediaItemException
+     * @throws BadMediaResponseFormatException
      */
     public function upload (MediaTypeInterface $media)
     {
-        if ($media->type() === 'news') {
+        if ($media->getType() === 'news') {
             $this->uploadArticle($media);
         } else {
             $this->uploadFile($media);
@@ -43,26 +43,24 @@ class MediaService extends Service
      * 
      * @return MediaTypeInterface
      * 
-     * @throws GuzzleException
-     * @throws ApiErrorException
-     * @throws Exception
+     * @throws BadMediaItemException
      */
     protected function uploadFile (MediaTypeInterface $media)
     {
         /* @var AbstractMediaType $media */
 
-        if (! property_exists($media, 'path')) {
-            throw new Exception("Property `path` not found on media item. Cannot upload.");
+        if ($media->getPath() === null) {
+            throw new BadMediaItemException("Path not set when uploading media item. Cannot upload.");
         }
 
-        $stream = fopen($media->path, 'rb');
+        $stream = fopen($media->getPath(), 'rb');
         if (! $stream) {
-            throw new Exception("Unable to open `{$media->path}` for reading.");
+            throw new BadMediaItemException("Unable to open `{$media->getPath()}` for reading.");
         }
 
         $request = new Request(
             'POST',
-            "http://api.weixin.qq.com/cgi-bin/media/upload?type={$media->type()}",
+            "http://api.weixin.qq.com/cgi-bin/media/upload?type={$media->getType()}",
             [],
             new MultipartStream ([
                 [
@@ -73,13 +71,11 @@ class MediaService extends Service
         );
 
         $response = $this->client->send($request);
-        $json = json_decode((string)$response->getBody(), true);
+        $json = json_decode((string)$response->getBody());
         
-        $cloned = clone $media;
-        $cloned->id = $json[$media->type() === 'thumb' ? 'thumb_media_id' : 'media_id']; 
-        $cloned->created = DateTime::createFromFormat('U', $json['created_at']);
-        
-        return $cloned;
+        return $media
+            ->setID($media->getType() == 'thumb' ? 'thumb_media_id' : 'media_id')
+            ->setUploadDate(DateTime::createFromFormat('U', $json['created_at']));
     }
 
     /**
@@ -90,14 +86,13 @@ class MediaService extends Service
      * 
      * @return ArticleMediaType
      * 
-     * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws BadMediaResponseFormatException
      */
     protected function uploadArticle (ArticleMediaType $media)
     {
         $body = ['articles' => []];
 
-        foreach ($media->items() as $item) {
+        foreach ($media->getItems() as $item) {
             $article = [
                 'title'          => $item['title'],
                 'content'        => $item['content'],
@@ -105,10 +100,10 @@ class MediaService extends Service
             ];
 
             foreach ([
-                         'author'  => 'author',
-                         'url'     => 'content_source_url',
-                         'summary' => 'digest',
-                         'image'   => 'show_cover_pic',
+                         'author'    => 'author',
+                         'url'       => 'content_source_url',
+                         'summary'   => 'digest',
+                         'showImage' => 'show_cover_pic',
                      ] as $src => $dest) {
                 if (isset($item[$src])) {
                     $article[$dest] = $item[$src];
@@ -120,13 +115,15 @@ class MediaService extends Service
 
         $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/media/uploadnews", [], json_encode($body));
         $response = $this->client->send($request);
-        $json = json_decode($response->getBody(), true);
+        $json = json_decode($response->getBody());
 
-        $cloned = clone $media;
-        $cloned->id = $json['media_id'];
-        $cloned->created = DateTime::createFromFormat('U', $json['created_at']);
-        
-        return $cloned;
+        if (isset($json->media_id, $json->created_at)) {
+            return $media
+                ->setID($json->media_id)
+                ->setUploadDate(new DateTime("@{$json->created_at}"));
+        } else {
+            throw new BadMediaResponseFormatException("expected properties: `media_id`, `created_at`", $response);
+        }
     }
 
     /**
@@ -142,16 +139,16 @@ class MediaService extends Service
      *
      * @return resource
      * 
-     * @throws GuzzleException
-     * @throws ApiErrorException
+     * @throws BadMediaItemException
+     * @throws IOException
      */
     public function download (MediaTypeInterface $media, $into = null)
     {
         /* @var AbstractMediaType $media */
         
         // Must have a media id.
-        if (!property_exists($media, 'id') || ! $media->id) {
-            throw new Exception("No media id found for downloading.");
+        if ($media->getID() === null) {
+            throw new BadMediaItemException("ID not set when downloading media item. Cannot download.");
         }
 
         // Open file for writing.
@@ -160,13 +157,13 @@ class MediaService extends Service
         } elseif (is_string($into)) {
             $stream = fopen($into, 'wb');
             if (! $stream) {
-                throw new Exception("Can't open file `{$into}` for writing.");
+                throw new IOException("Can't open file `{$into}` for writing.");
             }
         } else {
             $stream = tmpfile();
         }
 
-        $request = new Request('GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$media->id}");
+        $request = new Request('GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$media->getID()}");
         $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
         
         return $response->getBody()->detach();

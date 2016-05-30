@@ -46,7 +46,7 @@ class ArticleMediaType extends AbstractMediaType
     /**
      * @return array
      */
-    public function items ()
+    public function getItems ()
     {
         return $this->items;
     }
