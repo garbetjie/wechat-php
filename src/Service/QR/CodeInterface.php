@@ -9,12 +9,12 @@ interface CodeInterface
      *
      * @return string
      */
-    public function ticket ();
+    public function getTicket ();
 
     /**
      * Gives the URL at which the QR code can be viewed.
      *
      * @return string
      */
-    public function url ();
+    public function getURL ();
 }

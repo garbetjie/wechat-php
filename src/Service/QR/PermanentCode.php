@@ -22,7 +22,7 @@ class PermanentCode implements CodeInterface
      * @param string $ticket
      * @param string $url
      */
-    public function __construct ( $ticket, $url )
+    public function __construct ($ticket, $url)
     {
         $this->ticket = $ticket;
         $this->url = $url;
@@ -33,7 +33,7 @@ class PermanentCode implements CodeInterface
      *
      * @return string
      */
-    public function ticket ()
+    public function getTicket ()
     {
         return $this->ticket;
     }
@@ -43,7 +43,7 @@ class PermanentCode implements CodeInterface
      *
      * @return string
      */
-    public function url ()
+    public function getURL ()
     {
         return $this->url;
     }

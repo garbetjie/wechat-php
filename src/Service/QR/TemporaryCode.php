@@ -29,7 +29,7 @@ class TemporaryCode implements CodeInterface
      * @param DateTime $expires
      * @param string   $url
      */
-    public function __construct ( $ticket, $url, DateTime $expires )
+    public function __construct ($ticket, $url, DateTime $expires)
     {
         $this->ticket = $ticket;
         $this->expires = $expires;
@@ -41,7 +41,7 @@ class TemporaryCode implements CodeInterface
      *
      * @return string
      */
-    public function ticket ()
+    public function getTicket ()
     {
         return $this->ticket;
     }
@@ -59,7 +59,7 @@ class TemporaryCode implements CodeInterface
      *
      * @return string
      */
-    public function url ()
+    public function getURL ()
     {
         return $this->url;
     }

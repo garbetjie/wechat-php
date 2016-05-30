@@ -23,7 +23,7 @@ class QRCodeService extends Service
      *                              code should expire.
      *
      * @return TemporaryCode
-     * 
+     *
      * @throws InvalidArgumentException
      * @throws BadQRCodeResponseFormatException
      */
@@ -59,7 +59,7 @@ class QRCodeService extends Service
      * @param string|int $value
      *
      * @return PermanentCode
-     * 
+     *
      * @throws BadQRCodeResponseFormatException
      */
     public function permanent ($value)
@@ -102,7 +102,7 @@ class QRCodeService extends Service
             $stream = tmpfile();
         }
 
-        $request = new Request('GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->ticket()}");
+        $request = new Request('GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->getTicket()}");
         $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
         $stream = $response->getBody()->detach();
 
@@ -122,21 +122,21 @@ class QRCodeService extends Service
         $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/qrcode/create', [], json_encode($body));
         $response = $this->client->send($request);
         $json = json_decode($response->getBody());
-        
+
         // Permanent QR code.
         if (in_array($body['action_name'], ['QR_LIMIT_SCENE', 'QR_LIMIT_STR_SCENE'])) {
-            if (!isset($json->ticket, $json->url)) {
+            if (! isset($json->ticket, $json->url)) {
                 throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`", $response);
             }
 
             return [$json->ticket, $json->url];
-        }
-        // Temporary QR code.
+        } // Temporary QR code.
         else {
-            if (!isset($json->ticket, $json->url, $json->expire_seconds)) {
-                throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`, `expire_seconds`", $response);
+            if (! isset($json->ticket, $json->url, $json->expire_seconds)) {
+                throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`, `expire_seconds`",
+                    $response);
             }
-            
+
             return [$json->ticket, $json->url, DateTime::createFromFormat('U', time() + $json->expire_seconds)];
         }
     }
