@@ -9,7 +9,7 @@ You can use [composer](http://getcomposer.org) to install:
 
     composer require garbetjie/wechat
 
-Requires **PHP 5.5+**.
+Requires **PHP 5.6+**.
     
 ## Basic usage
 

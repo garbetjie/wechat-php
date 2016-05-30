@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder;
 
 use Garbetjie\WeChatClient\Responder\Exception\BadInputFormatException;
 use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
-use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
 use Garbetjie\WeChatClient\Responder\Input\AbstractInput;
 use Psr\Http\Message\ResponseInterface;
 use SimpleXMLElement;

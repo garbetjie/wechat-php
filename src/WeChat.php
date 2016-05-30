@@ -7,9 +7,9 @@ use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
 use Garbetjie\WeChatClient\Exception\WeChatClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use Garbetjie\WeChatClient\Service\Authentication\AccessToken;
-use Garbetjie\WeChatClient\Service\Authentication\Storage\FileStorage;
-use Garbetjie\WeChatClient\Service\Authentication\Storage\StorageInterface;
+use Garbetjie\WeChatClient\Authentication\AccessToken;
+use Garbetjie\WeChatClient\Authentication\Storage\FileStorage;
+use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 
 class WeChat
 {
@@ -29,59 +29,59 @@ class WeChat
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\QR\QRCodeService
+     * @return \Garbetjie\WeChatClient\QR\QRCodeService
      */
     public function qr ()
     {
-        return new Service\QR\QRCodeService($this->client);
+        return new QR\QRCodeService($this->client);
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\Menu\MenuService
+     * @return \Garbetjie\WeChatClient\Menu\MenuService
      */
     public function menu ()
     {
-        return new Service\Menu\MenuService($this->client);
+        return new Menu\MenuService($this->client);
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\Media\MediaService
+     * @return \Garbetjie\WeChatClient\Media\MediaService
      */
     public function media ()
     {
-        return new Service\Media\MediaService($this->client);
+        return new Media\MediaService($this->client);
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\Messaging\PushMessageService
+     * @return \Garbetjie\WeChatClient\Messaging\PushMessageService
      */
     public function messaging ()
     {
-        return new Service\Messaging\PushMessageService($this->client);
+        return new Messaging\PushMessageService($this->client);
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\Groups\GroupsService
+     * @return \Garbetjie\WeChatClient\Groups\GroupsService
      */
     public function groups ()
     {
-        return new Service\Groups\GroupsService($this->client);
+        return new Groups\GroupsService($this->client);
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\Users\UserService
+     * @return \Garbetjie\WeChatClient\Users\UserService
      */
     public function users ()
     {
-        return new Service\Users\UserService($this->client);
+        return new Users\UserService($this->client);
     }
 
     /**
-     * @return \Garbetjie\WeChatClient\Service\URL\URLService
+     * @return \Garbetjie\WeChatClient\URL\URLService
      */
     public function urls ()
     {
-        return new Service\URL\URLService($this->client);
+        return new URL\URLService($this->client);
     }
 
     /**

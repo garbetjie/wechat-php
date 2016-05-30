@@ -6,13 +6,13 @@ use DOMCdataSection;
 use DOMDocument;
 use DOMElement;
 use Garbetjie\WeChatClient\Service\Messaging\Type\AudioMessageMessageType;
-use Garbetjie\WeChatClient\Service\Messaging\Type\AudioMessageType;
-use Garbetjie\WeChatClient\Service\Messaging\Type\ImageMessageType;
-use Garbetjie\WeChatClient\Service\Messaging\Type\MusicMessageType;
-use Garbetjie\WeChatClient\Service\Messaging\Type\RichMediaMessageType;
-use Garbetjie\WeChatClient\Service\Messaging\Type\TextMessageType;
-use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
-use Garbetjie\WeChatClient\Service\Messaging\Type\VideoMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\AudioMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\ImageMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\MusicMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\RichMediaMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\TextMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\VideoMessageType;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class ReplyFormatter

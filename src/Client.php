@@ -9,7 +9,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Garbetjie\WeChatClient\Service\Authentication\AccessToken;
+use Garbetjie\WeChatClient\Authentication\AccessToken;
 
 class Client extends GuzzleClient
 {

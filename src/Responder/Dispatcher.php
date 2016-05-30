@@ -5,7 +5,7 @@ namespace Garbetjie\WeChatClient\Responder;
 use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
 use League\Event\Emitter;
 use League\Event\EventInterface;
-use Garbetjie\WeChatClient\Service\Messaging\Type\MessageTypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
 use Garbetjie\WeChatClient\Responder\Input\EventInput;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
