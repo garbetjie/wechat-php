@@ -5,8 +5,9 @@ around interacting with the WeChat API.
 
 # Table of contents
 
-1. [Installation](#installation)
-2. [Basic usage](#basic-usage)
+1. [Installation](#1-installation)
+2. [Basic usage](#2-basic-usage)
+3. [Authentication](#3-authentication)
 
 ## 1. Installation
 
