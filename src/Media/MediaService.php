@@ -76,7 +76,7 @@ class MediaService extends Service
         $json = json_decode((string)$response->getBody());
         
         return $media
-            ->setID($media->getType() == 'thumb' ? 'thumb_media_id' : 'media_id')
+            ->withID($media->getType() == 'thumb' ? $json->thumb_media_id : $json->media_id)
             ->setUploadDate(DateTime::createFromFormat('U', $json->created_at));
     }
 
@@ -121,7 +121,7 @@ class MediaService extends Service
 
         if (isset($json->media_id, $json->created_at)) {
             return $media
-                ->setID($json->media_id)
+                ->withID($json->media_id)
                 ->setUploadDate(new DateTime("@{$json->created_at}"));
         } else {
             throw new BadMediaResponseFormatException("expected properties: `media_id`, `created_at`", $response);

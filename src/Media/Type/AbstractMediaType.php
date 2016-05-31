@@ -78,7 +78,7 @@ abstract class AbstractMediaType implements MediaTypeInterface
     /**
      * @inheritdoc
      */
-    public function setID ($id)
+    public function withID ($id)
     {
         $cloned = clone $this;
         $cloned->id = $id;
@@ -89,7 +89,7 @@ abstract class AbstractMediaType implements MediaTypeInterface
     /**
      * @inheritdoc
      */
-    public function setPath ($path)
+    public function withPath ($path)
     {
         $cloned = clone $this;
         $cloned->path = $path;
@@ -100,7 +100,7 @@ abstract class AbstractMediaType implements MediaTypeInterface
     /**
      * @inheritdoc
      */
-    public function setUploadDate (\DateTime $uploaded)
+    public function withUploadDate (\DateTime $uploaded)
     {
         $cloned = clone $this;
         $cloned->uploaded = clone $uploaded;

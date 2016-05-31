@@ -43,7 +43,7 @@ interface MediaTypeInterface
      *
      * @return MediaTypeInterface
      */
-    public function setID ($id);
+    public function withID ($id);
 
     /**
      * Set the path to the media item on the local file system.
@@ -54,7 +54,7 @@ interface MediaTypeInterface
      *
      * @return MediaTypeInterface
      */
-    public function setPath ($path);
+    public function withPath ($path);
 
     /**
      * Set the date of when the media item was uploaded.
@@ -65,5 +65,5 @@ interface MediaTypeInterface
      *
      * @return MediaTypeInterface
      */
-    public function setUploadDate (\DateTime $uploaded);
+    public function withUploadDate (\DateTime $uploaded);
 }
