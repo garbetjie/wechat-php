@@ -49,7 +49,7 @@ class TemporaryCode implements CodeInterface
     /**
      * @return DateTime
      */
-    public function expires ()
+    public function getExpiryDate ()
     {
         return $this->expires;
     }

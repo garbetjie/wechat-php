@@ -2,10 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Authentication;
 
+use Garbetjie\WeChatClient\Authentication\Exception\AuthenticationException;
 use Garbetjie\WeChatClient\Authentication\Storage\FileStorage;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Authentication\Exception\BadAuthenticationResponseFormatException;
 use GuzzleHttp\Psr7\Request;
 
 class AuthenticationService extends Service
@@ -19,7 +19,7 @@ class AuthenticationService extends Service
      *
      * @return AccessToken
      *
-     * @throws BadAuthenticationResponseFormatException
+     * @throws AuthenticationException
      */
     public function authenticate ($appId, $secretKey, StorageInterface $storage = null)
     {
@@ -54,6 +54,6 @@ class AuthenticationService extends Service
             return $token;
         }
         
-        throw new BadAuthenticationResponseFormatException("expected properties: `access_token`, `expires_in`", $response);
+        throw new AuthenticationException("bad response: expected properties `access_token`, `expires_in`");
     }
 }

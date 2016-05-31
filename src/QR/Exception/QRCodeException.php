@@ -2,7 +2,9 @@
 
 namespace Garbetjie\WeChatClient\QR\Exception;
 
-interface QRCodeException
-{
+use Garbetjie\WeChatClient\Exception\WeChatClientException;
 
+class QRCodeException extends \Exception implements WeChatClientException
+{
+    // void
 }

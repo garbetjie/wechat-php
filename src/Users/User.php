@@ -5,15 +5,6 @@ namespace Garbetjie\WeChatClient\Users;
 use DateTime;
 use DateTimeZone;
 
-/**
- * @method string nickname()
- * @method string city()
- * @method string province()
- * @method string country()
- * @method string language()
- * @method string id()
- * @method string remark()
- */
 class User
 {
     const MALE = 1;

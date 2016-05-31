@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Groups\Exception;
 
 use Garbetjie\WeChatClient\Exception\WeChatClientException;
 
-interface GroupsException extends WeChatClientException
+class GroupsException extends \Exception implements WeChatClientException
 {
-
+    // void
 }

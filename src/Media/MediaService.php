@@ -3,16 +3,15 @@
 namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
+use Garbetjie\WeChatClient\Media\Exception\MediaException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Media\Exception\IOException;
-use Garbetjie\WeChatClient\Media\Exception\BadMediaResponseFormatException;
-use Garbetjie\WeChatClient\Media\Exception\BadMediaItemException;
 use Garbetjie\WeChatClient\Media\Type\AbstractMediaType;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Garbetjie\WeChatClient\Media\Type\ArticleMediaType;
 use Garbetjie\WeChatClient\Media\Type\MediaTypeInterface;
+use InvalidArgumentException;
 
 class MediaService extends Service
 {
@@ -26,8 +25,8 @@ class MediaService extends Service
      * 
      * @return MediaTypeInterface
      * 
-     * @throws BadMediaItemException
-     * @throws BadMediaResponseFormatException
+     * @throws InvalidArgumentException
+     * @throws MediaException
      */
     public function upload (MediaTypeInterface $media)
     {
@@ -45,19 +44,19 @@ class MediaService extends Service
      * 
      * @return MediaTypeInterface
      * 
-     * @throws BadMediaItemException
+     * @throws InvalidArgumentException
      */
     protected function uploadFile (MediaTypeInterface $media)
     {
         /* @var AbstractMediaType $media */
 
         if ($media->getPath() === null) {
-            throw new BadMediaItemException("Path not set when uploading media item. Cannot upload.");
+            throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
         }
 
         $stream = fopen($media->getPath(), 'rb');
         if (! $stream) {
-            throw new BadMediaItemException("Unable to open `{$media->getPath()}` for reading.");
+            throw new InvalidArgumentException("unable to open `{$media->getPath()}` for reading.");
         }
 
         $request = new Request(
@@ -75,9 +74,10 @@ class MediaService extends Service
         $response = $this->client->send($request);
         $json = json_decode((string)$response->getBody());
         
-        return $media
-            ->withID($media->getType() == 'thumb' ? $json->thumb_media_id : $json->media_id)
-            ->withUploadDate(DateTime::createFromFormat('U', $json->created_at));
+        $mediaID = $media->getType() == 'thumb' ? $json->thumb_media_id : $json->media_id;
+        $uploadDate = DateTime::createFromFormat('U', $json->created_at);
+        
+        return $media->withID($mediaID)->withUploadDate($uploadDate);
     }
 
     /**
@@ -88,7 +88,7 @@ class MediaService extends Service
      * 
      * @return ArticleMediaType
      * 
-     * @throws BadMediaResponseFormatException
+     * @throws MediaException
      */
     protected function uploadArticle (ArticleMediaType $media)
     {
@@ -124,7 +124,7 @@ class MediaService extends Service
                 ->withID($json->media_id)
                 ->withUploadDate(new DateTime("@{$json->created_at}"));
         } else {
-            throw new BadMediaResponseFormatException("expected properties: `media_id`, `created_at`", $response);
+            throw new MediaException("bad response: expected properties `media_id`, `created_at`");
         }
     }
 
@@ -141,8 +141,7 @@ class MediaService extends Service
      *
      * @return resource
      * 
-     * @throws BadMediaItemException
-     * @throws IOException
+     * @throws InvalidArgumentException
      */
     public function download (MediaTypeInterface $media, $into = null)
     {
@@ -150,7 +149,7 @@ class MediaService extends Service
         
         // Must have a media id.
         if ($media->getID() === null) {
-            throw new BadMediaItemException("ID not set when downloading media item. Cannot download.");
+            throw new InvalidArgumentException("ID not set when downloading media item. Cannot download.");
         }
 
         // Open file for writing.
@@ -159,7 +158,7 @@ class MediaService extends Service
         } elseif (is_string($into)) {
             $stream = fopen($into, 'wb');
             if (! $stream) {
-                throw new IOException("Can't open file `{$into}` for writing.");
+                throw new InvalidArgumentException("Can't open file `{$into}` for writing.");
             }
         } else {
             $stream = tmpfile();

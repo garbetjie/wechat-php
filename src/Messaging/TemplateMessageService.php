@@ -3,13 +3,11 @@
 namespace Garbetjie\WeChatClient\Messaging;
 
 use Garbetjie\WeChatClient\Exception\APIErrorException;
+use Garbetjie\WeChatClient\Messaging\Exception\MessagingException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Messaging\Exception\BadMessagingResponseFormatException;
-use Garbetjie\WeChatClient\Messaging\TemplateMessageFormatter;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
-use Garbetjie\WeChatClient\Client;
 
 class TemplateMessageService extends Service
 {
@@ -48,6 +46,7 @@ class TemplateMessageService extends Service
      *
      * @return string
      *
+     * @throws MessagingException
      * @throws InvalidArgumentException
      */
     public function send ($templateID, $recipientOpenID, $url, array $data, array $options = [])
@@ -75,7 +74,7 @@ class TemplateMessageService extends Service
         $json = json_decode($response->getBody());
 
         if (! isset($json->msgid)) {
-            throw new BadMessagingResponseFormatException("expected property: `msgid`", $response);
+            throw new MessagingException("bad response: expected property `msgid`");
         }
 
         return $json->msgid;

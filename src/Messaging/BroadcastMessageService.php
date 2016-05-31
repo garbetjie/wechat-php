@@ -3,13 +3,10 @@
 namespace Garbetjie\WeChatClient\Messaging;
 
 use Garbetjie\WeChatClient\Exception\APIErrorException;
+use Garbetjie\WeChatClient\Messaging\Exception\MessagingException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Messaging\Exception\BadMessagingResponseFormatException;
-use Garbetjie\WeChatClient\Messaging\BroadcastMessageFormatter;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use InvalidArgumentException;
-use Garbetjie\WeChatClient\Client;
 use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
 
 class BroadcastMessageService extends Service
@@ -24,7 +21,7 @@ class BroadcastMessageService extends Service
      *
      * @return int
      * 
-     * @throws BadMessagingResponseFormatException
+     * @throws MessagingException
      */
     public function sendToUsers (MessageTypeInterface $message, array $userOpenIDs)
     {
@@ -41,7 +38,7 @@ class BroadcastMessageService extends Service
         $json = json_decode($response->getBody());
 
         if (! isset($json->msg_id)) {
-            throw new BadMessagingResponseFormatException("expected property: `msg_id`", $response);
+            throw new MessagingException("bad response: expected property `msg_id`");
         }
 
         return $json->msg_id;
@@ -73,7 +70,7 @@ class BroadcastMessageService extends Service
         $json = json_decode($response->getBody());
 
         if (! isset($json->msg_id)) {
-            throw new BadMessagingResponseFormatException("expected property: `msg_id`", $response);
+            throw new MessagingException("bad response: expected property `msg_id`");
         }
 
         return $json->msg_id;

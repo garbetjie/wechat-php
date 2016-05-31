@@ -3,12 +3,8 @@
 namespace Garbetjie\WeChatClient\QR;
 
 use DateTime;
-use Garbetjie\WeChatClient\QR\TemporaryCode;
+use Garbetjie\WeChatClient\QR\Exception\QRCodeException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\QR\Exception\IOException;
-use Garbetjie\WeChatClient\QR\Exception\BadQRCodeResponseFormatException;
-use Garbetjie\WeChatClient\QR\CodeInterface;
-use Garbetjie\WeChatClient\QR\PermanentCode;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
@@ -27,10 +23,10 @@ class QRCodeService extends Service
      *
      * @return TemporaryCode
      *
+     * @throws QRCodeException
      * @throws InvalidArgumentException
-     * @throws BadQRCodeResponseFormatException
      */
-    public function temporary ($value, $expires = 1800)
+    public function createTemporary ($value, $expires = 1800)
     {
         if ($expires instanceof DateTime) {
             $expires = $expires->getTimestamp() - time();
@@ -39,7 +35,7 @@ class QRCodeService extends Service
         if ($expires > 1800) {
             $expires = 1800;
         } elseif ($expires < 1) {
-            throw new InvalidArgumentException("Code expiry can not be less than 1 second.");
+            throw new InvalidArgumentException("code expiry can not be less than 1 second.");
         }
 
         $args = $this->createCode([
@@ -63,9 +59,9 @@ class QRCodeService extends Service
      *
      * @return PermanentCode
      *
-     * @throws BadQRCodeResponseFormatException
+     * @throws QRCodeException
      */
-    public function permanent ($value)
+    public function createPermanent ($value)
     {
         $str = is_string($value);
 
@@ -90,7 +86,7 @@ class QRCodeService extends Service
      *
      * @return resource
      *
-     * @throws IOException
+     * @throws QRCodeException
      */
     public function download (CodeInterface $code, $into = null)
     {
@@ -99,7 +95,7 @@ class QRCodeService extends Service
         } elseif (is_string($into)) {
             $stream = fopen($into, 'wb');
             if (! $stream) {
-                throw new IOException("Can't open file `{$into}` for writing.");
+                throw new QRCodeException("can't open file `{$into}` for writing.");
             }
         } else {
             $stream = tmpfile();
@@ -119,6 +115,8 @@ class QRCodeService extends Service
      * @param array $body
      *
      * @return array
+     * 
+     * @throws QRCodeException
      */
     protected function createCode (array $body)
     {
@@ -129,15 +127,14 @@ class QRCodeService extends Service
         // Permanent QR code.
         if (in_array($body['action_name'], ['QR_LIMIT_SCENE', 'QR_LIMIT_STR_SCENE'])) {
             if (! isset($json->ticket, $json->url)) {
-                throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`", $response);
+                throw new QRCodeException("bad response: expected properties `ticket`, `url`");
             }
 
             return [$json->ticket, $json->url];
         } // Temporary QR code.
         else {
             if (! isset($json->ticket, $json->url, $json->expire_seconds)) {
-                throw new BadQRCodeResponseFormatException("expected properties: `ticket`, `url`, `expire_seconds`",
-                    $response);
+                throw new QRCodeException("bad response: expected properties `ticket`, `url`, `expire_seconds`");
             }
 
             return [$json->ticket, $json->url, DateTime::createFromFormat('U', time() + $json->expire_seconds)];

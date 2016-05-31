@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Menu\Exception;
 
 use Garbetjie\WeChatClient\Exception\WeChatClientException;
 
-interface MenuException extends WeChatClientException
+class MenuException extends \Exception implements WeChatClientException
 {
-
+    // void
 }

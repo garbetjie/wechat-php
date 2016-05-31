@@ -4,8 +4,7 @@ namespace Garbetjie\WeChatClient\Users;
 
 use Garbetjie\WeChatClient\Exception\APIErrorException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Users\User;
-use Garbetjie\WeChatClient\Users\Exception\BadUserResponseFormatException;
+use Garbetjie\WeChatClient\Users\Exception\UserException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
@@ -49,7 +48,7 @@ class UserService extends Service
         $json = json_decode((string)$response->getBody());
 
         if (! isset($json->groupid)) {
-            throw new BadUserResponseFormatException("expected property: `groupid`", $response);
+            throw new UserException("bad response: expected property `groupid`");
         } else {
             return $json->groupid;
         }
@@ -110,8 +109,7 @@ class UserService extends Service
      *
      * @return array
      *
-     * @throws GuzzleException
-     * @throws APIErrorException
+     * @throws UserException
      */
     public function paginate ($next = null)
     {
@@ -126,7 +124,7 @@ class UserService extends Service
         $json = json_decode($response->getBody());
 
         if (! isset($json->total, $json->data) || ! property_exists($json, 'next_openid')) {
-            throw new BadUserResponseFormatException("expected properties: `total`, `data`, `next_openid`", $response);
+            throw new UserException("bad response: expected properties `total`, `data`, `next_openid`");
         }
 
         // Calculate total pages.

@@ -2,17 +2,13 @@
 
 namespace Garbetjie\WeChatClient\URL;
 
-use Garbetjie\WeChatClient\Exception\BadResponseFormatException;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\URL\BulkURLService;
-use Garbetjie\WeChatClient\URL\Exception\BadURLResponseFormatException;
-use GuzzleHttp\Exception\GuzzleException;
+use Garbetjie\WeChatClient\URL\Exception\URLException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use Garbetjie\WeChatClient\Client;
 
 class URLService extends Service
 {
@@ -23,7 +19,7 @@ class URLService extends Service
      *
      * @return string
      *
-     * @throws BadURLResponseFormatException
+     * @throws URLException
      */
     public function shorten ($url)
     {
@@ -37,7 +33,7 @@ class URLService extends Service
         $json = json_decode((string)$response->getBody());
 
         if (! isset($json->short_url)) {
-            throw new BadURLResponseFormatException("expected property: `short_url`", $response);
+            throw new URLException("bad response: expected property `short_url`");
         } else {
             return $json->short_url;
         }
