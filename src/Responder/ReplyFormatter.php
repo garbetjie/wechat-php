@@ -5,7 +5,6 @@ namespace Garbetjie\WeChatClient\Responder;
 use DOMCdataSection;
 use DOMDocument;
 use DOMElement;
-use Garbetjie\WeChatClient\Service\Messaging\Type\AudioMessageMessageType;
 use Garbetjie\WeChatClient\Messaging\Type\AudioMessageType;
 use Garbetjie\WeChatClient\Messaging\Type\ImageMessageType;
 use Garbetjie\WeChatClient\Messaging\Type\MusicMessageType;
