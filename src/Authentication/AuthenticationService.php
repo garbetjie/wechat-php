@@ -2,7 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Authentication;
 
-use Garbetjie\WeChatClient\Authentication\AccessToken;
 use Garbetjie\WeChatClient\Authentication\Storage\FileStorage;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use Garbetjie\WeChatClient\Service;

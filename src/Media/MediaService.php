@@ -24,15 +24,17 @@ class MediaService extends Service
      *
      * @param MediaTypeInterface $media
      * 
+     * @return MediaTypeInterface
+     * 
      * @throws BadMediaItemException
      * @throws BadMediaResponseFormatException
      */
     public function upload (MediaTypeInterface $media)
     {
         if ($media->getType() === 'news') {
-            $this->uploadArticle($media);
+            return $this->uploadArticle($media);
         } else {
-            $this->uploadFile($media);
+            return $this->uploadFile($media);
         }
     }
 
@@ -75,7 +77,7 @@ class MediaService extends Service
         
         return $media
             ->setID($media->getType() == 'thumb' ? 'thumb_media_id' : 'media_id')
-            ->setUploadDate(DateTime::createFromFormat('U', $json['created_at']));
+            ->setUploadDate(DateTime::createFromFormat('U', $json->created_at));
     }
 
     /**
