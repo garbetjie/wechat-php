@@ -22,7 +22,7 @@ class BroadcastMessageFormatter
         if (method_exists($this, $method)) {
             $json[$type->getType()] = $this->$method($type);
         } elseif ($type instanceof AbstractMediaMessageType) {
-            $json[$type->type()] = ['media_id' => $type->id];
+            $json[$type->getType()] = ['media_id' => $type->getID()];
         }
 
         return $json;
@@ -35,7 +35,7 @@ class BroadcastMessageFormatter
      */
     private function formatText (TextMessageType $message)
     {
-        return ['content' => $message->content];
+        return ['content' => $message->getContent()];
     }
 
     /**
@@ -46,16 +46,16 @@ class BroadcastMessageFormatter
     private function formatMusic (MusicMessageType $message)
     {
         $out = [];
-        $out['musicurl'] = $message->url;
-        $out['hqmusicurl'] = $message->highQualityUrl;
-        $out['thumb_media_id'] = $message->thumbnailID;
+        $out['musicurl'] = $message->getUrl();
+        $out['hqmusicurl'] = $message->getHighQualityUrl();
+        $out['thumb_media_id'] = $message->getThumbnailID();
 
-        if ($message->title !== null) {
-            $out['title'] = $message->title;
+        if ($message->getTitle() !== null) {
+            $out['title'] = $message->getTitle();
         }
 
-        if ($message->description !== null) {
-            $out['description'] = $message->description;
+        if ($message->getDescription() !== null) {
+            $out['description'] = $message->getDescription();
         }
 
         return $out;
