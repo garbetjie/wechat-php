@@ -3,7 +3,12 @@
 This is a simple PHP library for interacting with the official WeChat APIs. It was created to remove some of the complexity
 around interacting with the WeChat API.
 
-## Installation
+# Table of contents
+
+1. [Installation](#installation)
+2. [Basic usage](#basic-usage)
+
+## 1. Installation
 
 You can use [composer](http://getcomposer.org) to install:
 
@@ -11,33 +16,78 @@ You can use [composer](http://getcomposer.org) to install:
 
 Requires **PHP 5.6+**.
     
-## Basic usage
+## 2. Basic usage
 
-Almost all interaction begins through the main `WeChat\WeChat` class instance:
+All available functionality has been split out into separate services. Each of these services require a
+`Garbetjie\WeChatClient\Client` instance. This client instance should be passed into the service when instantiating:
 
-    $wechat = new WeChat\WeChat();
+    // Create a client instance.
+    $client = new Garbetjie\WeChatClient\Client();
      
-    $user = $wechat->users()->get( 'ID' ); // Retrieve a user profile.
-    $groups = $wechat->groups()->all(); // Retrieve all groups.
-    $code = $wechar->qr()->temporary( 'value' ); // Create a temporary QR code.
+    // Create a service instance.
+    $userService = new Garbetjie\WeChatClient\Users\UserService($client);
 
-Before interacting with the API, an access token will be required. More information on retrieving an access token can be
-viewed in the [authentication readme](./src/Auth/readme.md).
+## 3. Authentication
 
-## Further documentation
+Before any interacting with the WeChat API can take place, an access token will be needed. The Authentication service
+can be used to acquire an access token:
 
-Further documentation on how to use each component can be viewed in each component's individual readme file. Links to the
-relevant README files have been provided below:
+    $client = new Garbetjie\WeChatClient\Client();
+    $appID = 'Your app ID';
+    $secret = 'Your secret key';
+     
+    try {
+        $authService = new Garbetjie\WeChatClient\Authentication\AuthenticationService($client);
+        $accessToken = $authService->authenticate($appID, $secret);
+        $client->setAccessToken($accessToken);
+    } catch (Garbetjie\WeChatClient\Authentication\Exception\AuthenticationException $e) {
+        // Handle errors.
+    }
+    
+Once you have authenticated, all further API calls made will have your access token automatically injected as part of
+the request.
 
- * [Auth](./src/Auth/readme.md)
- * [Groups](./src/Groups/readme.md)
- * [Media](./src/Media/readme.md)
- * [Menu](./src/Menu/readme.md)
- * [Messaging](./src/Messaging/readme.md)
- * [QR Codes](./src/QR/readme.md)
- * [Responders](./src/Responder/readme.md)
- * [Users](./src/Users/readme.md)
+### Caching access tokens
 
+There are a limited number of access tokens that can be retrieved for an OA in any given day. For this reason (and for
+performance reasons), it is a good idea to cache these access tokens. There are a number of storage mechanisms that are
+options available for caching access tokens.
+
+If no storage is specified, a default of storing the access tokens on the file system in the `sys_get_temp_dir()`
+directory.
+
+#### File system
+
+    $cacheDirectory = '/tmp';
+    $storage = new Garbetjie\WeChatClient\Authentication\Storage\FileStorage($cacheDirectory);
+
+#### Memcached
+
+    $memcached = new \Memcached();
+    $memcached->addServer('127.0.0.1', 11211);
+    $keyPrefix = 'accessToken:';
+     
+    $storage = new Garbetjie\WeChatClient\Authentication\Storage\MemcachedStorage($memcached, $keyPrefix);
+
+#### MySQL
+
+    $pdo = new PDO('mysql:host=127.0.0.1;dbname=mydb', 'root', '');
+    $tableName = '_wechat_tokens';
+    $columnMapping = [
+        'token'   => 'token_column_name',
+        'hash'    => 'hash_column_name',
+        'expires' => 'expiry_column_name',
+    ];
+    
+    $storage = new Garbetjie\WeChatClient\Authentication\Storage\MySQLDatabaseStorage($pdo, $tableName, $columnMapping);
+    
+The MySQL storage adapter can have the table name, as well as the column names customised. This will allow you to ensure
+the storage of access tokens fits into your current database structure.
+
+#### Custom interfaces
+
+You can write any custom interfaces you'd like to be able to store access tokens. Any of these custom storage adapters
+need to simply implement the `Garbetjie\WeChatClient\Authentication\Storage\StorageInterface` interface.
 
 # Terminology
 
