@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 - Normalizing of responder input.
+- Wrapping known exceptions in service-specific exceptions.
+
+## Version 0.8.0
+
+- Complete refactoring of the available services. This is very much a backwards-incompatible update.
 
 ## Version 0.3.1
 
