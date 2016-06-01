@@ -18,11 +18,21 @@ class ArticleMediaType extends AbstractMediaType
     private $items = [];
 
     /**
+     * ArticleMediaType constructor.
+     */
+    public function __construct ()
+    {
+        parent::__construct(null);
+    }
+
+    /**
      * Adds a new item to the article.
      *
      * @param array $item
+     * 
+     * @return ArticleMediaType
      */
-    public function addItem (array $item)
+    public function withItem (array $item)
     {
         $formatted = [];
 
@@ -40,7 +50,10 @@ class ArticleMediaType extends AbstractMediaType
             $formatted[$key] = isset($item[$key]) ? $item[$key] : null;
         }
 
-        $this->items[] = $formatted;
+        $cloned = clone $this;
+        $cloned->items[] = $formatted;
+        
+        return $cloned;
     }
 
     /**
