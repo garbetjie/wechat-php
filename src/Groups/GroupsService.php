@@ -65,6 +65,27 @@ class GroupsService extends Service
     }
 
     /**
+     * Returns the details for a single group. If no group with the given ID is found, null will be returned.
+     * 
+     * @param int $groupID
+     *
+     * @return Group|null
+     * @throws GroupsException
+     */
+    public function getGroup ($groupID)
+    {
+        $groups = $this->getAllGroups();
+        
+        foreach ($groups as $group) {
+            if ($group->getID() == $groupID) {
+                return $group;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
      * Allows the updating of a group.
      *
      * @param Group $group
@@ -76,12 +97,34 @@ class GroupsService extends Service
     {
         $json = [
             'group' => [
-                'id'   => $group->id(),
-                'name' => $group->name(),
+                'id'   => $group->getID(),
+                'name' => $group->getName(),
             ],
         ];
 
         $request = new Request("POST", "https://api.weixin.qq.com/cgi-bin/groups/update", [], json_encode($json));
         $this->client->send($request);
+    }
+
+    /**
+     * Deletes the supplied group from the WeChat API. All users in this group will be moved to the default group
+     * (which is probably the "Ungrouped" group).
+     * 
+     * @param Group $group
+     */
+    public function deleteGroup (Group $group)
+    {
+        $this->client->send(
+            new Request(
+                'POST',
+                'https://api.weixin.qq.com/cgi-bin/groups/delete',
+                [],
+                json_encode([
+                    'group' => [
+                        'id' => $group->getID(),
+                    ],
+                ])
+            )
+        );
     }
 }

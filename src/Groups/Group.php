@@ -26,22 +26,22 @@ class Group
      * @param string $name
      * @param int    $userCount
      */
-    public function __construct ( $id, $name, $userCount = 0 )
+    public function __construct ($id, $name, $userCount = 0)
     {
         // Convert from default Chinese group names to English.
-        if ( $id == 0 && $name == '未分组' ) {
+        if ($id == 0 && $name == '未分组') {
             $name = 'Ungrouped';
-        } else if ( $id == 1 && $name == '黑名单' ) {
+        } elseif ($id == 1 && $name == '黑名单') {
             $name = 'Blacklisted';
-        } else if ( $id == 2 && $name == '星标组' ) {
+        } elseif ($id == 2 && $name == '星标组') {
             $name = 'Starred';
         }
 
-        $this->id = (int) $id;
-        $this->name = (string) $name;
-        $this->userCount = (int) $userCount;
+        $this->id = (int)$id;
+        $this->name = (string)$name;
+        $this->userCount = (int)$userCount;
 
-        if ( $this->userCount < 0 ) {
+        if ($this->userCount < 0) {
             $this->userCount = 0;
         }
     }
@@ -49,7 +49,7 @@ class Group
     /**
      * @return int
      */
-    public function id ()
+    public function getID ()
     {
         return $this->id;
     }
@@ -57,15 +57,30 @@ class Group
     /**
      * @return string
      */
-    public function name ()
+    public function getName ()
     {
         return $this->name;
     }
 
     /**
+     * Modifies the group's name. Returns a new instance of the modified group.
+     * 
+     * @param string $name
+     *
+     * @return Group
+     */
+    public function withName ($name)
+    {
+        $cloned = clone $this;
+        $cloned->name = $name;
+        
+        return $cloned;
+    }
+
+    /**
      * @return int
      */
-    public function users ()
+    public function getUserCount ()
     {
         return $this->userCount;
     }
