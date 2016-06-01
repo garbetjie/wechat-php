@@ -8,6 +8,7 @@ around interacting with the WeChat API.
 1. [Installation](#1-installation)
 2. [Basic usage](#2-basic-usage)
 3. [Authentication](#3-authentication)
+4. [Groups](#4-groups)
 
 ## 1. Installation
 
@@ -89,6 +90,52 @@ the storage of access tokens fits into your current database structure.
 
 You can write any custom interfaces you'd like to be able to store access tokens. Any of these custom storage adapters
 need to simply implement the `Garbetjie\WeChatClient\Authentication\Storage\StorageInterface` interface.
+
+
+# 4. Groups
+
+User group management is done through the `Garbetjie\WeChatClient\Groups\GroupsService`. Authentication is required in
+order to view and modify groups.
+
+    $groupService = new Garbetjie\WeChatClient\Groups\GroupsService($client);
+
+When creating, modifying or retrieving groups from the API, instances of `Garbetjie\WeChatClient\Groups\Group` will be
+returned.
+
+## Available operations
+
+### Create a group
+
+    $group = $groupService->createGroup("Test group");
+
+### Modify a group
+
+    $changedGroup = $group->withName('New test name');
+    $groupService->updateGroup($changedGroup);
+    
+### Remove a group
+    
+    $groupService->deleteGroup($group);
+
+### Fetch all groups.
+
+    $groups = $groupService->getAllGroups();
+    
+    foreach ($groups as $group) {
+        echo sprintf(
+            "Group #%d with name `%s` has %d user(s)\n",
+            $group->getID(),
+            $group->getName(),
+            $group->getUserCount()
+        );
+    }
+
+### Fetch a single group.
+
+In reality, this is a thin wrapper around the `Garbetjie\WeChatClient\Groups\GroupsService::getAllGroups()` method call,
+that makes it easier to fetch a single group.
+
+    $group = $groupService->getGroup(1);
 
 # Terminology
 

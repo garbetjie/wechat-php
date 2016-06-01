@@ -5,6 +5,16 @@
 - Normalizing of responder input.
 - Wrapping known exceptions in service-specific exceptions.
 
+## Version 0.9.0
+
+### Changed
+
+- Modified the method names of the Group class.
+
+### Added
+
+- Group documentation in the readme.
+
 ## Version 0.8.0
 
 - Complete refactoring of the available services. This is very much a backwards-incompatible update.
