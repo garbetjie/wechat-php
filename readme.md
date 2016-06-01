@@ -9,6 +9,7 @@ around interacting with the WeChat API.
 2. [Basic usage](#2-basic-usage)
 3. [Authentication](#3-authentication)
 4. [Groups](#4-groups)
+5. [Media](#5-media)
 
 ## 1. Installation
 
@@ -92,7 +93,7 @@ You can write any custom interfaces you'd like to be able to store access tokens
 need to simply implement the `Garbetjie\WeChatClient\Authentication\Storage\StorageInterface` interface.
 
 
-# 4. Groups
+## 4. Groups
 
 User group management is done through the `Garbetjie\WeChatClient\Groups\GroupsService`. Authentication is required in
 order to view and modify groups.
@@ -101,8 +102,6 @@ order to view and modify groups.
 
 When creating, modifying or retrieving groups from the API, instances of `Garbetjie\WeChatClient\Groups\Group` will be
 returned.
-
-## Available operations
 
 ### Create a group
 
@@ -136,6 +135,83 @@ In reality, this is a thin wrapper around the `Garbetjie\WeChatClient\Groups\Gro
 that makes it easier to fetch a single group.
 
     $group = $groupService->getGroup(1);
+
+
+## 5. Media
+
+Media items need to be stored on WeChat's servers before they're able to be sent as messages to users. Both the uploading
+and downloading of media items is possible using the `Garbetjie\WeChatClient\Media\MediaService` service.
+
+### Creating a new instance
+
+    $mediaService = new Garbetjie\WeChatClient\Media\MediaService($client);
+
+### Uploading a file
+
+    $imageMediaItem = new Garbetjie\WeChatClient\Media\Type\ImageMediaType('/path/to/image.jpg');
+    $uploadedMediaItem = $mediaService->upload($imageMediaItem);
+    
+    // $uploadedMediaItem now has its ID and upload data populated:
+    $uploadedMediaItem->getID();
+    $uploadedMediaItem->getUploadDate();
+
+### Downloading a media item.
+
+There are 3 different way of downloading a media item:
+
+1. Into a file (pass the path as the `$into` parameter).
+
+        $mediaService->download($uploadedMediaItem->getID(), '/path/to/downloaded.jpg');
+    
+2. Into an already-opened stream (pass a stream into the `$into` parameter).
+
+        $fp = fopen('/tmp/downloaded.jpg', 'wb+');
+        $mediaService->download($uploadedMediaItem->getID(), $fp);
+        
+3. Or into a temporary stream (don't pass anything for the `$into` parameter) created by the `tmpfile()` function.
+
+        $fp = $mediaService->download($uploadedMediaItem->getID());
+        echo sprintf("Image is %d bytes in size", stream_get_length($fp));
+        fclose($fp);
+
+### Available media types
+    
+#### Thumbnails
+
+Required when uploading a news article. The media ID returned here needs to be used when adding a news article. Supports
+**JPG** images only, no larger than 64KB.
+ 
+    $thumbnailMediaItem = new Garbetjie\WeChatclient\Media\Type\ThumbnailMediaType('/path/to/thumbnail.jpg');
+
+#### Article
+
+This is used when sending a multi-story news article in a broadcast message. It will need to be uploaded first, and the
+resultant message ID will need to be used when sending the broadcast message.
+
+    $articleMediaItem = (new Garbetjie\WeChatClient\Media\Type\ArticleMediaType())
+        ->withItem([
+            'title' => 'Article title',
+            'content' => '<h2>Article body</h2><p>Content of the item.</p>',
+            'thumbnail' => $thumbnailMediaID,
+        ]);
+    
+#### Audio
+
+Used when sending a snippet of audio to the user. Supported types are AMR and MP3 audio files, no larger than 2MB.
+
+    $audioMessage = new Garbetjie\WeChatClient\Media\Type\AudioMediaType('/path/to/item.mp3');
+    
+#### Image
+
+Used to send an image to a user. Supports **BMP**, **PNG**, **JPEG**, **JPG** or **GIF** extensions, no larger than 2MB.
+
+    $imageMessage = new Garbetjie\WeChatClient\Media\Type\ImageMediaType('/path/to/image.jpg');
+
+#### Video
+
+Send a video to a user. Supports **MP4** format, no larger than 10MB in size.
+
+    $videoMediaItem = new Garbetjie\WeChatClient\Media\Type\VideoMediaType('/path/to/video.mp4');
 
 # Terminology
 
