@@ -10,6 +10,7 @@ around interacting with the WeChat API.
 3. [Authentication](#3-authentication)
 4. [Groups](#4-groups)
 5. [Media](#5-media)
+6. [Menus](#6-menus)
 
 ## 1. Installation
 
@@ -212,6 +213,40 @@ Used to send an image to a user. Supports **BMP**, **PNG**, **JPEG**, **JPG** or
 Send a video to a user. Supports **MP4** format, no larger than 10MB in size.
 
     $videoMediaItem = new Garbetjie\WeChatClient\Media\Type\VideoMediaType('/path/to/video.mp4');
+
+
+## 6. Menus
+
+Menus that are displayed within an official account can be customised via the WeChat API. The
+`Garbetjie\WeChatClient\Menu\MenuService` services enables the modification of this menu:
+
+    $menuService = new Garbetjie\WeChatClient\Menu\MenuService($client);
+
+### Create a menu
+
+    use Garbetjie\WeChatClient\Menu\Menu;
+    use Garbetjie\WeChatClient\Menu\MenuItem;
+     
+    $menu = (new Menu())
+        ->withItem(new MenuItem('Title 1', MenuItem::KEYWORD, 'keyword'))
+        ->withItem(new MenuItem('Title 2', MenuItem::URL, 'http://example.org'))
+        ->withItem(new MenuItem('Title 3', MenuItem::LOCATION));
+    
+### Delete a menu
+
+    $menuService->deleteMenu();
+    
+### Retrieve the current menu
+
+    $currentMenu = $menuService->getCurrentMenu();
+    
+### Validate a menu.
+
+There are certain rules that apply to menus (with regards to title length, number of child items, etc). There is a useful
+method that will validate the given menu, and will return a value indicating whether or not the menu is valid.
+
+    $menu = (new Menu())->withItem(new MenuItem('Title', MenuItem::LOCATION));
+    $isValid = $menuService->validateMenu($menu);
 
 # Terminology
 
