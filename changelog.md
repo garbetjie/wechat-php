@@ -1,9 +1,10 @@
 # Change log
 
-## [Unreleased]
+## [Unreleased / Upcoming]
 
 - Normalizing of responder input.
 - Wrapping known exceptions in service-specific exceptions.
+- Splitting of media item types into their remote & local differentiations.
 
 ## Version 0.9.0
 
