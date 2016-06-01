@@ -232,6 +232,8 @@ Menus that are displayed within an official account can be customised via the We
         ->withItem(new MenuItem('Title 2', MenuItem::URL, 'http://example.org'))
         ->withItem(new MenuItem('Title 3', MenuItem::LOCATION));
     
+    $menuService->saveMenu($menu);
+    
 ### Delete a menu
 
     $menuService->deleteMenu();

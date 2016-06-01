@@ -13,7 +13,7 @@ class MenuService extends Service
      *
      * @param Menu $menu
      */
-    public function createMenu (Menu $menu)
+    public function saveMenu (Menu $menu)
     {
         $this->client->send(
             new Request(
