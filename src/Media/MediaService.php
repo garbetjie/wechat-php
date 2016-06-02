@@ -4,13 +4,14 @@ namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
 use Garbetjie\WeChatClient\Media\Exception\MediaException;
+use Garbetjie\WeChatClient\Media\ItemType\ArticleMedia;
+use Garbetjie\WeChatClient\Media\ItemType\ArticleMediaItem;
+use Garbetjie\WeChatClient\Media\ItemType\LocalMedia;
+use Garbetjie\WeChatClient\Media\ItemType\RemoteMedia;
 use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Media\Type\AbstractMediaType;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
-use Garbetjie\WeChatClient\Media\Type\ArticleMediaType;
-use Garbetjie\WeChatClient\Media\Type\MediaTypeInterface;
 use InvalidArgumentException;
 
 class MediaService extends Service
@@ -21,35 +22,44 @@ class MediaService extends Service
      * This method assumes that the item has not been uploaded previously, and so will ignore any previously created
      * date and media id that has been set. The supplied media item will be modified.
      *
-     * @param MediaTypeInterface $media
-     * 
-     * @return MediaTypeInterface
-     * 
+     * @param LocalMedia|ArticleMedia $mediaItem
+     *
+     * @return LocalMedia|ArticleMedia
+     *
      * @throws InvalidArgumentException
      * @throws MediaException
      */
-    public function upload (MediaTypeInterface $media)
+    public function upload ($mediaItem)
     {
-        if ($media->getType() === 'news') {
-            return $this->uploadArticle($media);
+        // Must be a local media item or an article media item.
+        if (! ($mediaItem instanceof LocalMedia || $mediaItem instanceof ArticleMedia)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    "unexpected value %s%s given as media item for upload.",
+                    gettype($mediaItem),
+                    is_object($mediaItem) ? " (" . get_class($mediaItem) . ")" : ''
+                )
+            );
+        }
+
+        if ($mediaItem instanceof ArticleMedia) {
+            return $this->uploadArticle($mediaItem);
         } else {
-            return $this->uploadFile($media);
+            return $this->uploadFile($mediaItem);
         }
     }
 
     /**
      * Uploads the given media file to the WeChat content servers, and populates the item's ID and created date.
-     * 
-     * @param MediaTypeInterface $media
-     * 
-     * @return MediaTypeInterface
-     * 
+     *
+     * @param LocalMedia $media
+     *
+     * @return RemoteMedia
+     *
      * @throws InvalidArgumentException
      */
-    protected function uploadFile (MediaTypeInterface $media)
+    protected function uploadFile (LocalMedia $media)
     {
-        /* @var AbstractMediaType $media */
-
         if ($media->getPath() === null) {
             throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
         }
@@ -73,56 +83,66 @@ class MediaService extends Service
 
         $response = $this->client->send($request);
         $json = json_decode((string)$response->getBody());
-        
-        $mediaID = $media->getType() == 'thumb' ? $json->thumb_media_id : $json->media_id;
+
+        $mediaID = $media->getType() == MediaType::THUMBNAIL ? $json->thumb_media_id : $json->media_id;
         $uploadDate = DateTime::createFromFormat('U', $json->created_at);
-        
-        return $media->withID($mediaID)->withUploadDate($uploadDate);
+
+        return new RemoteMedia($media->getType(), $mediaID, $uploadDate);
     }
 
     /**
      * Uploads the given news article items to the WeChat content servers, and populates the media item's ID and created
      * date.
-     * 
-     * @param ArticleMediaType $media
-     * 
-     * @return ArticleMediaType
-     * 
+     *
+     * @param ArticleMedia $media
+     *
+     * @return RemoteMedia
+     *
      * @throws MediaException
      */
-    protected function uploadArticle (ArticleMediaType $media)
+    protected function uploadArticle (ArticleMedia $media)
     {
-        $body = ['articles' => []];
+        $jsonBody = [
+            'articles' => [],
+        ];
 
         foreach ($media->getItems() as $item) {
             $article = [
-                'title'          => $item['title'],
-                'content'        => $item['content'],
-                'thumb_media_id' => $item['thumbnail'],
+                'title'          => $item->getTitle(),
+                'content'        => $item->getContent(),
+                'thumb_media_id' => $item->getThumbnailMediaID(),
             ];
 
-            foreach ([
-                         'author'    => 'author',
-                         'url'       => 'content_source_url',
-                         'summary'   => 'digest',
-                         'showImage' => 'show_cover_pic',
-                     ] as $src => $dest) {
-                if (isset($item[$src])) {
-                    $article[$dest] = $item[$src];
-                }
+            if ($item->getAuthor() !== null) {
+                $article['author'] = $item->getAuthor();
             }
 
-            $body['articles'][] = $article;
+            if ($item->getURL() !== null) {
+                $article['content_source_url'] = $item->getURL();
+            }
+
+            if ($item->getSummary() !== null) {
+                $article['digest'] = $item->getSummary();
+            }
+
+            $article['show_cover_pic'] = $item->isImageShowing() ? true : false;
+
+            $jsonBody['articles'][] = $article;
         }
 
-        $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/media/uploadnews", [], json_encode($body));
-        $response = $this->client->send($request);
-        $json = json_decode($response->getBody());
+        $json = json_decode(
+            $this->client->send(
+                new Request(
+                    'POST',
+                    'https://api.weixin.qq.com/cgi-bin/media/uploadnews',
+                    [],
+                    json_encode($jsonBody)
+                )
+            )->getBody()
+        );
 
         if (isset($json->media_id, $json->created_at)) {
-            return $media
-                ->withID($json->media_id)
-                ->withUploadDate(new DateTime("@{$json->created_at}"));
+            return new RemoteMedia(MediaType::ARTICLE, $json->media_id, new DateTime("@{$json->created_at}"));
         } else {
             throw new MediaException("bad response: expected properties `media_id`, `created_at`");
         }
@@ -136,22 +156,15 @@ class MediaService extends Service
      * If no file is specified using the `$into` parameter, then a temporary file resource is created using the
      * `tmpfile()` function.
      *
-     * @param MediaTypeInterface $media The media item to download.
-     * @param resource|string    $into  Optional file or file resource to download the media item into.
+     * @param string          $mediaID The media item to download.
+     * @param resource|string $into    Optional file or file resource to download the media item into.
      *
      * @return resource
-     * 
+     *
      * @throws InvalidArgumentException
      */
-    public function download (MediaTypeInterface $media, $into = null)
+    public function download ($mediaID, $into = null)
     {
-        /* @var AbstractMediaType $media */
-        
-        // Must have a media id.
-        if ($media->getID() === null) {
-            throw new InvalidArgumentException("ID not set when downloading media item. Cannot download.");
-        }
-
         // Open file for writing.
         if (is_resource($into)) {
             $stream = $into;
@@ -164,9 +177,83 @@ class MediaService extends Service
             $stream = tmpfile();
         }
 
-        $request = new Request('GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$media->getID()}");
+        $request = new Request('GET', "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$mediaID}");
         $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
-        
+
         return $response->getBody()->detach();
+    }
+
+    /**
+     * Paginates all the media items that have been uploaded to the WeChat API.
+     *
+     * @param string $type   - One the MediaType::* constants, indicating the type of media to download.
+     * @param int    $offset - The offset index (starts at 0).
+     * @param int    $limit  - The maximum number of items to return (max: 20)
+     *
+     * @return array
+     * @throws MediaException
+     */
+    public function paginate ($type, $offset = 0, $limit = 20)
+    {
+        // Ensure the limit is within range.
+        if ($limit < 1) {
+            $limit = 1;
+        } elseif ($limit > 20) {
+            $limit = 20;
+        }
+
+        // Send query.
+        $json = json_decode(
+            $this->client->send(
+                new Request(
+                    'GET',
+                    'https://api.weixin.qq.com/cgi-bin/material/batchget_material',
+                    [],
+                    json_encode([
+                        'type'   => $type,
+                        'offset' => $offset,
+                        'count'  => $limit,
+                    ])
+                )
+            )->getBody()
+        );
+
+        // Ensure response formatting.
+        if (! isset($json->total_count, $json->item_count, $json->item)) {
+            throw new MediaException("bad response: expecting properties `total_count`, `item_count`, `item`");
+        }
+
+        $items = [];
+
+        // Parse items into their object representations.
+        foreach ($json->item as $remoteItem) {
+            // We're paginating articles.
+            if ($type === MediaType::ARTICLE) {
+                foreach ($remoteItem->content->news_item as $newsItem) {
+                    $items[] = (new ArticleMediaItem(
+                        $newsItem->title,
+                        $newsItem->content,
+                        $newsItem->thumb_media_id
+                    ))->withAuthor($newsItem->author)
+                        ->withURL($newsItem->content_source_url)
+                        ->withSummary($newsItem->digest)
+                        ->withImageShowing($newsItem->show_cover_pic);
+                }
+            } // Any other item type.
+            else {
+                $items[] = (new RemoteMedia(
+                    $type,
+                    $remoteItem->media_id,
+                    new DateTime("@{$remoteItem->update_time}")
+                ))->withURL($remoteItem->url);
+            }
+        }
+
+        // Return the paginated results.
+        return [
+            'offset' => $offset,
+            'total'  => $json->total_count,
+            'items'  => $items,
+        ];
     }
 }
