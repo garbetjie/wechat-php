@@ -11,6 +11,7 @@ use Garbetjie\WeChatClient\Media\ItemType\RemoteMedia;
 use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 
@@ -24,14 +25,25 @@ class MediaService extends Service
      *
      * @param LocalMedia|ArticleMedia $mediaItem
      *
-     * @return LocalMedia|ArticleMedia
+     * @return RemoteMedia
      *
      * @throws InvalidArgumentException
      * @throws MediaException
      */
-    public function upload ($mediaItem)
+    public function uploadTemporaryItem ($mediaItem)
     {
         // Must be a local media item or an article media item.
+        $this->ensureMediaItem($mediaItem);
+
+        if ($mediaItem instanceof ArticleMedia) {
+            return $this->uploadArticle('https://api.weixin.qq.com/cgi-bin/media/uploadnews', $mediaItem);
+        } else {
+            return $this->uploadFile('http://api.weixin.qq.com/cgi-bin/media/upload', $mediaItem);
+        }
+    }
+    
+    private function ensureMediaItem ($mediaItem)
+    {
         if (! ($mediaItem instanceof LocalMedia || $mediaItem instanceof ArticleMedia)) {
             throw new InvalidArgumentException(
                 sprintf(
@@ -41,11 +53,17 @@ class MediaService extends Service
                 )
             );
         }
+    }
+    
+    public function uploadPermanentItem ($mediaItem)
+    {
+        // Must be a local media item or an article media item.
+        $this->ensureMediaItem($mediaItem);
 
         if ($mediaItem instanceof ArticleMedia) {
-            return $this->uploadArticle($mediaItem);
+            return $this->uploadArticle('https://api.weixin.qq.com/cgi-bin/material/add_news', $mediaItem);
         } else {
-            return $this->uploadFile($mediaItem);
+            return $this->uploadFile('https://api.weixin.qq.com/cgi-bin/material/add_material', $mediaItem);
         }
     }
 
@@ -58,7 +76,7 @@ class MediaService extends Service
      *
      * @throws InvalidArgumentException
      */
-    protected function uploadFile (LocalMedia $media)
+    protected function uploadFile ($endpoint, LocalMedia $media)
     {
         if ($media->getPath() === null) {
             throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
@@ -69,25 +87,26 @@ class MediaService extends Service
             throw new InvalidArgumentException("unable to open `{$media->getPath()}` for reading.");
         }
 
-        $request = new Request(
-            'POST',
-            "http://api.weixin.qq.com/cgi-bin/media/upload?type={$media->getType()}",
-            [],
-            new MultipartStream ([
-                [
-                    'name'     => 'media',
-                    'contents' => $stream,
-                ],
-            ])
+        $json = json_decode(
+            $this->client->send(
+                new Request(
+                    'POST',
+                    Uri::withQueryValue(new Uri($endpoint), 'type', $media->getType()),
+                    [],
+                    new MultipartStream ([
+                        [
+                            'name'     => 'media',
+                            'contents' => $stream,
+                        ],
+                    ])
+                )
+            )
         );
-
-        $response = $this->client->send($request);
-        $json = json_decode((string)$response->getBody());
 
         $mediaID = $media->getType() == MediaType::THUMBNAIL ? $json->thumb_media_id : $json->media_id;
         $uploadDate = DateTime::createFromFormat('U', $json->created_at);
 
-        return new RemoteMedia($media->getType(), $mediaID, $uploadDate);
+        return (new RemoteMedia($media->getType(), $mediaID))->withLastModifiedDate($uploadDate);
     }
 
     /**
@@ -100,7 +119,7 @@ class MediaService extends Service
      *
      * @throws MediaException
      */
-    protected function uploadArticle (ArticleMedia $media)
+    protected function uploadArticle ($endpoint, ArticleMedia $media)
     {
         $jsonBody = [
             'articles' => [],
@@ -134,7 +153,7 @@ class MediaService extends Service
             $this->client->send(
                 new Request(
                     'POST',
-                    'https://api.weixin.qq.com/cgi-bin/media/uploadnews',
+                    $endpoint,
                     [],
                     json_encode($jsonBody)
                 )
@@ -243,9 +262,9 @@ class MediaService extends Service
             else {
                 $items[] = (new RemoteMedia(
                     $type,
-                    $remoteItem->media_id,
-                    new DateTime("@{$remoteItem->update_time}")
-                ))->withURL($remoteItem->url);
+                    $remoteItem->media_id
+                ))->withLastModifiedDate(new DateTime("@{$remoteItem->update_time}"))
+                  ->withURL($remoteItem->url);
             }
         }
 

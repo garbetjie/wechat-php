@@ -29,13 +29,11 @@ class RemoteMedia
      *
      * @param string    $type
      * @param string    $id
-     * @param \DateTime $lastModifiedDate
      */
-    public function __construct ($type, $id, \DateTime $lastModifiedDate)
+    public function __construct ($type, $id)
     {
         $this->type = $type;
         $this->id = $id;
-        $this->lastModifiedDate = $lastModifiedDate;
     }
 
     /**
@@ -47,13 +45,13 @@ class RemoteMedia
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTime|null
      */
     public function getLastModifiedDate ()
     {
         return $this->lastModifiedDate;
     }
-
+    
     /**
      * @return string
      */
@@ -63,7 +61,7 @@ class RemoteMedia
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getURL ()
     {
@@ -79,6 +77,19 @@ class RemoteMedia
     {
         $new = clone $this;
         $new->url = $url;
+        
+        return $new;
+    }
+
+    /**
+     * @param \DateTime $lastModifiedDate
+     * 
+     * @return RemoteMedia
+     */
+    public function withLastModifiedDate (\DateTime $lastModifiedDate)
+    {
+        $new = clone $this;
+        $new->lastModifiedDate = $lastModifiedDate;
         
         return $new;
     }
