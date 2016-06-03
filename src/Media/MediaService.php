@@ -100,7 +100,7 @@ class MediaService extends Service
                         ],
                     ])
                 )
-            )
+            )->getBody()
         );
 
         $mediaID = $media->getType() == MediaType::THUMBNAIL ? $json->thumb_media_id : $json->media_id;
