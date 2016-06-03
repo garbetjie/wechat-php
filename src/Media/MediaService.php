@@ -36,9 +36,9 @@ class MediaService extends Service
         $this->ensureMediaItem($mediaItem);
 
         if ($mediaItem instanceof ArticleMedia) {
-            return $this->uploadArticle('https://api.weixin.qq.com/cgi-bin/media/uploadnews', $mediaItem);
+            return $this->uploadArticle(false, $mediaItem);
         } else {
-            return $this->uploadFile('http://api.weixin.qq.com/cgi-bin/media/upload', $mediaItem);
+            return $this->uploadFile(false, $mediaItem);
         }
     }
     
@@ -61,9 +61,9 @@ class MediaService extends Service
         $this->ensureMediaItem($mediaItem);
 
         if ($mediaItem instanceof ArticleMedia) {
-            return $this->uploadArticle('https://api.weixin.qq.com/cgi-bin/material/add_news', $mediaItem);
+            return $this->uploadArticle(true, $mediaItem);
         } else {
-            return $this->uploadFile('https://api.weixin.qq.com/cgi-bin/material/add_material', $mediaItem);
+            return $this->uploadFile(true, $mediaItem);
         }
     }
 
@@ -76,7 +76,7 @@ class MediaService extends Service
      *
      * @throws InvalidArgumentException
      */
-    protected function uploadFile ($endpoint, LocalMedia $media)
+    protected function uploadFile ($isPermanent, LocalMedia $media)
     {
         if ($media->getPath() === null) {
             throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
@@ -85,6 +85,12 @@ class MediaService extends Service
         $stream = fopen($media->getPath(), 'rb');
         if (! $stream) {
             throw new InvalidArgumentException("unable to open `{$media->getPath()}` for reading.");
+        }
+        
+        if ($isPermanent) {
+            $endpoint = 'https://api.weixin.qq.com/cgi-bin/material/add_material';
+        } else {
+            $endpoint = 'http://api.weixin.qq.com/cgi-bin/media/upload';
         }
 
         $json = json_decode(
@@ -103,10 +109,16 @@ class MediaService extends Service
             )->getBody()
         );
 
-        $mediaID = $media->getType() == MediaType::THUMBNAIL ? $json->thumb_media_id : $json->media_id;
-        $uploadDate = DateTime::createFromFormat('U', $json->created_at);
-
-        return (new RemoteMedia($media->getType(), $mediaID))->withLastModifiedDate($uploadDate);
+        $remoteMedia = new RemoteMedia(
+            $media->getType(),
+            $media->getType() == MediaType::THUMBNAIL ? $json->thumb_media_id : $json->media_id
+        );
+        
+        if (isset($json->created_at)) {
+            $remoteMedia = $remoteMedia->withLastModifiedDate(DateTime::createFromFormat('U', $json->created_at));
+        }
+        
+        return $remoteMedia;
     }
 
     /**
@@ -119,7 +131,7 @@ class MediaService extends Service
      *
      * @throws MediaException
      */
-    protected function uploadArticle ($endpoint, ArticleMedia $media)
+    protected function uploadArticle ($isPermanent, ArticleMedia $media)
     {
         $jsonBody = [
             'articles' => [],
@@ -148,6 +160,12 @@ class MediaService extends Service
 
             $jsonBody['articles'][] = $article;
         }
+        
+        if ($isPermanent) {
+            $endpoint = 'https://api.weixin.qq.com/cgi-bin/material/add_news';
+        } else {
+            $endpoint = 'https://api.weixin.qq.com/cgi-bin/media/uploadnews';
+        }
 
         $json = json_decode(
             $this->client->send(
@@ -159,7 +177,7 @@ class MediaService extends Service
                 )
             )->getBody()
         );
-
+        
         if (isset($json->media_id, $json->created_at)) {
             return new RemoteMedia(MediaType::ARTICLE, $json->media_id, new DateTime("@{$json->created_at}"));
         } else {
