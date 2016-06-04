@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\ItemType;
+namespace Garbetjie\WeChatClient\Media;
 
 class RemoteArticleMedia extends ArticleMedia
 {
@@ -25,5 +25,23 @@ class RemoteArticleMedia extends ArticleMedia
     public function getMediaID ()
     {
         return $this->mediaID;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withItem (RemoteArticleMediaItem $item)
+    {
+        return parent::withItem($item);
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @return RemoteArticleMediaItem[]
+     */
+    public function getItems ()
+    {
+        return parent::getItems();
     }
 }

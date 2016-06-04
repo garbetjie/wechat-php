@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\ItemType;
+namespace Garbetjie\WeChatClient\Media;
 
-final class LocalMedia
+class FileMedia
 {
     /**
      * @var string
@@ -15,7 +15,7 @@ final class LocalMedia
     protected $path;
 
     /**
-     * LocalMedia constructor.
+     * FileMedia constructor.
      *
      * @param string $path
      */

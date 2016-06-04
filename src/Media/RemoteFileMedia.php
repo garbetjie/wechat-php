@@ -1,16 +1,16 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\ItemType;
+namespace Garbetjie\WeChatClient\Media;
 
-class RemoteMedia
+class RemoteFileMedia
 {
     /**
      * @var string
      */
-    protected $id;
+    protected $mediaID;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     protected $lastModifiedDate;
 
@@ -25,23 +25,23 @@ class RemoteMedia
     protected $type;
 
     /**
-     * RemoteMedia constructor.
+     * RemoteFileMedia constructor.
      *
      * @param string    $type
      * @param string    $id
      */
-    public function __construct ($type, $id)
+    public function __construct ($type, $mediaID)
     {
         $this->type = $type;
-        $this->id = $id;
+        $this->mediaID = $mediaID;
     }
 
     /**
      * @return string
      */
-    public function getID ()
+    public function getMediaID ()
     {
-        return $this->id;
+        return $this->mediaID;
     }
 
     /**
@@ -71,7 +71,7 @@ class RemoteMedia
     /**
      * @param string $url
      *
-     * @return RemoteMedia
+     * @return RemoteFileMedia
      */
     public function withURL ($url)
     {
@@ -84,7 +84,7 @@ class RemoteMedia
     /**
      * @param \DateTime $lastModifiedDate
      * 
-     * @return RemoteMedia
+     * @return RemoteFileMedia
      */
     public function withLastModifiedDate (\DateTime $lastModifiedDate)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\ItemType;
+namespace Garbetjie\WeChatClient\Media;
 
 use InvalidArgumentException;
 
@@ -60,7 +60,7 @@ class ArticleMediaItem
      * 
      * @param string $author
      *
-     * @return ArticleMediaItem
+     * @return static
      */
     public function withAuthor ($author)
     {
@@ -75,7 +75,7 @@ class ArticleMediaItem
      * 
      * @param string $url
      *
-     * @return ArticleMediaItem
+     * @return static
      * @throws InvalidArgumentException
      */
     public function withURL ($url)
@@ -95,7 +95,7 @@ class ArticleMediaItem
      * 
      * @param string $summary
      *
-     * @return ArticleMediaItem
+     * @return static
      */
     public function withSummary ($summary)
     {
@@ -110,7 +110,7 @@ class ArticleMediaItem
      * 
      * @param bool $showImage
      *
-     * @return ArticleMediaItem
+     * @return static
      */
     public function withImageShowing ($showImage)
     {

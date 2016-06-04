@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\ItemType;
+namespace Garbetjie\WeChatClient\Media;
 
 class ArticleMedia
 {
@@ -22,7 +22,7 @@ class ArticleMedia
      *
      * @param ArticleMediaItem $item
      *
-     * @return ArticleMedia
+     * @return static
      */
     public function withItem (ArticleMediaItem $item)
     {
