@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Media;
 
-class ArticleMedia
+class News
 {
     /**
      * @var array
@@ -20,11 +20,11 @@ class ArticleMedia
     /**
      * Adds a new item to the article.
      *
-     * @param ArticleMediaItem $item
+     * @param NewsArticle $item
      *
      * @return static
      */
-    public function withItem (ArticleMediaItem $item)
+    public function withItem (NewsArticle $item)
     {
         $new = clone $this;
         $new->items[] = $item;
@@ -33,7 +33,7 @@ class ArticleMedia
     }
 
     /**
-     * @return ArticleMediaItem[]
+     * @return NewsArticle[]
      */
     public function getItems ()
     {

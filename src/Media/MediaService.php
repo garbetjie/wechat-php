@@ -3,12 +3,12 @@
 namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
-use Garbetjie\WeChatClient\Media\Exception\MediaException;
-use Garbetjie\WeChatClient\Media\ArticleMedia;
-use Garbetjie\WeChatClient\Media\ArticleMediaItem;
+use Garbetjie\WeChatClient\Media\MediaException;
+use Garbetjie\WeChatClient\Media\News;
+use Garbetjie\WeChatClient\Media\NewsArticle;
 use Garbetjie\WeChatClient\Media\FileMedia;
-use Garbetjie\WeChatClient\Media\RemoteArticleMedia;
-use Garbetjie\WeChatClient\Media\RemoteArticleMediaItem;
+use Garbetjie\WeChatClient\Media\RemoteNews;
+use Garbetjie\WeChatClient\Media\RemoteNewsArticle;
 use Garbetjie\WeChatClient\Media\RemoteFileMedia;
 use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Psr7\MultipartStream;
@@ -25,7 +25,7 @@ class MediaService extends Service
      * This method assumes that the item has not been uploaded previously, and so will ignore any previously created
      * date and media id that has been set. The supplied media item will be modified.
      *
-     * @param FileMedia|ArticleMedia $mediaItem
+     * @param FileMedia|News $mediaItem
      *
      * @return RemoteFileMedia
      *
@@ -37,7 +37,7 @@ class MediaService extends Service
         // Must be a local media item or an article media item.
         $this->ensureMediaItem($mediaItem);
 
-        if ($mediaItem instanceof ArticleMedia) {
+        if ($mediaItem instanceof News) {
             return $this->uploadArticle(false, $mediaItem);
         } else {
             return $this->uploadFile(false, $mediaItem);
@@ -48,13 +48,13 @@ class MediaService extends Service
      * Ensures the given media item is an instance of one of the media item classes. Throws an exception if the given
      * media item is not one of them.
      * 
-     * @param FileMedia|ArticleMedia $mediaItem
+     * @param FileMedia|News $mediaItem
      * 
      * @throws InvalidArgumentException
      */
     private function ensureMediaItem ($mediaItem)
     {
-        if (! ($mediaItem instanceof FileMedia || $mediaItem instanceof ArticleMedia)) {
+        if (! ($mediaItem instanceof FileMedia || $mediaItem instanceof News)) {
             throw new InvalidArgumentException(
                 sprintf(
                     "unexpected value %s%s given as media item for upload.",
@@ -68,7 +68,7 @@ class MediaService extends Service
     /**
      * Uploads the given media item for permanent storage on the WeChat servers.
      * 
-     * @param FileMedia|ArticleMedia $mediaItem
+     * @param FileMedia|News $mediaItem
      *
      * @return RemoteFileMedia
      * @throws MediaException
@@ -79,7 +79,7 @@ class MediaService extends Service
         // Must be a local media item or an article media item.
         $this->ensureMediaItem($mediaItem);
 
-        if ($mediaItem instanceof ArticleMedia) {
+        if ($mediaItem instanceof News) {
             return $this->uploadArticle(true, $mediaItem);
         } else {
             return $this->uploadFile(true, $mediaItem);
@@ -144,13 +144,13 @@ class MediaService extends Service
      * Uploads the given news article items to the WeChat content servers, and populates the media item's ID and created
      * date.
      *
-     * @param ArticleMedia $media
+     * @param News $media
      *
      * @return RemoteFileMedia
      *
      * @throws MediaException
      */
-    protected function uploadArticle ($isPermanent, ArticleMedia $media)
+    protected function uploadArticle ($isPermanent, News $media)
     {
         $jsonBody = [
             'articles' => [],
@@ -337,7 +337,7 @@ class MediaService extends Service
                 
                 foreach ($remoteItem->content->news_item as $newsItem) {
                     $articleItem = $articleItem->withItem(
-                        (new RemoteArticleMediaItem(
+                        (new RemoteNewsArticle(
                             $newsItem->title,
                             $newsItem->content,
                             $newsItem->thumb_media_id

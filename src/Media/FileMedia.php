@@ -2,13 +2,8 @@
 
 namespace Garbetjie\WeChatClient\Media;
 
-class FileMedia
+abstract class FileMedia
 {
-    /**
-     * @var string
-     */
-    protected $type;
-
     /**
      * @var string
      */
@@ -19,9 +14,8 @@ class FileMedia
      *
      * @param string $path
      */
-    public function __construct ($type, $path)
+    public function __construct ($path)
     {
-        $this->type = $type;
         $this->path = $path;
     }
 
@@ -36,8 +30,5 @@ class FileMedia
     /**
      * @return string
      */
-    public function getType ()
-    {
-        return $this->type;
-    }
+    abstract public function getType ();
 }
