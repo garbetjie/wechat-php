@@ -8,7 +8,7 @@ use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 
-class GroupManager extends Service
+class GroupService extends Service
 {
     /**
      * Create a new group.

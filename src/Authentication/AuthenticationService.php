@@ -8,7 +8,7 @@ use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Psr7\Request;
 
-class AuthenticationManager extends Service
+class AuthenticationService extends Service
 {
     /**
      * @param string                $appId     The application ID
