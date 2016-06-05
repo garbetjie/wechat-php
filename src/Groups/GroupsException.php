@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Groups\Exception;
+namespace Garbetjie\WeChatClient\Groups;
 
 use Garbetjie\WeChatClient\Exception\WeChatClientException;
 

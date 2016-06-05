@@ -3,12 +3,12 @@
 namespace Garbetjie\WeChatClient\Groups;
 
 use Garbetjie\WeChatClient\Exception\APIErrorException;
-use Garbetjie\WeChatClient\Groups\Exception\GroupsException;
+use Garbetjie\WeChatClient\Groups\GroupsException;
 use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 
-class GroupsService extends Service
+class GroupManager extends Service
 {
     /**
      * Create a new group.
