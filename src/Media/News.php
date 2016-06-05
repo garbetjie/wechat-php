@@ -20,11 +20,11 @@ class News
     /**
      * Adds a new item to the article.
      *
-     * @param NewsArticle $item
+     * @param NewsItem $item
      *
      * @return static
      */
-    public function withItem (NewsArticle $item)
+    public function withItem (NewsItem $item)
     {
         $new = clone $this;
         $new->items[] = $item;
@@ -33,7 +33,7 @@ class News
     }
 
     /**
-     * @return NewsArticle[]
+     * @return NewsItem[]
      */
     public function getItems ()
     {

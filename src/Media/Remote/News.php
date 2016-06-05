@@ -32,7 +32,7 @@ class News extends LocalNews
     /**
      * @inheritDoc
      */
-    public function withItem (NewsArticle $item)
+    public function withItem (NewsItem $item)
     {
         return parent::withItem($item);
     }
@@ -40,7 +40,7 @@ class News extends LocalNews
     /**
      * @inheritDoc
      * 
-     * @return NewsArticle[]
+     * @return NewsItem[]
      */
     public function getItems ()
     {

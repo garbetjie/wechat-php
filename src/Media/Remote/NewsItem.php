@@ -2,9 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Media\Remote;
 
-use Garbetjie\WeChatClient\Media\NewsArticle as LocalNewsArticle;
+use Garbetjie\WeChatClient\Media\NewsItem as LocalNewsArticle;
 
-class NewsArticle extends LocalNewsArticle
+class NewsItem extends LocalNewsArticle
 {
     /**
      * @var string

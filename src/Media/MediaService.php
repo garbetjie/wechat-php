@@ -5,7 +5,7 @@ namespace Garbetjie\WeChatClient\Media;
 use DateTime;
 use Garbetjie\WeChatClient\Media\MediaException;
 use Garbetjie\WeChatClient\Media\News;
-use Garbetjie\WeChatClient\Media\NewsArticle;
+use Garbetjie\WeChatClient\Media\NewsItem;
 use Garbetjie\WeChatClient\Media\FileMedia;
 use Garbetjie\WeChatClient\Media\RemoteNews;
 use Garbetjie\WeChatClient\Media\RemoteNewsArticle;

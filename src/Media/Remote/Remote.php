@@ -10,13 +10,19 @@ abstract class Remote
     protected $mediaID;
 
     /**
+     * @var resource
+     */
+    protected $stream;
+
+    /**
      * Remote constructor.
      *
      * @param string $mediaID
      */
-    public function __construct ($mediaID)
+    public function __construct ($mediaID, $stream)
     {
         $this->mediaID = $mediaID;
+        $this->stream = $stream;
     }
     
     /**
@@ -30,5 +36,13 @@ abstract class Remote
     public function getMediaID ()
     {
         return $this->mediaID;
+    }
+
+    /**
+     * @return resource
+     */
+    public function getStream ()
+    {
+        return $this->stream;
     }
 }

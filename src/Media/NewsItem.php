@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Media;
 
 use InvalidArgumentException;
 
-class NewsArticle
+class NewsItem
 {
     /**
      * @var string
@@ -42,7 +42,7 @@ class NewsArticle
     protected $showImage = true;
 
     /**
-     * NewsArticle constructor.
+     * NewsItem constructor.
      *
      * @param string $title
      * @param string $content
