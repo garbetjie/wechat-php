@@ -2,13 +2,13 @@
 
 namespace Garbetjie\WeChatClient\Authentication;
 
-use Garbetjie\WeChatClient\Authentication\Exception\AuthenticationException;
+use Garbetjie\WeChatClient\Authentication\AuthenticationException;
 use Garbetjie\WeChatClient\Authentication\Storage\FileStorage;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Psr7\Request;
 
-class AuthenticationService extends Service
+class AuthenticationManager extends Service
 {
     /**
      * @param string                $appId     The application ID
