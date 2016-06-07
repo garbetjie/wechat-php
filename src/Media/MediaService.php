@@ -3,301 +3,425 @@
 namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
-use Garbetjie\WeChatClient\Media\MediaException;
-use Garbetjie\WeChatClient\Media\News;
-use Garbetjie\WeChatClient\Media\NewsItem;
-use Garbetjie\WeChatClient\Media\FileMedia;
-use Garbetjie\WeChatClient\Media\RemoteNews;
-use Garbetjie\WeChatClient\Media\RemoteNewsArticle;
-use Garbetjie\WeChatClient\Media\RemoteFileMedia;
 use Garbetjie\WeChatClient\Service;
-use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 
 class MediaService extends Service
 {
     /**
-     * Uploads the supplied media item to the WeChat API.
+     * Downloads a temporary image.
      *
-     * This method assumes that the item has not been uploaded previously, and so will ignore any previously created
-     * date and media id that has been set. The supplied media item will be modified.
+     * @param string               $mediaID
+     * @param null|string|resource $into
      *
-     * @param FileMedia|News $mediaItem
-     *
-     * @return RemoteFileMedia
-     *
-     * @throws InvalidArgumentException
-     * @throws MediaException
+     * @return Downloaded\Image
      */
-    public function uploadTemporaryItem ($mediaItem)
+    public function fetchTemporaryImage ($mediaID, $into = null)
     {
-        // Must be a local media item or an article media item.
-        $this->ensureMediaItem($mediaItem);
-
-        if ($mediaItem instanceof News) {
-            return $this->uploadArticle(false, $mediaItem);
-        } else {
-            return $this->uploadFile(false, $mediaItem);
-        }
+        return new Downloaded\Image($mediaID, $this->doTemporaryFetchToStream($mediaID, $into));
     }
 
     /**
-     * Ensures the given media item is an instance of one of the media item classes. Throws an exception if the given
-     * media item is not one of them.
-     * 
-     * @param FileMedia|News $mediaItem
-     * 
-     * @throws InvalidArgumentException
+     * Downloads a permanent image.
+     *
+     * @param string               $mediaID
+     * @param null|string|resource $into
+     *
+     * @return Downloaded\Image
      */
-    private function ensureMediaItem ($mediaItem)
+    public function fetchPermanentImage ($mediaID, $into = null)
     {
-        if (! ($mediaItem instanceof FileMedia || $mediaItem instanceof News)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    "unexpected value %s%s given as media item for upload.",
-                    gettype($mediaItem),
-                    is_object($mediaItem) ? " (" . get_class($mediaItem) . ")" : ''
-                )
-            );
-        }
+        return new Downloaded\Image($mediaID, $this->doPermanentFetchToStream($mediaID, $into));
     }
 
     /**
-     * Uploads the given media item for permanent storage on the WeChat servers.
-     * 
-     * @param FileMedia|News $mediaItem
+     * Downloads a temporary audio item.
      *
-     * @return RemoteFileMedia
-     * @throws MediaException
-     * @throws InvalidArgumentException
+     * @param string               $mediaID
+     * @param null|string|resource $into
+     *
+     * @return Downloaded\Audio
      */
-    public function uploadPermanentItem ($mediaItem)
+    public function fetchTemporaryAudio ($mediaID, $into = null)
     {
-        // Must be a local media item or an article media item.
-        $this->ensureMediaItem($mediaItem);
-
-        if ($mediaItem instanceof News) {
-            return $this->uploadArticle(true, $mediaItem);
-        } else {
-            return $this->uploadFile(true, $mediaItem);
-        }
+        return new Downloaded\Audio($mediaID, $this->doTemporaryFetchToStream($mediaID, $into));
     }
 
     /**
-     * Uploads the given media file to the WeChat content servers, and populates the item's ID and created date.
+     * Downloads a permanent audio item.
      *
-     * @param FileMedia $media
+     * @param string               $mediaID
+     * @param null|string|resource $into
      *
-     * @return RemoteFileMedia
-     *
-     * @throws InvalidArgumentException
+     * @return Downloaded\Audio
      */
-    protected function uploadFile ($isPermanent, FileMedia $media)
+    public function fetchPermanentAudio ($mediaID, $into = null)
     {
-        if ($media->getPath() === null) {
-            throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
-        }
-
-        $stream = fopen($media->getPath(), 'rb');
-        if (! $stream) {
-            throw new InvalidArgumentException("unable to open `{$media->getPath()}` for reading.");
-        }
-
-        if ($isPermanent) {
-            $endpoint = 'https://api.weixin.qq.com/cgi-bin/material/add_material';
-        } else {
-            $endpoint = 'http://api.weixin.qq.com/cgi-bin/media/upload';
-        }
-
-        $json = json_decode(
-            $this->client->send(
-                new Request(
-                    'POST',
-                    Uri::withQueryValue(new Uri($endpoint), 'type', $media->getType()),
-                    [],
-                    new MultipartStream ([
-                        [
-                            'name'     => 'media',
-                            'contents' => $stream,
-                        ],
-                    ])
-                )
-            )->getBody()
-        );
-
-        $remoteMedia = new RemoteFileMedia(
-            $media->getType(),
-            isset($json->thumb_media_id) ? $json->thumb_media_id : $json->media_id
-        );
-
-        if (isset($json->created_at)) {
-            $remoteMedia = $remoteMedia->withLastModifiedDate(DateTime::createFromFormat('U', $json->created_at));
-        }
-
-        return $remoteMedia;
+        return new Downloaded\Audio($mediaID, $this->doPermanentFetchToStream($mediaID, $into));
     }
 
     /**
-     * Uploads the given news article items to the WeChat content servers, and populates the media item's ID and created
-     * date.
+     * Downloads a temporary thumbnail item.
      *
-     * @param News $media
+     * @param string               $mediaID
+     * @param null|string|resource $into
      *
-     * @return RemoteFileMedia
-     *
-     * @throws MediaException
+     * @return Downloaded\Thumbnail
      */
-    protected function uploadArticle ($isPermanent, News $media)
+    public function fetchTemporaryThumbnail ($mediaID, $into = null)
     {
-        $jsonBody = [
-            'articles' => [],
-        ];
-
-        foreach ($media->getItems() as $item) {
-            $article = [
-                'title'          => $item->getTitle(),
-                'content'        => $item->getContent(),
-                'thumb_media_id' => $item->getThumbnailMediaID(),
-            ];
-
-            if ($item->getAuthor() !== null) {
-                $article['author'] = $item->getAuthor();
-            }
-
-            if ($item->getURL() !== null) {
-                $article['content_source_url'] = $item->getURL();
-            }
-
-            if ($item->getSummary() !== null) {
-                $article['digest'] = $item->getSummary();
-            }
-
-            $article['show_cover_pic'] = $item->isImageShowing() ? true : false;
-
-            $jsonBody['articles'][] = $article;
-        }
-
-        if ($isPermanent) {
-            $endpoint = 'https://api.weixin.qq.com/cgi-bin/material/add_news';
-        } else {
-            $endpoint = 'https://api.weixin.qq.com/cgi-bin/media/uploadnews';
-        }
-
-        $json = json_decode(
-            $this->client->send(
-                new Request(
-                    'POST',
-                    $endpoint,
-                    [],
-                    json_encode($jsonBody)
-                )
-            )->getBody()
-        );
-
-        if (! isset($json->media_id)) {
-            throw new MediaException("bad response: expected property `media_id`");
-        }
-
-        $remoteMedia = new RemoteFileMedia($media->getType(), $json->media_id);
-
-        if (isset($json->created_at)) {
-            $remoteMedia = $remoteMedia->withLastModifiedDate(new DateTime("@{$json->created_at}"));
-        }
-
-        return $remoteMedia;
+        return new Downloaded\Thumbnail($mediaID, $this->doTemporaryFetchToStream($mediaID, $into));
     }
-
-    private function createStream ($file)
-    {
-        if (is_resource($file)) {
-            $stream = $file;
-        } elseif (is_string($file)) {
-            $stream = fopen($file, 'wb');
-            if (! $stream) {
-                throw new InvalidArgumentException("Can't open file `{$file}` for writing.");
-            }
-        } else {
-            $stream = tmpfile();
-        }
-
-        return $stream;
-    }
-
 
     /**
-     * Downloads the given media item from the WeChat API.
+     * Downloads a permanent thumbnail item.
      *
-     * The media item must have been uploaded previously, and so must have its ID set.
+     * @param string               $mediaID
+     * @param null|string|resource $into
      *
-     * If no file is specified using the `$into` parameter, then a temporary file resource is created using the
-     * `tmpfile()` function.
-     *
-     * @param string          $mediaID The media item to download.
-     * @param resource|string $into    Optional file or file resource to download the media item into.
-     *
-     * @return resource
-     *
-     * @throws InvalidArgumentException
+     * @return Downloaded\Thumbnail
      */
-    public function downloadTemporary ($mediaID, $into = null)
+    public function fetchPermanentThumbnail ($mediaID, $into = null)
     {
-        return $this->client->send(
+        return new Downloaded\Thumbnail($mediaID, $this->doPermanentFetchToStream($mediaID, $into));
+    }
+
+    /**
+     * Downloads the temporary news item, and returns an object representation of it.
+     *
+     * @param string $mediaID
+     *
+     * @return Downloaded\News
+     */
+    public function fetchTemporaryNews ($mediaID)
+    {
+        $stream = $this->doTemporaryFetchToStream($mediaID, null);
+        $json = json_decode(stream_get_contents($stream));
+
+        return $this->expandNews($json->news_item, new Downloaded\News($mediaID));
+    }
+
+    /**
+     * Downloads the specified permanent news item, and returns an object representation of it.
+     *
+     * @param string $mediaID
+     *
+     * @return Downloaded\News
+     */
+    public function fetchPermanentNews ($mediaID)
+    {
+        $stream = $this->doPermanentFetchToStream($mediaID, null);
+        $json = json_decode(stream_get_contents($stream));
+
+        return $this->expandNews($json->news_item, new Downloaded\News($mediaID));
+    }
+
+    /**
+     * Downloads a temporary video.
+     *
+     * @param string               $mediaID
+     * @param null|string|resource $into
+     *
+     * @return Downloaded\Video
+     */
+    public function fetchTemporaryVideo ($mediaID, $into = null)
+    {
+        return new Downloaded\Video($mediaID, $this->doTemporaryFetchToStream($mediaID, $into));
+    }
+
+    /**
+     * Downloads the given video into the specified file.
+     *
+     * @param string               $mediaID
+     * @param null|string|resource $into
+     *
+     * @return Downloaded\Video
+     */
+    public function fetchPermanentVideo ($mediaID, $into = null)
+    {
+        $stream = $this->doPermanentFetchToStream($mediaID, null);
+        $json = json_decode(stream_get_contents($stream));
+
+        $body = $this->client->send(
             new Request(
                 'GET',
-                "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$mediaID}"
+                $json->down_url
             ),
             [
-                RequestOptions::SINK => $this->createStream($into),
+                RequestOptions::SINK => $this->createWritableStream($into),
             ]
-        )->getBody()
-         ->detach();
+        )->getBody();
+
+        if ($body->isSeekable()) {
+            $body->seek(0);
+        }
+
+        return (new Downloaded\Video($mediaID, $body->detach()))
+            ->withTitle($json->title)
+            ->withDescription($json->description);
+    }
+    
+    /**
+     * Upload a news item for permanent storage.
+     *
+     * @param News $news
+     *
+     * @return Uploaded\News
+     */
+    public function storePermanentNews (News $news)
+    {
+        $json = $this->storeNews('https://api.weixin.qq.com/cgi-bin/material/add_news', $news);
+
+        return new Uploaded\News($json->media_id);
     }
 
     /**
-     * Downloads the given permanent media item. The contents are returned as a stream.
+     * Upload a news item for temporary storage. It will expire after 3 days, but we'll set the expiry to 2 days, to be
+     * safe when it comes to time zones.
      *
-     * If the media item downloaded is a news article, then the stream will contain the JSON representation of it.
-     * Otherwise, it will contain the raw data for the image or video that is downloaded.
+     * @param News $news
      *
-     * @param string               $mediaID - The ID of the media item.
-     * @param string|resource|null $into    - Where to download the item into.
+     * @return Uploaded\News
+     */
+    public function storeTemporaryNews (News $news)
+    {
+        $json = $this->storeNews('https://api.weixin.qq.com/cgi-bin/media/uploadnews', $news);
+
+        return (new Uploaded\News($json->media_id))->withExpiresDate($this->createExpiryDate($json->created_at));
+    }
+
+    /**
+     * Uploads a video for permanent storage to the WeChat servers. The video supplied must have had the title and
+     * description populated.
      *
-     * @return resource
+     * @param Video $video
+     *
+     * @return Uploaded\Video
      * @throws InvalidArgumentException
      */
-    public function downloadPermanent ($mediaID, $into = null)
+    public function storePermanentVideo (Video $video)
     {
-        $response = $this->client->send(
-            new Request(
-                'POST',
-                'https://api.weixin.qq.com/cgi-bin/material/get_material',
-                [],
-                json_encode([
-                    'media_id' => $mediaID,
-                ])
-            ),
-            [
-                RequestOptions::SINK => $this->createStream($into),
-            ]
-        );
+        if ($video->getTitle() === null || $video->getDescription() === null) {
+            throw new InvalidArgumentException("permanent videos must have a title and description");
+        }
 
-        return $response->getBody()->detach();
+        return $this->storeVideo(true, $video);
     }
 
     /**
-     * Paginates all the media items that have been uploaded to the WeChat API.
+     * Uploads a video item for temporary storage on the WeChat servers.
      *
-     * @param string $type   - One the MediaType::* constants, indicating the type of media to download.
-     * @param int    $offset - The offset index (starts at 0).
-     * @param int    $limit  - The maximum number of items to return (max: 20)
+     * @param Video $video
      *
-     * @return RemoteFileMedia[]|RemoteArticleMedia[]
+     * @return Uploaded\Video
+     */
+    public function storeTemporaryVideo (Video $video)
+    {
+        return $this
+            ->storeVideo(false, $video)
+            ->withExpiresDate(new \DateTime('@' . (time() + 172800))); // @todo: change to use the JSON's created_at property.
+    }
+
+    /**
+     * Uploads an image for permanent storage on the WeChat servers.
+     *
+     * @param Image $image
+     *
+     * @return Uploaded\Image
+     */
+    public function storePermanentImage (Image $image)
+    {
+        $json = $this->storeGenericMedia(MediaType::IMAGE, true, $image);
+
+        return (new Uploaded\Image($json->media_id))->withURL($json->url);
+    }
+
+    /**
+     * Uploads an image for temporary storage on the WeChat servers.
+     *
+     * @param Image $image
+     *
+     * @return Uploaded\Image
+     */
+    public function storeTemporaryImage (Image $image)
+    {
+        $json = $this->storeGenericMedia(MediaType::IMAGE, false, $image);
+
+        return (new Uploaded\Image($json->media_id))
+            ->withExpiresDate($this->createExpiryDate($json->created_at));
+    }
+
+    /**
+     * Uploads  a thumbnail for permanent storage on the WeChat servers.
+     *
+     * @param Thumbnail $thumbnail
+     *
+     * @return Uploaded\Thumbnail
+     */
+    public function storePermanentThumbnail (Thumbnail $thumbnail)
+    {
+        $json = $this->storeGenericMedia(MediaType::THUMBNAIL, true, $thumbnail);
+
+        return new Uploaded\Thumbnail($json->media_id);
+    }
+
+    /**
+     * Uploads a thumbnail for temporary storage on the WeChat servers.
+     *
+     * @param Thumbnail $thumbnail
+     *
+     * @return Uploaded\Thumbnail
+     */
+    public function storeTemporaryThumbnail (Thumbnail $thumbnail)
+    {
+        $json = $this->storeGenericMedia(MediaType::THUMBNAIL, false, $thumbnail);
+
+        return (new Uploaded\Thumbnail($json->thumb_media_id))
+            ->withExpiresDate($this->createExpiryDate($json->created_at));
+    }
+
+    /**
+     * Uploads an audio item for permanent storage on the WeChat servers.
+     *
+     * @param Audio $audio
+     *
+     * @return Uploaded\Audio
+     */
+    public function storePermanentAudio (Audio $audio)
+    {
+        $json = $this->storeGenericMedia(MediaType::AUDIO, true, $audio);
+
+        return new Uploaded\Audio($json->media_id);
+    }
+
+    /**
+     * Uploads an audio item for temporary storage on the WeChat servers.
+     *
+     * @param Audio $audio
+     *
+     * @return Uploaded\Audio
+     */
+    public function storeTemporaryAudio (Audio $audio)
+    {
+        $json = $this->storeGenericMedia(MediaType::AUDIO, false, $audio);
+
+        return (new Uploaded\Audio($json->media_id))
+            ->withExpiresDate($this->createExpiryDate($json->created_at));
+    }
+
+    /**
+     * Expands the given news media, with its items into an object.
+     *
+     * @param array       $newsItems
+     * @param Downloaded\News $news
+     *
+     * @return Downloaded\News
+     */
+    private function expandNews (array $newsItems, Downloaded\News $news)
+    {
+        foreach ($newsItems as $newsItem) {
+            $news = $news->withItem(
+                (new Downloaded\NewsItem(
+                    $newsItem->title,
+                    $newsItem->content,
+                    $newsItem->thumb_media_id
+                ))
+                    ->withAuthor($newsItem->author)
+                    ->withURL($newsItem->content_source_url)
+                    ->withSummary($newsItem->digest)
+                    ->withImageShowing($newsItem->show_cover_pic)
+                    ->withDisplayURL($newsItem->url)
+            );
+        }
+
+        return $news;
+    }
+
+    /**
+     * Paginates through images stored on the WeChat servers.
+     * 
+     * @param int $offset - The offset from which to start showing items.
+     * @param int $count - The number of items to show.
+     *
+     * @return Remote\PaginatedImage
      * @throws MediaException
      */
-    public function paginate ($type, $offset = 0, $limit = 20)
+    public function paginateImages ($offset = 0, $count = 20)
+    {
+        $json = $this->paginate(MediaType::IMAGE, $offset, $count);
+print_r("=====  paginated images =====\n");
+print_r($json);
+print_r("=====  /paginated images =====\n");
+        return new Remote\PaginatedImage($json->total_count, $json->item);
+    }
+
+    /**
+     * Paginates through videos stored on the WeChat servers.
+     *
+     * @param int $offset - The offset from which to start showing items.
+     * @param int $count - The number of items to show.
+     *
+     * @return Remote\PaginatedVideo
+     * @throws MediaException
+     */
+    public function paginateVideos ($offset = 0, $count = 20)
+    {
+        $json = $this->paginate(MediaType::VIDEO, $offset, $count);
+        print_r("=====  paginated videos =====\n");
+        print_r($json);
+        print_r("=====  /paginated videos =====\n");
+        return new Remote\PaginatedVideo($json->total_count, $json->item);
+    }
+
+    /**
+     * Paginates through audio items stored on the WeChat servers.
+     *
+     * @param int $offset - The offset from which to start showing items.
+     * @param int $count - The number of items to show.
+     *
+     * @return Remote\PaginatedAudio
+     * @throws MediaException
+     */
+    public function paginateAudio ($offset = 0, $count = 20)
+    {
+        $json = $this->paginate(MediaType::AUDIO, $offset, $count);
+        print_r("=====  paginated audio =====\n");
+        print_r($json);
+        print_r("=====  /paginated audio =====\n");
+        return new Remote\PaginatedAudio($json->total_count, $json->item);
+    }
+
+    /**
+     * Paginates through news items stored on the WeChat servers.
+     *
+     * @param int $offset - The offset from which to start showing items.
+     * @param int $count - The number of items to show.
+     *
+     * @return Remote\PaginatedNews
+     * @throws MediaException
+     */
+    public function paginateNews ($offset = 0, $count = 20)
+    {
+        $json = $this->paginate(MediaType::ARTICLE, $offset, $count);
+        print_r("=====  paginated news =====\n");
+        print_r($json);
+        print_r("=====  /paginated news =====\n");
+        return new Remote\PaginatedNews($json->total_count, $json->item);
+    }
+
+    /**
+     * Performs the actual pagination request for the given item type.
+     * 
+     * @param string $type - The type of media item to paginate.
+     * @param int    $offset - The offset from which to start showing items.
+     * @param int    $limit - The number of items to show.
+     *
+     * @return \stdClass
+     * @throws MediaException
+     */
+    private function paginate ($type, $offset, $limit)
     {
         // Ensure the limit is within range.
         if ($limit < 1) {
@@ -323,48 +447,280 @@ class MediaService extends Service
         );
 
         // Ensure response formatting.
-        if (! isset($json->total_count, $json->item_count, $json->item)) {
+        if (! isset($json->total_count, $json->item)) {
             throw new MediaException("bad response: expecting properties `total_count`, `item_count`, `item`");
         }
+        
+        return $json;
+    }
 
-        $items = [];
+    /**
+     * Downloads the generic media item into the given destination.
+     *
+     * @param string               $mediaID
+     * @param string|null|resource $into
+     *
+     * @return resource
+     */
+    private function doTemporaryFetchToStream ($mediaID, $into)
+    {
+        $body = $this->client->send(
+            new Request(
+                'GET',
+                "http://api.weixin.qq.com/cgi-bin/media/get?media_id={$mediaID}"
+            ),
+            [
+                RequestOptions::SINK => $this->createWritableStream($into),
+            ]
+        )->getBody();
 
-        // Parse items into their object representations.
-        foreach ($json->item as $remoteItem) {
-            // We're paginating articles.
-            if ($type === MediaType::ARTICLE) {
-                $articleItem = (new RemoteArticleMedia($remoteItem->media_id));
-                
-                foreach ($remoteItem->content->news_item as $newsItem) {
-                    $articleItem = $articleItem->withItem(
-                        (new RemoteNewsArticle(
-                            $newsItem->title,
-                            $newsItem->content,
-                            $newsItem->thumb_media_id
-                        ))->withAuthor($newsItem->author)
-                          ->withURL($newsItem->url)
-                          ->withSummary($newsItem->digest)
-                          ->withImageShowing($newsItem->show_cover_pic)
-                          ->withDisplayURL($newsItem->url)
-                    );
-                }
-                
-                $items[] = $articleItem;
-            } // Any other item type.
-            else {
-                $items[] = (new RemoteFileMedia(
-                    $type,
-                    $remoteItem->media_id
-                ))->withLastModifiedDate(new DateTime("@{$remoteItem->update_time}"))
-                    ->withURL($remoteItem->url);
-            }
+        if ($body->isSeekable()) {
+            $body->seek(0);
         }
 
-        // Return the paginated results.
-        return [
-            'offset' => $offset,
-            'total'  => $json->total_count,
-            'items'  => $items,
-        ];
+        return $body->detach();
+    }
+
+    /**
+     * Downloads the generic permanent media item into the given destination.
+     *
+     * @param string               $mediaID
+     * @param string|null|resource $into
+     *
+     * @return resource
+     */
+    private function doPermanentFetchToStream ($mediaID, $into)
+    {
+        $body = $this->client->send(
+            new Request(
+                'POST',
+                'https://api.weixin.qq.com/cgi-bin/material/get_material',
+                [],
+                json_encode([
+                    'media_id' => $mediaID,
+                ])
+            ),
+            [
+                RequestOptions::SINK => $this->createWritableStream($into),
+            ]
+        )->getBody();
+
+        if ($body->isSeekable()) {
+            $body->seek(0);
+        }
+
+        return $body->detach();
+    }
+
+    /**
+     * Creates a writable stream that downloaded contents can be stored in.
+     *
+     * @param string|null $filePath
+     *
+     * @return resource
+     */
+    private function createWritableStream ($filePath)
+    {
+        if (is_resource($filePath)) {
+            $stream = $filePath;
+        } elseif (is_string($filePath)) {
+            $stream = fopen($filePath, 'wb');
+            if (! $stream) {
+                throw new InvalidArgumentException("Can't open file `{$filePath}` for writing.");
+            }
+        } else {
+            $stream = tmpfile();
+        }
+
+        return $stream;
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return resource
+     */
+    private function createReadableStream ($path)
+    {
+        if ($path === null) {
+            throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
+        }
+
+        $stream = fopen($path, 'rb');
+        if (! $stream) {
+            throw new InvalidArgumentException("unable to open `{$path}` for reading.");
+        }
+
+        return $stream;
+    }
+
+    /**
+     * Returns a `\DateTime` instance, representing the date & time at which the media item should be considered
+     * expired.
+     *
+     * @param int $createdAt
+     *
+     * @return \DateTime
+     */
+    private function createExpiryDate ($createdAt)
+    {
+        return new \DateTime('@' . ($createdAt + 172800));
+    }
+
+    /**
+     * @param string    $type
+     * @param bool      $isPermanent
+     * @param FileMedia $item
+     *
+     * @return \stdClass
+     */
+    private function storeGenericMedia ($type, $isPermanent, FileMedia $item)
+    {
+        $endpoint = 'http://api.weixin.qq.com/cgi-bin/media/upload';
+        if ($isPermanent) {
+            $endpoint = 'https://api.weixin.qq.com/cgi-bin/material/add_material';
+        }
+
+        // Shortcut to uploading video.
+        return $this->doMultipartUpload(
+            $endpoint,
+            $type,
+            $this->createReadableStream($item->getPath())
+        );
+    }
+
+    /**
+     * @param Video $video
+     *
+     * @return Uploaded\Video
+     */
+    private function storeVideo ($isPermanent, Video $video)
+    {
+        $endpoint = 'https://api.weixin.qq.com/cgi-bin/media/upload';
+        if ($isPermanent) {
+            $endpoint = 'https://api.weixin.qq.com/cgi-bin/material/add_material';
+        }
+
+        $json = $this->doMultipartUpload(
+            $endpoint,
+            MediaType::VIDEO,
+            $this->createReadableStream($video->getPath()),
+            [
+                [
+                    'name'     => 'description',
+                    'contents' => json_encode([
+                        'title'        => $video->getTitle(),
+                        'introduction' => $video->getDescription(),
+                    ]),
+                ],
+            ]
+        );
+
+        if ($isPermanent) {
+            print_r("========= perm video");
+            print_r($json);
+            print_r("========= /perm video");
+        } else {
+            print_r("========= temp video");
+            print_r($json);
+            print_r("========= /temp video");
+        }
+
+        return new Uploaded\Video($json->media_id);
+    }
+
+    /**
+     * Handles the uploading of a news item to the WeChat servers.
+     *
+     * @param string $endpoint
+     * @param News   $news
+     *
+     * @return \stdClass
+     */
+    private function storeNews ($endpoint, News $news)
+    {
+        $jsonBody = ['articles' => []];
+
+        foreach ($news->getItems() as $newsArticle) {
+            $jsonArticle = [
+                'title'          => $newsArticle->getTitle(),
+                'content'        => $newsArticle->getContent(),
+                'thumb_media_id' => $newsArticle->getThumbnailMediaID(),
+            ];
+
+            if ($newsArticle->getAuthor() !== null) {
+                $jsonArticle['author'] = $newsArticle->getAuthor();
+            }
+
+            if ($newsArticle->getURL() !== null) {
+                $jsonArticle['content_source_url'] = $newsArticle->getURL();
+            }
+
+            if ($newsArticle->getSummary() !== null) {
+                $jsonArticle['digest'] = $newsArticle->getSummary();
+            }
+
+            $jsonArticle['show_cover_pic'] = $newsArticle->isImageShowing() ? true : false;
+
+            $jsonBody['articles'][] = $jsonArticle;
+        }
+
+        return $this->doUpload(
+            $endpoint,
+            MediaType::ARTICLE,
+            json_encode($jsonBody)
+        );
+    }
+
+    /**
+     * Uploads a simple string body to the WeChat servers.
+     *
+     * @param string $endpoint
+     * @param string $type
+     * @param string $body
+     *
+     * @return \stdClass
+     */
+    private function doUpload ($endpoint, $type, $body)
+    {
+        return json_decode(
+            $this->client->send(
+                new Request(
+                    'POST',
+                    Uri::withQueryValue(new Uri($endpoint), 'type', $type),
+                    [],
+                    $body
+                )
+            )->getBody()
+        );
+    }
+
+    /**
+     * Performs a multipart upload to the WeChat API. Additional multipart fields can be added in if required.
+     *
+     * @param string   $endpoint
+     * @param string   $type
+     * @param resource $stream
+     * @param array    $extra
+     *
+     * @return \stdClass
+     */
+    private function doMultipartUpload ($endpoint, $type, $stream, array $extra = [])
+    {
+        return json_decode(
+            $this->client->send(
+                new Request(
+                    'POST',
+                    Uri::withQueryValue(new Uri($endpoint), 'type', $type),
+                    [],
+                    new MultipartStream (array_merge([
+                        [
+                            'name'     => 'media',
+                            'contents' => $stream,
+                        ],
+                    ], $extra))
+                )
+            )->getBody()
+        );
     }
 }
