@@ -8,14 +8,6 @@ class News
      * @var array
      */
     protected $items = [];
-    
-    /**
-     * @return string
-     */
-    public function getType ()
-    {
-        return 'news';
-    }
 
     /**
      * Adds a new item to the article.

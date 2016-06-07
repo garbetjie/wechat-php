@@ -5,25 +5,17 @@ namespace Garbetjie\WeChatClient\Media;
 class Video extends FileMedia
 {
     /**
-     * @var string
+     * @var string|null
      */
-    protected $title;
+    private $title;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $description;
+    private $description;
 
     /**
-     * @inheritDoc
-     */
-    public function getType ()
-    {
-        return 'video';
-    }
-
-    /**
-     * @return string
+     * @return null|string
      */
     public function getTitle ()
     {
@@ -31,7 +23,7 @@ class Video extends FileMedia
     }
 
     /**
-     * @return mixed
+     * @return null|string
      */
     public function getDescription ()
     {

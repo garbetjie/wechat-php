@@ -57,7 +57,7 @@ class NewsItem
 
     /**
      * Sets the name of the author of the article.
-     * 
+     *
      * @param string $author
      *
      * @return static
@@ -66,13 +66,13 @@ class NewsItem
     {
         $new = clone $this;
         $new->author = $author;
-        
+
         return $new;
     }
 
     /**
      * Populates the URL to be used when clicking on "View more" in an article.
-     * 
+     *
      * @param string $url
      *
      * @return static
@@ -86,13 +86,13 @@ class NewsItem
 
         $new = clone $this;
         $new->url = $url;
-        
+
         return $new;
     }
 
     /**
      * Adds the summary to the article item.
-     * 
+     *
      * @param string $summary
      *
      * @return static
@@ -101,13 +101,13 @@ class NewsItem
     {
         $new = clone $this;
         $new->summary = $summary;
-        
+
         return $new;
     }
 
     /**
      * Sets a flag indicating whether or not the cover image should be showing.
-     * 
+     *
      * @param bool $showImage
      *
      * @return static
@@ -116,7 +116,7 @@ class NewsItem
     {
         $new = clone $this;
         $new->showImage = !! $showImage;
-        
+
         return $new;
     }
 

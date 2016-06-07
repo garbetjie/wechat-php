@@ -26,9 +26,4 @@ abstract class FileMedia
     {
         return $this->path;
     }
-
-    /**
-     * @return string
-     */
-    abstract public function getType ();
 }
