@@ -13,13 +13,10 @@ class Image extends Uploaded
      * Image constructor.
      *
      * @param string $mediaID
-     * @param string $url
      */
-    public function __construct ($mediaID, $url)
+    public function __construct ($mediaID)
     {
         parent::__construct($mediaID);
-
-        $this->url = $url;
     }
 
     /**
@@ -28,5 +25,18 @@ class Image extends Uploaded
     public function getURL ()
     {
         return $this->url;
+    }
+
+    /**
+     * @param string $url
+     *
+     * @return Image
+     */
+    public function withURL ($url)
+    {
+        $new = clone $this;
+        $new->url = $url;
+        
+        return $new;
     }
 }
