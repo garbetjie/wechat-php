@@ -13,14 +13,6 @@ class Video extends Remote
      * @var string|null
      */
     private $description;
-    
-    /**
-     * @inheritDocx
-     */
-    public function getType ()
-    {
-        return 'video';
-    }
 
     /**
      * @return null|string
@@ -41,26 +33,26 @@ class Video extends Remote
     /**
      * @param string $title
      *
-     * @return Video
+     * @return static
      */
     public function withTitle ($title)
     {
         $new = clone $this;
         $new->title = $title;
-        
+
         return $new;
     }
 
     /**
      * @param string $description
      *
-     * @return Video
+     * @return static
      */
     public function withDescription ($description)
     {
         $new = clone $this;
         $new->description = $description;
-        
+
         return $new;
     }
 }

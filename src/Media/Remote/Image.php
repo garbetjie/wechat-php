@@ -8,14 +8,6 @@ class Image extends Remote
      * @var string
      */
     private $url;
-    
-    /**
-     * @inheritDoc
-     */
-    public function getType ()
-    {
-        return 'image';
-    }
 
     /**
      * @return string
@@ -34,7 +26,7 @@ class Image extends Remote
     {
         $new = clone $this;
         $new->url = $url;
-        
+
         return $new;
     }
 }

@@ -2,48 +2,33 @@
 
 namespace Garbetjie\WeChatClient\Media\Remote;
 
-use Garbetjie\WeChatClient\Media\News as LocalNews;
-
-class News extends LocalNews 
+class News extends Remote 
 {
     /**
-     * @var string
+     * @var array
      */
-    private $mediaID;
+    private $items = [];
 
     /**
-     * News constructor.
-     *
-     * @param string $mediaID
-     */
-    public function __construct ($mediaID)
-    {
-        $this->mediaID = $mediaID;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMediaID ()
-    {
-        return $this->mediaID;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withItem (NewsItem $item)
-    {
-        return parent::withItem($item);
-    }
-
-    /**
-     * @inheritDoc
-     * 
-     * @return NewsItem[]
+     * @return array
      */
     public function getItems ()
     {
-        return parent::getItems();
+        return $this->items;
+    }
+
+    /**
+     * Adds the item to the cloned object.
+     *
+     * @param mixed $item
+     *
+     * @return static
+     */
+    public function withItem ($item)
+    {
+        $new = clone $this;
+        $new->items[] = $item;
+
+        return $new;
     }
 }
