@@ -361,14 +361,14 @@ class MediaService extends Service
      * @param int $offset - The offset from which to start showing items.
      * @param int $count - The number of items to show.
      *
-     * @return Remote\PaginatedImage
+     * @return Paginated\ImageResultSet
      * @throws MediaException
      */
     public function paginateImages ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::IMAGE, $offset, $count);
 
-        return new Remote\PaginatedImage($json->total_count, $json->item);
+        return new Paginated\ImageResultSet($json->total_count, $json->item);
     }
 
     /**
@@ -377,14 +377,14 @@ class MediaService extends Service
      * @param int $offset - The offset from which to start showing items.
      * @param int $count - The number of items to show.
      *
-     * @return Remote\PaginatedVideo
+     * @return Paginated\VideoResultSet
      * @throws MediaException
      */
     public function paginateVideos ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::VIDEO, $offset, $count);
 
-        return new Remote\PaginatedVideo($json->total_count, $json->item);
+        return new Paginated\VideoResultSet($json->total_count, $json->item);
     }
 
     /**
@@ -393,14 +393,14 @@ class MediaService extends Service
      * @param int $offset - The offset from which to start showing items.
      * @param int $count - The number of items to show.
      *
-     * @return Remote\PaginatedAudio
+     * @return Paginated\AudioResultSet
      * @throws MediaException
      */
     public function paginateAudio ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::AUDIO, $offset, $count);
 
-        return new Remote\PaginatedAudio($json->total_count, $json->item);
+        return new Paginated\AudioResultSet($json->total_count, $json->item);
     }
 
     /**
@@ -409,14 +409,14 @@ class MediaService extends Service
      * @param int $offset - The offset from which to start showing items.
      * @param int $count - The number of items to show.
      *
-     * @return Remote\PaginatedNews
+     * @return Paginated\NewsResultSet
      * @throws MediaException
      */
     public function paginateNews ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::ARTICLE, $offset, $count);
 
-        return new Remote\PaginatedNews($json->total_count, $json->item);
+        return new Paginated\NewsResultSet($json->total_count, $json->item);
     }
 
     /**

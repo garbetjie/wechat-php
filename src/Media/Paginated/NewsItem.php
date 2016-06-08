@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
 use Garbetjie\WeChatClient\Media\NewsItem as SourceNewsItem;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-class PaginatedNews extends Paginated
+class NewsResultSet extends ResultSet
 {
     /**
      * @return News

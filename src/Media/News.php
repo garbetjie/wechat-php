@@ -35,14 +35,14 @@ class News
     /**
      * Creates a new news item from the given one.
      * 
-     * @param News|Downloaded\News|Remote\News $news
+     * @param News|Downloaded\News|\Garbetjie\WeChatClient\Media\Paginated\News $news
      * 
      * @return News
      * @throws \InvalidArgumentException
      */
     static public final function createFrom ($news)
     {
-        if (!($news instanceof News || $news instanceof Downloaded\News || $news instanceof Remote\News)) {
+        if (!($news instanceof News || $news instanceof Downloaded\News || $news instanceof Paginated\News)) {
             throw new \InvalidArgumentException('$news must be a `News` instance');
         }
         

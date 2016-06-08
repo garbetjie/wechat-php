@@ -2,9 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Media\Downloaded;
 
-use Garbetjie\WeChatClient\Media\Remote\Remote;
+use Garbetjie\WeChatClient\Media\Paginated\Paginated;
 
-abstract class Downloaded extends Remote
+abstract class Downloaded extends Paginated
 {
     /**
      * @var resource

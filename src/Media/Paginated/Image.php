@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-class Image extends Remote
+class Image extends Paginated
 {
     /**
      * @var string

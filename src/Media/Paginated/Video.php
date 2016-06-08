@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-class Video extends Remote
+class Video extends Paginated
 {
     /**
      * @var string|null

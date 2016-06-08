@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-abstract class Paginated
+abstract class ResultSet
 {
     /**
      * @var int
@@ -15,7 +15,7 @@ abstract class Paginated
     private $items = [];
 
     /**
-     * Paginated constructor.
+     * ResultSet constructor.
      *
      * @param int   $totalCount
      * @param array $items

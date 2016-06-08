@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-abstract class Remote
+abstract class Paginated
 {
     /**
      * @var string
@@ -10,7 +10,7 @@ abstract class Remote
     protected $mediaID;
 
     /**
-     * Remote constructor.
+     * Paginated constructor.
      *
      * @param string $mediaID
      */

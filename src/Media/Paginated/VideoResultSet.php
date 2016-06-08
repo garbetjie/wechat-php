@@ -1,24 +1,25 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-class PaginatedImage extends Paginated
+class VideoResultSet extends ResultSet
 {
     /**
-     * @return Image[]
+     * @return Video[]
      */
     public function getItems ()
     {
         return parent::getItems();
     }
-
+    
     /**
      * @param \stdClass $item
      *
-     * @return Image
+     * @return Video
      */
     protected function expand ($item)
     {
-        return (new Image($item->media_id))->withURL($item->url);
+        return (new Video($item->media_id));
     }
+
 }

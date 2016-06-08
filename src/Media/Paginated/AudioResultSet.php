@@ -1,8 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media\Remote;
+namespace Garbetjie\WeChatClient\Media\Paginated;
 
-class PaginatedAudio extends Paginated
+class AudioResultSet extends ResultSet
 {
     /**
      * @return Audio
