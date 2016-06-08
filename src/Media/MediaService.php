@@ -4,7 +4,9 @@ namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
 use Garbetjie\WeChatClient\Service;
+use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 
@@ -616,16 +618,6 @@ print_r("=====  /paginated images =====\n");
             ]
         );
 
-        if ($isPermanent) {
-            print_r("========= perm video");
-            print_r($json);
-            print_r("========= /perm video");
-        } else {
-            print_r("========= temp video");
-            print_r($json);
-            print_r("========= /temp video");
-        }
-
         return new Uploaded\Video($json->media_id);
     }
 
@@ -713,7 +705,7 @@ print_r("=====  /paginated images =====\n");
                     'POST',
                     Uri::withQueryValue(new Uri($endpoint), 'type', $type),
                     [],
-                    new MultipartStream (array_merge([
+                    new MultipartStream(array_merge([
                         [
                             'name'     => 'media',
                             'contents' => $stream,
