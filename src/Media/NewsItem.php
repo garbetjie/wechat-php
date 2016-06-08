@@ -81,7 +81,7 @@ class NewsItem
     public function withURL ($url)
     {
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException("invalid url `{$url}` given for article media item");
+            throw new InvalidArgumentException("invalid url `{$url}` given for news item");
         }
 
         $new = clone $this;

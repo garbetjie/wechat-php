@@ -155,7 +155,6 @@ class MediaService extends Service
                 RequestOptions::SINK => $this->createWritableStream($into),
             ]
         )->getBody();
-
         if ($body->isSeekable()) {
             $body->seek(0);
         }
@@ -316,26 +315,41 @@ class MediaService extends Service
     /**
      * Expands the given news media, with its items into an object.
      *
-     * @param array       $newsItems
+     * @param array           $rawNewsItems
      * @param Downloaded\News $news
      *
      * @return Downloaded\News
      */
-    private function expandNews (array $newsItems, Downloaded\News $news)
+    public function expandNews (array $rawNewsItems, Downloaded\News $news)
     {
-        foreach ($newsItems as $newsItem) {
-            $news = $news->withItem(
-                (new Downloaded\NewsItem(
-                    $newsItem->title,
-                    $newsItem->content,
-                    $newsItem->thumb_media_id
-                ))
-                    ->withAuthor($newsItem->author)
-                    ->withURL($newsItem->content_source_url)
-                    ->withSummary($newsItem->digest)
-                    ->withImageShowing($newsItem->show_cover_pic)
-                    ->withDisplayURL($newsItem->url)
+        foreach ($rawNewsItems as $rawNewsItem) {
+            $newsItem = new Downloaded\NewsItem(
+                $rawNewsItem->title,
+                $rawNewsItem->content,
+                $rawNewsItem->thumb_media_id
             );
+            
+            if (strlen($rawNewsItem->author) > 0) {
+                $newsItem = $newsItem->withAuthor($rawNewsItem->author);
+            }
+            
+            if (strlen($rawNewsItem->content_source_url) > 0) {
+                $newsItem = $newsItem->withURL($rawNewsItem->content_source_url);
+            }
+            
+            if (strlen($rawNewsItem->digest) > 0) {
+                $newsItem = $newsItem->withSummary($rawNewsItem->digest);
+            }
+            
+            if (isset($rawNewsItem->show_cover_pic)) {
+                $newsItem = $newsItem->withImageShowing(!! $rawNewsItem->show_cover_pic);
+            }
+            
+            if (strlen($rawNewsItem->url) > 0) {
+                $newsItem = $newsItem->withDisplayURL($rawNewsItem->url);
+            }
+            
+            $news = $news->withItem($newsItem);
         }
 
         return $news;
@@ -353,9 +367,7 @@ class MediaService extends Service
     public function paginateImages ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::IMAGE, $offset, $count);
-print_r("=====  paginated images =====\n");
-print_r($json);
-print_r("=====  /paginated images =====\n");
+
         return new Remote\PaginatedImage($json->total_count, $json->item);
     }
 
@@ -371,9 +383,7 @@ print_r("=====  /paginated images =====\n");
     public function paginateVideos ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::VIDEO, $offset, $count);
-        print_r("=====  paginated videos =====\n");
-        print_r($json);
-        print_r("=====  /paginated videos =====\n");
+
         return new Remote\PaginatedVideo($json->total_count, $json->item);
     }
 
@@ -389,9 +399,7 @@ print_r("=====  /paginated images =====\n");
     public function paginateAudio ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::AUDIO, $offset, $count);
-        print_r("=====  paginated audio =====\n");
-        print_r($json);
-        print_r("=====  /paginated audio =====\n");
+
         return new Remote\PaginatedAudio($json->total_count, $json->item);
     }
 
@@ -407,9 +415,7 @@ print_r("=====  /paginated images =====\n");
     public function paginateNews ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::ARTICLE, $offset, $count);
-        print_r("=====  paginated news =====\n");
-        print_r($json);
-        print_r("=====  /paginated news =====\n");
+
         return new Remote\PaginatedNews($json->total_count, $json->item);
     }
 
