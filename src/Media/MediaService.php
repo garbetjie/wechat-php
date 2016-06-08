@@ -320,7 +320,7 @@ class MediaService extends Service
      *
      * @return Downloaded\News
      */
-    public function expandNews (array $rawNewsItems, Downloaded\News $news)
+    private function expandNews (array $rawNewsItems, Downloaded\News $news)
     {
         foreach ($rawNewsItems as $rawNewsItem) {
             $newsItem = new Downloaded\NewsItem(
