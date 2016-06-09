@@ -13,7 +13,7 @@ class MenuService extends Service
      *
      * @param Menu $menu
      */
-    public function saveMenu (Menu $menu)
+    public function storeMenu (Menu $menu)
     {
         $this->client->send(
             new Request(
@@ -42,7 +42,7 @@ class MenuService extends Service
      * 
      * @throws MenuException
      */
-    public function getCurrentMenu ()
+    public function fetchCurrentMenu ()
     {
         $request = new Request("GET", "https://api.weixin.qq.com/cgi-bin/menu/get");
         $response = $this->client->send($request);
