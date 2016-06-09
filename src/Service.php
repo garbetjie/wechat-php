@@ -10,7 +10,7 @@ abstract class Service
     protected $client;
 
     /**
-     * GroupsService constructor.
+     * Service constructor.
      *
      * @param Client $client
      */
