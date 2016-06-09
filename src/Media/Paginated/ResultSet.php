@@ -10,6 +10,11 @@ abstract class ResultSet
     private $total;
 
     /**
+     * @var int
+     */
+    private $offset;
+
+    /**
      * @var array
      */
     private $items = [];
@@ -20,12 +25,20 @@ abstract class ResultSet
      * @param int   $totalCount
      * @param array $items
      */
-    public function __construct ($totalCount, array $items)
+    public function __construct (array $items, $totalCount, $offset)
     {
-        $this->total = $totalCount;
-
-        foreach ($items as $item) {
-            $this->items[] = $this->expand($item);
+        $this->total = (int)$totalCount;
+        $this->offset = (int)$offset;
+        $this->items = $items;
+        
+        if ($this->total < 0) {
+            $this->total = 0;
+        }
+        
+        if ($this->offset < 0) {
+            $this->offset = 0;
+        } elseif ($this->offset > $this->total) {
+            $this->offset = $this->total;
         }
     }
 
@@ -38,13 +51,4 @@ abstract class ResultSet
     {
         return $this->items;
     }
-
-    /**
-     * Expands the given paginated item into its object representation.
-     *
-     * @param \stdClass $item
-     *
-     * @return mixed
-     */
-    abstract protected function expand ($item);
 }

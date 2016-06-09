@@ -11,15 +11,4 @@ class VideoResultSet extends ResultSet
     {
         return parent::getItems();
     }
-    
-    /**
-     * @param \stdClass $item
-     *
-     * @return Video
-     */
-    protected function expand ($item)
-    {
-        return (new Video($item->media_id));
-    }
-
 }

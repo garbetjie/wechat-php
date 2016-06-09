@@ -2,10 +2,13 @@
 
 namespace Garbetjie\WeChatClient\Media\Downloaded;
 
-use Garbetjie\WeChatClient\Media\Paginated\Paginated;
-
-abstract class Downloaded extends Paginated
+abstract class Downloaded
 {
+    /**
+     * @var string
+     */
+    private $mediaID;
+    
     /**
      * @var resource
      */
@@ -19,8 +22,7 @@ abstract class Downloaded extends Paginated
      */
     public function __construct ($mediaID, $stream)
     {
-        parent::__construct($mediaID);
-        
+        $this->mediaID = $mediaID;
         $this->stream = $stream;
     }
 
@@ -30,5 +32,13 @@ abstract class Downloaded extends Paginated
     public function getStream ()
     {
         return $this->stream;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMediaID ()
+    {
+        return $this->mediaID;
     }
 }

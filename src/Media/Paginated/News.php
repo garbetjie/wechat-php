@@ -20,11 +20,11 @@ class News extends Paginated
     /**
      * Adds the item to the cloned object.
      *
-     * @param mixed $item
+     * @param NewsItem $item
      *
      * @return static
      */
-    public function withItem ($item)
+    public function withItem (NewsItem $item)
     {
         $new = clone $this;
         $new->items[] = $item;

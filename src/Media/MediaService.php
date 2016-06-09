@@ -96,14 +96,16 @@ class MediaService extends Service
      * @param string $mediaID
      *
      * @return Downloaded\News
+     * 
+     * @todo For some reason, the contents for this is coming back garbled. Investigate why this is.
      */
-    public function fetchTemporaryNews ($mediaID)
+    /* public function fetchTemporaryNews ($mediaID)
     {
         $stream = $this->doTemporaryFetchToStream($mediaID, null);
         $json = json_decode(stream_get_contents($stream));
 
         return $this->expandNews($json->news_item, new Downloaded\News($mediaID));
-    }
+    } */
 
     /**
      * Downloads the specified permanent news item, and returns an object representation of it.
@@ -117,7 +119,7 @@ class MediaService extends Service
         $stream = $this->doPermanentFetchToStream($mediaID, null);
         $json = json_decode(stream_get_contents($stream));
 
-        return $this->expandNews($json->news_item, new Downloaded\News($mediaID));
+        return $this->expandNews($json->news_item, new Downloaded\News($mediaID, $json->update_time));
     }
 
     /**
@@ -315,12 +317,12 @@ class MediaService extends Service
     /**
      * Expands the given news media, with its items into an object.
      *
-     * @param array           $rawNewsItems
-     * @param Downloaded\News $news
+     * @param array          $rawNewsItems
+     * @param Paginated\News $news
      *
-     * @return Downloaded\News
+     * @return Paginated\News
      */
-    private function expandNews (array $rawNewsItems, Downloaded\News $news)
+    private function expandNews (array $rawNewsItems, Paginated\News $news)
     {
         foreach ($rawNewsItems as $rawNewsItem) {
             $newsItem = new Downloaded\NewsItem(
@@ -349,6 +351,10 @@ class MediaService extends Service
                 $newsItem = $newsItem->withDisplayURL($rawNewsItem->url);
             }
             
+            if (isset($rawNewsItem->thumb_url) && strlen($rawNewsItem->thumb_url) > 0) {
+                $newsItem = $newsItem->withThumbnailURL($rawNewsItem->thumb_url);
+            }
+            
             $news = $news->withItem($newsItem);
         }
 
@@ -367,8 +373,19 @@ class MediaService extends Service
     public function paginateImages ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::IMAGE, $offset, $count);
+        $resultSet = [];
+        
+        foreach ($json->item as $item) {
+            $image = new Paginated\Image($item->media_id, $item->name, $item->update_time);
+            
+            if (isset($item->url) && strlen($item->url) > 0) {
+                $image = $image->withURL($item->url);
+            }
+            
+            $resultSet[] = $image;
+        }
 
-        return new Paginated\ImageResultSet($json->total_count, $json->item);
+        return new Paginated\ImageResultSet($resultSet, $json->total_count, $offset);
     }
 
     /**
@@ -383,8 +400,13 @@ class MediaService extends Service
     public function paginateVideos ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::VIDEO, $offset, $count);
+        $resultSet = [];
+        
+        foreach ($json->item as $item) {
+            $resultSet[] = new Paginated\Video($item->media_id, $item->update_time);
+        }
 
-        return new Paginated\VideoResultSet($json->total_count, $json->item);
+        return new Paginated\VideoResultSet($resultSet, $json->total_count, $offset);
     }
 
     /**
@@ -399,8 +421,13 @@ class MediaService extends Service
     public function paginateAudio ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::AUDIO, $offset, $count);
+        $resultSet = [];
+        
+        foreach ($json->item as $item) {
+            $resultSet = new Paginated\Audio($item->media_id, $item->update_time);
+        }
 
-        return new Paginated\AudioResultSet($json->total_count, $json->item);
+        return new Paginated\AudioResultSet($resultSet, $json->total_count, $offset);
     }
 
     /**
@@ -415,8 +442,16 @@ class MediaService extends Service
     public function paginateNews ($offset = 0, $count = 20)
     {
         $json = $this->paginate(MediaType::ARTICLE, $offset, $count);
+        $resultSet = [];
+        
+        foreach ($json->item as $item) {
+            $resultSet[] = $this->expandNews(
+                $item->content->news_item,
+                new Paginated\News($item->media_id, $item->update_time)
+            );
+        }
 
-        return new Paginated\NewsResultSet($json->total_count, $json->item);
+        return new Paginated\NewsResultSet($resultSet, $json->total_count, $offset);
     }
 
     /**

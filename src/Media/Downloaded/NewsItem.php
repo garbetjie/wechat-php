@@ -2,33 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Media\Downloaded;
 
-use Garbetjie\WeChatClient\Media\NewsItem as SourceNewsItem;
+use Garbetjie\WeChatClient\Media\Paginated\NewsItem as BaseNewsItem;
 
-class NewsItem extends SourceNewsItem
+class NewsItem extends BaseNewsItem
 {
-    /**
-     * @var string
-     */
-    private $displayURL;
 
-    /**
-     * @return string
-     */
-    public function getDisplayURL ()
-    {
-        return $this->displayURL;
-    }
-
-    /**
-     * @param $url
-     *
-     * @return $this
-     */
-    public function withDisplayURL ($url)
-    {
-        $new = clone $this;
-        $new->displayURL = $url;
-
-        return $new;
-    }
 }

@@ -10,16 +10,6 @@ class Image extends Uploaded
     private $url;
 
     /**
-     * Image constructor.
-     *
-     * @param string $mediaID
-     */
-    public function __construct ($mediaID)
-    {
-        parent::__construct($mediaID);
-    }
-
-    /**
      * @return string
      */
     public function getURL ()
