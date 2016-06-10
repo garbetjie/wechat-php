@@ -2,8 +2,8 @@
 
 namespace Garbetjie\WeChatClient\QR;
 
-use DateTime;
-use Garbetjie\WeChatClient\QR\CodeInterface;
+use DateTimeInterface;
+use DateTimeImmutable;
 
 class TemporaryCode implements CodeInterface
 {
@@ -13,7 +13,7 @@ class TemporaryCode implements CodeInterface
     protected $ticket;
 
     /**
-     * @var DateTime
+     * @var DateTimeImmutable
      */
     protected $expires;
 
@@ -26,13 +26,13 @@ class TemporaryCode implements CodeInterface
      * QRCode constructor.
      *
      * @param string   $ticket
-     * @param DateTime $expires
+     * @param DateTimeInterface $expires
      * @param string   $url
      */
-    public function __construct ($ticket, $url, DateTime $expires)
+    public function __construct ($ticket, $url, DateTimeInterface $expires)
     {
         $this->ticket = $ticket;
-        $this->expires = $expires;
+        $this->expires = new DateTimeImmutable('@' . $expires->getTimestamp());
         $this->url = $url;
     }
 
@@ -47,7 +47,7 @@ class TemporaryCode implements CodeInterface
     }
 
     /**
-     * @return DateTime
+     * @return DateTimeImmutable
      */
     public function getExpiryDate ()
     {

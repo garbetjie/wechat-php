@@ -2,7 +2,8 @@
 
 namespace Garbetjie\WeChatClient\QR;
 
-use DateTime;
+use DateTimeInterface;
+use DateTimeImmutable;
 use Garbetjie\WeChatClient\QR\Exception\QRCodeException;
 use Garbetjie\WeChatClient\Service;
 use GuzzleHttp\Psr7\Request;
@@ -12,13 +13,13 @@ use InvalidArgumentException;
 class QRCodeService extends Service
 {
     /**
-     * Creates a temporary GroupsService code that is only valid for the limited duration given. The expiry given
+     * Creates a temporary QR code that is only valid for the limited duration given. The expiry given
      * cannot be longer than 1,800 seconds (30 minutes), or less than 1 second.
      *
      * Expiry times of less than 1 second will cause and `InvalidArgumentException` to be thrown.
      *
-     * @param int          $value   The value of the GroupsService code.
-     * @param int|DateTime $expires The duration of the GroupsService code, or the `DateTime` instance at which the
+     * @param int          $value   The value of the QR code.
+     * @param int|DateTimeInterface $expires The duration of the QR code, or the `DateTimeInterface` instance at which the
      *                              code should expire.
      *
      * @return TemporaryCode
@@ -28,7 +29,7 @@ class QRCodeService extends Service
      */
     public function createTemporary ($value, $expires = 1800)
     {
-        if ($expires instanceof DateTime) {
+        if ($expires instanceof DateTimeInterface) {
             $expires = $expires->getTimestamp() - time();
         }
 
@@ -52,7 +53,7 @@ class QRCodeService extends Service
     }
 
     /**
-     * Creates and returns an instance of a new permanent GroupsService code. This code can be used to download the
+     * Creates and returns an instance of a new permanent QR code. This code can be used to download the
      * code contents.
      *
      * @param string|int $value
@@ -110,7 +111,7 @@ class QRCodeService extends Service
 
     /**
      * Method responsible for the actual interaction with the WeChat API, and returns the arguments used for creating
-     * a GroupsService code.
+     * a GroupService code.
      *
      * @param array $body
      *
@@ -137,7 +138,7 @@ class QRCodeService extends Service
                 throw new QRCodeException("bad response: expected properties `ticket`, `url`, `expire_seconds`");
             }
 
-            return [$json->ticket, $json->url, DateTime::createFromFormat('U', time() + $json->expire_seconds)];
+            return [$json->ticket, $json->url, new DateTimeImmutable('@' . (time() + $json->expire_seconds))];
         }
     }
 }
