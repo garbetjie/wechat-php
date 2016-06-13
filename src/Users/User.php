@@ -112,29 +112,31 @@ class User
      */
     public function __construct ($attributes)
     {
-        // Ensure we can handle objects or arrays.
-        $attributes = new \ArrayObject($attributes);
+        // Convert an array of attributes to an object.
+        if (is_array($attributes)) {
+            $attributes = (object)$attributes;
+        }
         
         // Need to set the OpenID at least.
-        $this->openID = (string)$attributes['openid'];
+        $this->openID = (string)$attributes->openid;
 
         // User is not subscribed. Do nothing.
-        if (! $attributes['subscribe']) {
+        if (! $attributes->subscribe) {
             return;
         }
 
-        $this->subscribed = new DateTime("@{$attributes['subscribe_time']}", new DateTimeZone('UTC'));
-        $this->nickname = (string)$attributes['nickname'];
-        $this->gender = (int)$attributes['sex'];
-        $this->language = (string)$attributes['language'];
-        $this->city = (string)$attributes['city'];
-        $this->province = (string)$attributes['province'];
-        $this->country = (string)$attributes['country'];
-        $this->groupID = (string)$attributes['groupid'];
-        $this->remark = (string)$attributes['remark'];
+        $this->subscribed = new DateTime("@{$attributes->subscribe_time}", new DateTimeZone('UTC'));
+        $this->nickname = (string)$attributes->nickname;
+        $this->gender = (int)$attributes->sex;
+        $this->language = (string)$attributes->language;
+        $this->city = (string)$attributes->city;
+        $this->province = (string)$attributes->province;
+        $this->country = (string)$attributes->country;
+        $this->groupID = (string)$attributes->groupid;
+        $this->remark = (string)$attributes->remark;
 
-        if (! empty($attributes['headimgurl'])) {
-            $this->profileImages[static::PROFILE_IMAGE_FULL] = $attributes['headimgurl']; // Biggest image.
+        if (! empty($attributes->headimgurl)) {
+            $this->profileImages[static::PROFILE_IMAGE_FULL] = $attributes->headimgurl; // Biggest image.
 
             // Add additional image sizes.
             foreach ([
@@ -144,9 +146,9 @@ class User
                  static::PROFILE_IMAGE_132,
             ] as $size) {
                 $this->profileImages[$size] = substr(
-                    $attributes['headimgurl'],
+                    $attributes->headimgurl,
                     0,
-                    strrpos($attributes['headimgurl'], '/')
+                    strrpos($attributes->headimgurl, '/')
                 ) . '/' . $size;
             }
         }

@@ -6,8 +6,12 @@ use Garbetjie\WeChatClient\Exception\APIErrorException;
 use Garbetjie\WeChatClient\Service;
 use Garbetjie\WeChatClient\Users\Exception\UserException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
+use InvalidArgumentException;
+use Psr\Http\Message\ResponseInterface;
 
 class UserService extends Service
 {
@@ -16,42 +20,67 @@ class UserService extends Service
      *
      * @param string $userOpenID - The user's WeChat ID.
      * @param int    $groupID    - The ID of the group to move the user to.
+     *
+     * @return bool
      */
     public function changeGroup ($userOpenID, $groupID)
     {
-        $json = json_encode([
-            'openid'     => $userOpenID,
-            'to_groupid' => $groupID,
-        ]);
+        $failed = $this->changeAllGroups([$userOpenID], $groupID);
 
-        $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/groups/members/update', [], $json);
-        $this->client->send($request);
+        if (count($failed) <= 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
-     * Retrieves the group ID of the specified user.
+     * Changes the group for all the specified users. Returns an array containing the OpenID's of the users that failed
+     * to have their group changed.
      *
-     * @param int $userOpenID The WeChat ID of the user to fetch the group ID for.
+     * @param array $userOpenIDs
+     * @param int   $groupID
      *
-     * @return int
+     * @return array
      */
-    public function getGroupID ($userOpenID)
+    public function changeAllGroups (array $userOpenIDs, $groupID)
     {
-        $request = new Request(
-            'POST',
-            'https://api.weixin.qq.com/cgi-bin/groups/getid',
-            [],
-            json_encode(['openid' => $userOpenID])
-        );
-
-        $response = $this->client->send($request);
-        $json = json_decode((string)$response->getBody());
-
-        if (! isset($json->groupid)) {
-            throw new UserException("bad response: expected property `groupid`");
-        } else {
-            return $json->groupid;
+        if (count($userOpenIDs) < 1) {
+            throw new InvalidArgumentException("At least one user is required.");
         }
+
+        // Build requests.
+        $requests = function ($users) use ($groupID) {
+            foreach (array_chunk($users, 50) as $chunk) {
+                yield new Request(
+                    "POST",
+                    "https://api.weixin.qq.com/cgi-bin/groups/members/batchupdate",
+                    [],
+                    json_encode([
+                        'openid_list' => $chunk,
+                        'to_groupid'  => $groupID,
+                    ])
+                );
+            }
+        };
+
+        $failed = [];
+
+        (new Pool(
+            $this->client,
+            $requests($userOpenIDs),
+            [   
+                'rejected' => function (RequestException $reason) use (&$failed) {
+                    $json = json_decode((string)$reason->getRequest()->getBody());
+
+                    if (isset($json->openid_list)) {
+                        $failed = array_merge($failed, $json->openid_list);
+                    }
+                },
+            ]
+        ))->promise()->wait();
+
+        return $failed;
     }
 
     /**
@@ -67,13 +96,83 @@ class UserService extends Service
      * @throws GuzzleException
      * @throws APIErrorException
      */
-    public function get ($user, $lang = 'en')
+    public function getUser ($user, $lang = 'en')
     {
-        $request = new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?lang={$lang}&openid={$user}");
-        $response = $this->client->send($request);
-        $json = json_decode((string)$response->getBody(), true);
+        return $this->getAllUsers([$user], null, $lang)[$user];
+    }
 
-        return new User($json);
+    /**
+     * Retrieves the profiles of all the specified WeChat user IDs.
+     *
+     * If no callback is supplied, then an array containing the relevant user objects (if the profile request was
+     * successful), or NULL values (if the profile request failed) indexed by the specified profile ID is returned.
+     *
+     * <pre>
+     * $returned[ 'user id' ] = new User(); // Successful.
+     * $returned[ 'user id' ] = null; // Failed.
+     * </pre>
+     *
+     * If a callback is supplied, then instead of populating an array, the callback will be called on each successful
+     * or failed profile retrieval. The signature of the callback is given below.
+     *
+     * For failed profile retrievals, the User object will be NULL.
+     *
+     * <pre>
+     * $callback = function (RequestException $error = null, User $user = null) { };
+     * </pre>
+     *
+     * @param array    $userOpenIDs The IDs of the users to fetch profiles for.
+     * @param callable $callback    Optional callback to execute on each profile retrieval.
+     * @param string   $lang        The language to retrieve the user's details in.
+     *
+     * @return array
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getAllUsers (array $userOpenIDs, callable $callback = null, $lang = 'en')
+    {
+        if (count($userOpenIDs) < 1) {
+            throw new InvalidArgumentException("At least one user is required.");
+        } else {
+            $userOpenIDs = array_unique(array_values($userOpenIDs));
+        }
+
+        // Build requests.
+        $requestBuilder = function ($openIDs) use ($lang) {
+            foreach ($openIDs as $user) {
+                yield new Request('POST', "https://api.weixin.qq.com/cgi-bin/user/info?openid={$user}&lang={$lang}");
+            }
+        };
+
+        $profiles = [];
+
+        // Set default callback.
+        if (! isset($callback)) {
+            $profiles = array_combine($userOpenIDs, array_pad([], count($userOpenIDs), null));
+            $callback = function (RequestException $error = null, User $user = null) use (&$profiles) {
+                if ($user !== null) {
+                    $profiles[$user->getOpenID()] = $user;
+                }
+            };
+        }
+
+        // Send requests.
+        (new Pool(
+            $this->client,
+            $requestBuilder($userOpenIDs),
+            [
+                'fulfilled' => function (ResponseInterface $response, $index) use ($callback) {
+                    $json = json_decode($response->getBody());
+
+                    call_user_func($callback, null, new User($json));
+                },
+                'rejected'  => function (RequestException $reason, $index) use ($callback) {
+                    call_user_func($callback, $reason, null);
+                },
+            ]
+        ))->promise()->wait();
+
+        return $profiles;
     }
 
     /**
@@ -83,61 +182,35 @@ class UserService extends Service
      */
     public function countAllUsers ()
     {
-        $followers = $this->paginate(null);
-
-        return (int)$followers['total'];
+        return $this->paginateUsers(null)->getTotalCount();
     }
 
     /**
      * Allows pagination through the entire list of followers.
      *
-     * Returns an array containing the IDs of the followers in this page, as well as the ID of the user to paginate from
-     * in the next page request, as well as the total number of followers.
+     * @param string $nextOpenID - Optional ID of the next user to paginate from.
      *
-     * Example of the return value:
-     *
-     * <pre>
-     * [
-     *     'next' => '',
-     *     'users' => [ ],
-     *     'total' => 0,
-     *     'pages' => 0,
-     * ]
-     * </pre>
-     *
-     * @param string $next Optional ID of the next user to paginate from.
-     *
-     * @return array
-     *
+     * @return PaginatedResultSet
      * @throws UserException
      */
-    public function paginate ($next = null)
+    public function paginateUsers ($nextOpenID = null)
     {
-        // Build the URI
-        $uri = new Uri("https://api.weixin.qq.com/cgi-bin/user/get");
-        if ($next !== null) {
-            $uri = Uri::withQueryValue($uri, 'next_openid', $next);
+        $json = json_decode(
+            $this->client->send(
+                new Request(
+                    'GET',
+                    Uri::withQueryValue(new Uri('https://api.weixin.qq.com/cgi-bin/user/get'), 'next_openid',
+                        $nextOpenID)
+                )
+            )->getBody()
+        );
+
+        if (! isset($json->total)) {
+            return new PaginatedResultSet(null, 0, []);
+        } elseif (! isset($json->next_openid, $json->data->openid)) {
+            return new PaginatedResultSet(null, $json->total, []);
+        } else {
+            return new PaginatedResultSet($json->next_openid ?: null, $json->total, $json->data->openid);
         }
-
-        $request = new Request('GET', $uri);
-        $response = $this->client->send($request);
-        $json = json_decode($response->getBody());
-
-        if (! isset($json->total, $json->data) || ! property_exists($json, 'next_openid')) {
-            throw new UserException("bad response: expected properties `total`, `data`, `next_openid`");
-        }
-
-        // Calculate total pages.
-        $pages = ceil($json->total / 10000);
-        if ($pages < 1) {
-            $pages = 1;
-        }
-
-        return [
-            'next'  => $json->next_openid ?: null,
-            'users' => isset($json->data->openid) ? $json->data->openid : [],
-            'total' => $json->total,
-            'pages' => $pages,
-        ];
     }
 }
