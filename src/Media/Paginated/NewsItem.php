@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Media\Paginated;
 
-use Garbetjie\WeChatClient\Media\NewsItem as SourceNewsItem;
+use Garbetjie\WeChatClient\Media\Type\NewsItem as SourceNewsItem;
 
 class NewsItem extends SourceNewsItem
 {

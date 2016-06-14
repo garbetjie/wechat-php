@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Media;
+namespace Garbetjie\WeChatClient\Media\Type;
 
 use InvalidArgumentException;
 

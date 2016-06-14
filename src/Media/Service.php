@@ -3,14 +3,20 @@
 namespace Garbetjie\WeChatClient\Media;
 
 use DateTime;
-use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Media\Type\Audio;
+use Garbetjie\WeChatClient\Media\Type\FileMedia;
+use Garbetjie\WeChatClient\Media\Type\Image;
+use Garbetjie\WeChatClient\Media\Type\News;
+use Garbetjie\WeChatClient\Media\Type\Thumbnail;
+use Garbetjie\WeChatClient\Media\Type\Video;
+use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 
-class MediaService extends Service
+class Service extends BaseService
 {
     /**
      * Downloads a temporary image.
@@ -368,7 +374,7 @@ class MediaService extends Service
      * @param int $count - The number of items to show.
      *
      * @return Paginated\ImageResultSet
-     * @throws MediaException
+     * @throws Exception
      */
     public function paginateImages ($offset = 0, $count = 20)
     {
@@ -395,7 +401,7 @@ class MediaService extends Service
      * @param int $count - The number of items to show.
      *
      * @return Paginated\VideoResultSet
-     * @throws MediaException
+     * @throws Exception
      */
     public function paginateVideos ($offset = 0, $count = 20)
     {
@@ -416,7 +422,7 @@ class MediaService extends Service
      * @param int $count - The number of items to show.
      *
      * @return Paginated\AudioResultSet
-     * @throws MediaException
+     * @throws Exception
      */
     public function paginateAudio ($offset = 0, $count = 20)
     {
@@ -437,7 +443,7 @@ class MediaService extends Service
      * @param int $count - The number of items to show.
      *
      * @return Paginated\NewsResultSet
-     * @throws MediaException
+     * @throws Exception
      */
     public function paginateNews ($offset = 0, $count = 20)
     {
@@ -462,7 +468,7 @@ class MediaService extends Service
      * @param int    $limit - The number of items to show.
      *
      * @return \stdClass
-     * @throws MediaException
+     * @throws Exception
      */
     private function paginate ($type, $offset, $limit)
     {
@@ -491,7 +497,7 @@ class MediaService extends Service
 
         // Ensure response formatting.
         if (! isset($json->total_count, $json->item)) {
-            throw new MediaException("bad response: expecting properties `total_count`, `item_count`, `item`");
+            throw new Exception("bad response: expecting properties `total_count`, `item_count`, `item`");
         }
         
         return $json;
