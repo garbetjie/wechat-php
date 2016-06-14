@@ -556,48 +556,6 @@ class MediaService extends Service
     }
 
     /**
-     * Creates a writable stream that downloaded contents can be stored in.
-     *
-     * @param string|null $filePath
-     *
-     * @return resource
-     */
-    private function createWritableStream ($filePath)
-    {
-        if (is_resource($filePath)) {
-            $stream = $filePath;
-        } elseif (is_string($filePath)) {
-            $stream = fopen($filePath, 'wb');
-            if (! $stream) {
-                throw new InvalidArgumentException("Can't open file `{$filePath}` for writing.");
-            }
-        } else {
-            $stream = tmpfile();
-        }
-
-        return $stream;
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return resource
-     */
-    private function createReadableStream ($path)
-    {
-        if ($path === null) {
-            throw new InvalidArgumentException("path not set when uploading media item. cannot upload.");
-        }
-
-        $stream = fopen($path, 'rb');
-        if (! $stream) {
-            throw new InvalidArgumentException("unable to open `{$path}` for reading.");
-        }
-
-        return $stream;
-    }
-
-    /**
      * Returns a `\DateTime` instance, representing the date & time at which the media item should be considered
      * expired.
      *

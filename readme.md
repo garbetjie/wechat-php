@@ -11,6 +11,7 @@ around interacting with the WeChat API.
 4. [Groups](#4-groups)
 5. [Media](#5-media)
 6. [Menus](#6-menus)
+7. [QR](#7-qr)
 
 ## 1. Installation
 
@@ -222,33 +223,45 @@ Menus that are displayed within an official account can be customised via the We
 
     $menuService = new Garbetjie\WeChatClient\Menu\MenuService($client);
 
-### Create a menu
 
-    use Garbetjie\WeChatClient\Menu\Menu;
-    use Garbetjie\WeChatClient\Menu\MenuItem;
-     
-    $menu = (new Menu())
-        ->withItem(new MenuItem('Title 1', MenuItem::KEYWORD, 'keyword'))
-        ->withItem(new MenuItem('Title 2', MenuItem::URL, 'http://example.org'))
-        ->withItem(new MenuItem('Title 3', MenuItem::LOCATION));
-    
-    $menuService->saveMenu($menu);
-    
-### Delete a menu
+## 7. QR Codes
 
-    $menuService->deleteMenu();
-    
-### Retrieve the current menu
+QR codes can be generated via the WeChat API. There are two kinds of QR codes that are available: temporary codes, and
+permanent codes.
 
-    $currentMenu = $menuService->getCurrentMenu();
-    
-### Validate a menu.
+Temporary codes expire after a developer-determine time period (maximum of 30 days), whereas permanent codes never
+expire. However, an official account is limited to having 100,000 permanent codes active at any given time.
 
-There are certain rules that apply to menus (with regards to title length, number of child items, etc). There is a useful
-method that will validate the given menu, and will return a value indicating whether or not the menu is valid.
+```php
+use Garbetjie\WeChatClient\QR\QRCodeService;
+ 
+$service = new QRCodeService($client);
+```
+ 
+### Creating a temporary QR code
+ 
+When creating a temporary QR code, you are limited to a QR code value of a number, in the range of 1 to 100,000:
 
-    $menu = (new Menu())->withItem(new MenuItem('Title', MenuItem::LOCATION));
-    $isValid = $menuService->validateMenu($menu);
+```php
+use Garbetjie\WeChatClient\QR\TemporaryCode;
+ 
+$service = new QRCodeService($client);
+$temporaryCode = $service->createTemporaryCode(1000, 3600); // Expires in an hour.
+```
+
+### Creating a permanent QR code
+
+Permanent QR codes are limited to 100,000 of them, and do not have an expiry date. You can use either a numeric value
+(in the range of 1 to 100,000), or you can use a string value of up to 64 characters long.
+
+```php
+use Garbetjie\WeChatClient\QR\TemporaryCode;
+ 
+$service = new QRCodeService($client);
+$permanentCode = $service->createPermanentCode(1000);
+// OR
+$permanentCode = $service->createPermanentCode('Look at me');
+```
 
 # Terminology
 
