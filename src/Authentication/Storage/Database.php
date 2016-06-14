@@ -5,7 +5,7 @@ namespace Garbetjie\WeChatClient\Authentication\Storage;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use PDO;
 
-abstract class DatabaseStorage implements StorageInterface
+abstract class Database implements StorageInterface
 {
     /**
      * @var PDO
@@ -27,7 +27,7 @@ abstract class DatabaseStorage implements StorageInterface
     ];
 
     /**
-     * DatabaseStorage constructor.
+     * Database constructor.
      *
      * @param PDO   $pdo
      * @param null  $table

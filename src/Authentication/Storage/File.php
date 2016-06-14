@@ -6,7 +6,7 @@ use DateTime;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use Garbetjie\WeChatClient\Authentication\AccessToken;
 
-class FileStorage implements StorageInterface
+class File implements StorageInterface
 {
     /**
      * @var string
@@ -14,7 +14,7 @@ class FileStorage implements StorageInterface
     protected $base;
 
     /**
-     * FileStorage constructor.
+     * File constructor.
      *
      * @param string $base The base directory in which all access tokens will be stored.
      */

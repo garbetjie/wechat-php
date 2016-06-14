@@ -3,11 +3,11 @@
 namespace Garbetjie\WeChatClient\Authentication\Storage;
 
 use DateTime;
-use Garbetjie\WeChatClient\Authentication\Storage\DatabaseStorage;
+use Garbetjie\WeChatClient\Authentication\Storage\Database;
 use PDO;
 use Garbetjie\WeChatClient\Authentication\AccessToken;
 
-class MySQLDatabaseStorage extends DatabaseStorage
+class MySQL extends Database
 {
     /**
      * Responsible for retrieving the authentication token from which persistent storage is in use.

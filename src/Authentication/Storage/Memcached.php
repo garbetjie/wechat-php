@@ -6,7 +6,7 @@ use DateTime;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
 use Garbetjie\WeChatClient\Authentication\AccessToken;
 
-class MemcachedStorage implements StorageInterface
+class Memcached implements StorageInterface
 {
     /**
      * @var \Memcached
@@ -19,7 +19,7 @@ class MemcachedStorage implements StorageInterface
     protected $prefix;
 
     /**
-     * MemcachedStorage constructor.
+     * Memcached constructor.
      *
      * @param \Memcached $memcached
      * @param string           $prefix
