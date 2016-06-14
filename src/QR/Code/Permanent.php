@@ -1,10 +1,8 @@
 <?php
 
-namespace Garbetjie\WeChatClient\QR;
+namespace Garbetjie\WeChatClient\QR\Code;
 
-use Garbetjie\WeChatClient\QR\CodeInterface;
-
-class PermanentCode implements CodeInterface
+class Permanent implements CodeInterface
 {
     /**
      * @var string

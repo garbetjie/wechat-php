@@ -1,11 +1,11 @@
 <?php
 
-namespace Garbetjie\WeChatClient\QR;
+namespace Garbetjie\WeChatClient\QR\Code;
 
 use DateTimeInterface;
 use DateTimeImmutable;
 
-class TemporaryCode implements CodeInterface
+class Temporary implements CodeInterface
 {
     /**
      * @var string

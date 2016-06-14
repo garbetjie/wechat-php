@@ -4,13 +4,13 @@ namespace Garbetjie\WeChatClient\QR;
 
 use DateTimeInterface;
 use DateTimeImmutable;
-use Garbetjie\WeChatClient\QR\Exception\QRCodeException;
-use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\QR\Code;
+use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use InvalidArgumentException;
 
-class QRCodeService extends Service
+class Service extends BaseService
 {
     /**
      * Creates a temporary QR code that is only valid for the limited duration given. The expiry given
@@ -22,9 +22,9 @@ class QRCodeService extends Service
      * @param int|DateTimeInterface $expires The duration of the QR code, or the `DateTimeInterface` instance at which
      *                                       the code should expire.
      *
-     * @return TemporaryCode
+     * @return Code\Temporary
      *
-     * @throws QRCodeException
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function createTemporaryCode ($value, $expires = 1800)
@@ -49,7 +49,7 @@ class QRCodeService extends Service
             ],
         ]);
 
-        return new TemporaryCode($args[0], $args[1], $args[2]);
+        return new Code\Temporary($args[0], $args[1], $args[2]);
     }
 
     /**
@@ -58,9 +58,9 @@ class QRCodeService extends Service
      *
      * @param string|int $value
      *
-     * @return PermanentCode
+     * @return Code\Permanent
      *
-     * @throws QRCodeException
+     * @throws Exception
      */
     public function createPermanentCode ($value)
     {
@@ -75,7 +75,7 @@ class QRCodeService extends Service
             ],
         ]);
 
-        return new PermanentCode($args[0], $args[1]);
+        return new Code\Permanent($args[0], $args[1]);
     }
 
     /**
@@ -87,7 +87,7 @@ class QRCodeService extends Service
      *
      * @return resource
      *
-     * @throws QRCodeException
+     * @throws Exception
      */
     public function downloadCode ($ticket, $into = null)
     {
@@ -110,25 +110,32 @@ class QRCodeService extends Service
      *
      * @return array
      *
-     * @throws QRCodeException
+     * @throws Exception
      */
-    protected function createCode (array $body)
+    private function createCode (array $body)
     {
-        $request = new Request('POST', 'https://api.weixin.qq.com/cgi-bin/qrcode/create', [], json_encode($body));
-        $response = $this->client->send($request);
-        $json = json_decode($response->getBody());
+        $json = json_decode(
+            $this->client->send(
+                new Request(
+                    'POST',
+                    'https://api.weixin.qq.com/cgi-bin/qrcode/create',
+                    [], 
+                    json_encode($body)
+                )
+            )->getBody()
+        );
 
         // Permanent QR code.
         if (in_array($body['action_name'], ['QR_LIMIT_SCENE', 'QR_LIMIT_STR_SCENE'])) {
             if (! isset($json->ticket, $json->url)) {
-                throw new QRCodeException("bad response: expected properties `ticket`, `url`");
+                throw new Exception("bad response: expected properties `ticket`, `url`");
             }
 
             return [$json->ticket, $json->url];
         } // Temporary QR code.
         else {
             if (! isset($json->ticket, $json->url, $json->expire_seconds)) {
-                throw new QRCodeException("bad response: expected properties `ticket`, `url`, `expire_seconds`");
+                throw new Exception("bad response: expected properties `ticket`, `url`, `expire_seconds`");
             }
 
             return [$json->ticket, $json->url, new DateTimeImmutable('@' . (time() + $json->expire_seconds))];

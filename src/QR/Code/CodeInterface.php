@@ -1,6 +1,6 @@
 <?php
 
-namespace Garbetjie\WeChatClient\QR;
+namespace Garbetjie\WeChatClient\QR\Code;
 
 interface CodeInterface
 {
