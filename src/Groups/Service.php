@@ -3,12 +3,11 @@
 namespace Garbetjie\WeChatClient\Groups;
 
 use Garbetjie\WeChatClient\Exception\APIErrorException;
-use Garbetjie\WeChatClient\Groups\GroupsException;
-use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 
-class GroupService extends Service
+class Service extends BaseService
 {
     /**
      * Create a new group.
@@ -17,7 +16,7 @@ class GroupService extends Service
      *
      * @return Group
      *
-     * @throws GroupsException
+     * @throws Exception
      */
     public function createGroup ($name)
     {
@@ -34,7 +33,7 @@ class GroupService extends Service
         if (isset($json->group->id, $json->group->name)) {
             return new Group($json->group->id, $json->group->name);
         } else {
-            throw new GroupsException("bad response: expected properties `id`, `name`");
+            throw new Exception("bad response: expected properties `id`, `name`");
         }
     }
 
@@ -58,7 +57,7 @@ class GroupService extends Service
                 $groups[] = new Group($group->id, $group->name, $group->count);
             }
         } else {
-            throw new GroupsException("bad response: expected property `groups`");
+            throw new Exception("bad response: expected property `groups`");
         }
 
         return $groups;
@@ -70,7 +69,7 @@ class GroupService extends Service
      * @param int $groupID
      *
      * @return Group|null
-     * @throws GroupsException
+     * @throws Exception
      */
     public function getGroup ($groupID)
     {
