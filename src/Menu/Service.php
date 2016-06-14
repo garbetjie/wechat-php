@@ -2,11 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Menu;
 
-use Garbetjie\WeChatClient\Menu\Exception\MenuException;
-use Garbetjie\WeChatClient\Service;
+use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Psr7\Request;
 
-class MenuService extends Service
+class Service extends BaseService
 {
     /**
      * Creates a menu for the OA.
@@ -40,7 +39,7 @@ class MenuService extends Service
      *
      * @return Menu
      * 
-     * @throws MenuException
+     * @throws Exception
      */
     public function fetchCurrentMenu ()
     {
@@ -49,7 +48,7 @@ class MenuService extends Service
         $json = json_decode((string)$response->getBody());
 
         if (! isset($json->menu->button)) {
-            throw new MenuException('Unexpected menu JSON structure: `menu.button` not found', $response);
+            throw new Exception('Unexpected menu JSON structure: `menu.button` not found', $response);
         }
 
         $menu = new Menu();
