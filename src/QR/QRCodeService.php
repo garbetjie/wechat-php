@@ -18,16 +18,16 @@ class QRCodeService extends Service
      *
      * Expiry times of less than 1 second will cause and `InvalidArgumentException` to be thrown.
      *
-     * @param int          $value   The value of the QR code.
-     * @param int|DateTimeInterface $expires The duration of the QR code, or the `DateTimeInterface` instance at which the
-     *                              code should expire.
+     * @param int                   $value   The value of the QR code.
+     * @param int|DateTimeInterface $expires The duration of the QR code, or the `DateTimeInterface` instance at which
+     *                                       the code should expire.
      *
      * @return TemporaryCode
      *
      * @throws QRCodeException
      * @throws InvalidArgumentException
      */
-    public function createTemporary ($value, $expires = 1800)
+    public function createTemporaryCode ($value, $expires = 1800)
     {
         if ($expires instanceof DateTimeInterface) {
             $expires = $expires->getTimestamp() - time();
@@ -62,7 +62,7 @@ class QRCodeService extends Service
      *
      * @throws QRCodeException
      */
-    public function createPermanent ($value)
+    public function createPermanentCode ($value)
     {
         $str = is_string($value);
 
@@ -82,31 +82,24 @@ class QRCodeService extends Service
      * Download the given QR code into the specified file. If no file is supplied, a temporary one will be created using
      * the `tmpfile()` function.
      *
-     * @param CodeInterface $code The QR code to download.
-     * @param string        $into The path in which to save the QR code.
+     * @param string $ticket - The QR code to download.
+     * @param string $into   - The path or stream in which to save the QR code.
      *
      * @return resource
      *
      * @throws QRCodeException
      */
-    public function download (CodeInterface $code, $into = null)
+    public function downloadCode ($ticket, $into = null)
     {
-        if (is_resource($into)) {
-            $stream = $into;
-        } elseif (is_string($into)) {
-            $stream = fopen($into, 'wb');
-            if (! $stream) {
-                throw new QRCodeException("can't open file `{$into}` for writing.");
-            }
-        } else {
-            $stream = tmpfile();
-        }
-
-        $request = new Request('GET', "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$code->getTicket()}");
-        $response = $this->client->send($request, [RequestOptions::SINK => $stream]);
-        $stream = $response->getBody()->detach();
-
-        return $stream;
+        return $this->client->send(
+            new Request(
+                'GET',
+                "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={$ticket}"
+            ),
+            [
+                RequestOptions::SINK => $this->createWritableStream($into),
+            ]
+        )->getBody()->detach();
     }
 
     /**
@@ -116,7 +109,7 @@ class QRCodeService extends Service
      * @param array $body
      *
      * @return array
-     * 
+     *
      * @throws QRCodeException
      */
     protected function createCode (array $body)
