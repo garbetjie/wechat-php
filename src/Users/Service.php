@@ -3,8 +3,7 @@
 namespace Garbetjie\WeChatClient\Users;
 
 use Garbetjie\WeChatClient\Exception\APIErrorException;
-use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\Users\Exception\UserException;
+use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
@@ -13,7 +12,7 @@ use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 
-class UserService extends Service
+class Service extends BaseService
 {
     /**
      * Changes the group for the specified user to the specified group's ID.
@@ -191,7 +190,7 @@ class UserService extends Service
      * @param string $nextOpenID - Optional ID of the next user to paginate from.
      *
      * @return PaginatedResultSet
-     * @throws UserException
+     * @throws Exception
      */
     public function paginateUsers ($nextOpenID = null)
     {
