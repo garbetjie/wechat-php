@@ -2,17 +2,13 @@
 
 namespace Garbetjie\WeChatClient\URL;
 
-use Garbetjie\WeChatClient\Service;
-use Garbetjie\WeChatClient\URL\Exception\URLException;
+use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\RequestOptions;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
 
-class URLService extends Service
+class Service extends BaseService
 {
     /**
      * Shortens all the given URLs.
