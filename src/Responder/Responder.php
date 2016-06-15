@@ -63,14 +63,12 @@ class Responder
             if ($forResponse !== null) {
                 $forResponse = $forResponse->withHeader('Content-Type', 'text/plain');
                 $forResponse->getBody()->write($this->params['echostr']);
-                
-                return $forResponse;
             } else {
                 header('Content-Type: text/plain');
                 echo $this->params['echostr'];
-
-                return null;
             }
+            
+            return $forResponse;
         }
 
         // Extract input, and create XML object from it.
