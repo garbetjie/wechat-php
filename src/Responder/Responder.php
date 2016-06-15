@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder;
 
 use Garbetjie\WeChatClient\Responder\Exception\BadInputFormatException;
 use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
-use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
 use Garbetjie\WeChatClient\Responder\Input\AbstractInput;
 use Psr\Http\Message\ResponseInterface;
 use SimpleXMLElement;
@@ -12,7 +12,7 @@ use SimpleXMLElement;
 class Responder
 {
     /**
-     * @var MessageTypeInterface
+     * @var TypeInterface
      */
     protected $defaultReply;
 
@@ -86,12 +86,12 @@ class Responder
         $formatter = new ReplyFormatter();
         
         // Send a reply.
-        if ($reply instanceof MessageTypeInterface) {
+        if ($reply instanceof TypeInterface) {
             return $this->sendReply($formatter->format($input, $reply), $forResponse);
         }
 
         // Send default response, only if a response is allowed.
-        if ($reply !== false && $this->defaultReply instanceof MessageTypeInterface) {
+        if ($reply !== false && $this->defaultReply instanceof TypeInterface) {
             return $this->sendReply($formatter->format($input, $this->defaultReply), $forResponse);
         }
 
@@ -156,9 +156,9 @@ class Responder
     /**
      * Set a default response to use if nothing was matched for the input.
      *
-     * @param MessageTypeInterface $message
+     * @param TypeInterface $message
      */
-    public function setDefaultReply (MessageTypeInterface $message)
+    public function setDefaultReply (TypeInterface $message)
     {
         $this->defaultReply = $message;
     }

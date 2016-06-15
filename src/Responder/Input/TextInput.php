@@ -17,7 +17,7 @@ class TextInput extends AbstractInput
     private $menu = false;
 
     /**
-     * TextMessageType constructor.
+     * Text constructor.
      *
      * @param SimpleXMLElement $xml
      */

@@ -5,13 +5,13 @@ namespace Garbetjie\WeChatClient\Responder;
 use DOMCdataSection;
 use DOMDocument;
 use DOMElement;
-use Garbetjie\WeChatClient\Messaging\Type\AudioMessageType;
-use Garbetjie\WeChatClient\Messaging\Type\ImageMessageType;
-use Garbetjie\WeChatClient\Messaging\Type\MusicMessageType;
-use Garbetjie\WeChatClient\Messaging\Type\RichMediaMessageType;
-use Garbetjie\WeChatClient\Messaging\Type\TextMessageType;
-use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
-use Garbetjie\WeChatClient\Messaging\Type\VideoMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\Audio;
+use Garbetjie\WeChatClient\Messaging\Type\Image;
+use Garbetjie\WeChatClient\Messaging\Type\Music;
+use Garbetjie\WeChatClient\Messaging\Type\News;
+use Garbetjie\WeChatClient\Messaging\Type\Text;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\Video;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class ReplyFormatter
@@ -22,12 +22,12 @@ class ReplyFormatter
     private $doc;
 
     /**
-     * @param InputInterface       $input
-     * @param MessageTypeInterface $message
+     * @param InputInterface $input
+     * @param TypeInterface  $message
      *
      * @return string
      */
-    public function format (InputInterface $input, MessageTypeInterface $message)
+    public function format (InputInterface $input, TypeInterface $message)
     {
         $this->doc = new DOMDocument();
         $root = $this->doc->createElement('xml');
@@ -76,10 +76,10 @@ class ReplyFormatter
     /**
      * Fill a text message.
      *
-     * @param DOMElement      $root
-     * @param TextMessageType $message
+     * @param DOMElement $root
+     * @param Text       $message
      */
-    protected function fillTextMessage (DOMElement $root, TextMessageType $message)
+    protected function fillTextMessage (DOMElement $root, Text $message)
     {
         $this->fill($root, ['Content' => $message->getContent()]);
     }
@@ -87,16 +87,16 @@ class ReplyFormatter
     /**
      * Fill an image message.
      *
-     * @param DOMElement              $root
-     * @param ImageMessageType $message
+     * @param DOMElement $root
+     * @param Image      $message
      */
-    protected function fillImageMessage (DOMElement $root, ImageMessageType $message)
+    protected function fillImageMessage (DOMElement $root, Image $message)
     {
         $this->fill(
             $root,
             [
                 'ImageMediaType' => [
-                    'MediaId' => $message->getID(),
+                    'MediaId' => $message->getMediaID(),
                 ],
             ]
         );
@@ -105,15 +105,15 @@ class ReplyFormatter
     /**
      * Fill an audio message.
      *
-     * @param DOMElement              $root
-     * @param AudioMessageType $message
+     * @param DOMElement $root
+     * @param Audio      $message
      */
-    protected function fillVoiceMessage (DOMElement $root, AudioMessageType $message)
+    protected function fillVoiceMessage (DOMElement $root, Audio $message)
     {
         $this->fill($root,
             [
                 'Voice' => [
-                    'MediaId' => $message->getID(),
+                    'MediaId' => $message->getMediaID(),
                 ],
             ]
         );
@@ -122,15 +122,15 @@ class ReplyFormatter
     /**
      * Fill a video message.
      *
-     * @param DOMElement              $root
-     * @param VideoMessageType $message
+     * @param DOMElement $root
+     * @param Video      $message
      */
-    protected function fillVideoMessage (DOMElement $root, VideoMessageType $message)
+    protected function fillVideoMessage (DOMElement $root, Video $message)
     {
         $this->fill($root,
             [
                 'VideoMediaType' => [
-                    'MediaId'      => $message->getID(),
+                    'MediaId'      => $message->getMediaID(),
                     'ThumbMediaId' => $message->getThumbnailID(),
                 ],
             ]
@@ -140,14 +140,14 @@ class ReplyFormatter
     /**
      * Fill a music message.
      *
-     * @param DOMElement       $root
-     * @param MusicMessageType $message
+     * @param DOMElement $root
+     * @param Music      $message
      */
-    protected function fillMusicMessage (DOMElement $root, MusicMessageType $message)
+    protected function fillMusicMessage (DOMElement $root, Music $message)
     {
         $append = [];
-        $append['MusicUrl'] = $message->getUrl();
-        $append['HQMusicUrl'] = $message->getHighQualityUrl();
+        $append['MusicUrl'] = $message->getSourceURL();
+        $append['HQMusicUrl'] = $message->getHighQualitySourceURL();
         $append['ThumbMediaId'] = $message->getThumbnailID();
 
         if ($message->getTitle()) {
@@ -158,16 +158,16 @@ class ReplyFormatter
             $append['Description'] = $message->getDescription();
         }
 
-        $this->fill($root, ['MusicMessageType' => $append]);
+        $this->fill($root, ['Music' => $append]);
     }
 
     /**
      * Fill a rich media message.
      *
-     * @param DOMElement           $root
-     * @param RichMediaMessageType $message
+     * @param DOMElement $root
+     * @param News       $message
      */
-    protected function fillNewsMessage (DOMElement $root, RichMediaMessageType $message)
+    protected function fillNewsMessage (DOMElement $root, News $message)
     {
         $articleElement = $this->doc->createElement('Articles');
 

@@ -5,7 +5,7 @@ namespace Garbetjie\WeChatClient\Responder;
 use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
 use League\Event\Emitter;
 use League\Event\EventInterface;
-use Garbetjie\WeChatClient\Messaging\Type\MessageTypeInterface;
+use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
 use Garbetjie\WeChatClient\Responder\Input\EventInput;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
@@ -17,7 +17,7 @@ class Dispatcher
     protected $emitter;
 
     /**
-     * @var MessageTypeInterface
+     * @var TypeInterface
      */
     protected $reply;
 
@@ -49,7 +49,7 @@ class Dispatcher
      *
      * @param InputInterface $input
      * 
-     * @return MessageTypeInterface
+     * @return TypeInterface
      */
     public function handle (InputInterface $input)
     {
@@ -86,7 +86,7 @@ class Dispatcher
             $stop = false;
 
             if ($reply !== null) {
-                if ($reply === false || $reply instanceof MessageTypeInterface) {
+                if ($reply === false || $reply instanceof TypeInterface) {
                     $stop = true;
                 }
             }
