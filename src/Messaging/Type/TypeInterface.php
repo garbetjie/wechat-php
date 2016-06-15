@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-interface MessageTypeInterface
+interface TypeInterface
 {
     /**
      * Returns the message type, as used in the WeChat API.

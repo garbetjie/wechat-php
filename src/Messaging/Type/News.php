@@ -2,16 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-use Garbetjie\WeChatClient\Messaging\Type\AbstractMessageType;
 use InvalidArgumentException;
 
-class RichMediaMessageType extends AbstractMessageType
+class News implements TypeInterface
 {
-    /**
-     * @var string
-     */
-    protected $type = 'news';
-
     /**
      * @var array
      */
@@ -30,13 +24,32 @@ class RichMediaMessageType extends AbstractMessageType
                 $args[] = isset($item[$key]) ? $item[$key] : null;
             }
 
-            $self = call_user_func_array([$this, 'withItem'], $item);
+            $this->items[] = call_user_func_array([$this, 'validateItem'], $args);
+        }
+    }
+
+    /**
+     * Validates and returns the formatted news item.
+     * 
+     * @param string $title
+     * @param string $description
+     * @param string $url
+     * @param string $image
+     *
+     * @return array
+     */
+    private function validateItem ($title, $description, $url, $image)
+    {
+        // Basic validation.
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            throw new InvalidArgumentException('Invalid URL for \'$url\'');
         }
 
-        // Set items.
-        if (isset($self)) {
-            $this->items = $self->items;
+        if (filter_var($image, FILTER_VALIDATE_URL) === false) {
+            throw new InvalidArgumentException('Invalid URL for \'$image\'');
         }
+        
+        return compact('title', 'description', 'url', 'image');
     }
 
     /**
@@ -47,21 +60,14 @@ class RichMediaMessageType extends AbstractMessageType
      * @param string $url
      * @param string $image
      *
-     * @return RichMediaMessageType
+     * @return News
      */
     public function withItem ($title, $description, $url, $image)
     {
-        // Basic validation.
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException('Invalid URL for \'$url\'');
-        }
-
-        if (filter_var($image, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException('Invalid URL for \'$image\'');
-        }
+        $item = $this->validateItem($title, $description, $url, $image);
 
         $cloned = clone $this;
-        $cloned->items[] = compact('title', 'description', 'url', 'image');
+        $cloned->items[] = $item;
 
         return $cloned;
     }
@@ -72,5 +78,13 @@ class RichMediaMessageType extends AbstractMessageType
     public function getItems ()
     {
         return $this->items;
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function getType ()
+    {
+        return 'news';
     }
 }

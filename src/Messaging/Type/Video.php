@@ -2,9 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-use Garbetjie\WeChatClient\Messaging\Type\AbstractMediaMessageType;
+use Garbetjie\WeChatClient\Messaging\Type\Uploaded;
 
-class VideoMessageType extends AbstractMediaMessageType
+class Video extends Uploaded
 {
     /**
      * The media ID of the thumbnail image to use for this video.

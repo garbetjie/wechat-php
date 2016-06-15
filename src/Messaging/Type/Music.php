@@ -2,16 +2,10 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-use Garbetjie\WeChatClient\Messaging\Type\AbstractMessageType;
 use InvalidArgumentException;
 
-class MusicMessageType extends AbstractMessageType
+class Music implements TypeInterface
 {
-    /**
-     * @var string
-     */
-    protected $type = 'music';
-
     /**
      * @var string
      */
@@ -30,7 +24,7 @@ class MusicMessageType extends AbstractMessageType
     /**
      * @var string
      */
-    private $highQualityUrl;
+    private $highQualityURL;
 
     /**
      * @var string
@@ -38,34 +32,34 @@ class MusicMessageType extends AbstractMessageType
     private $thumbnailID;
 
     /**
-     * @param string $url
-     * @param string $hqUrl
-     * @param string $thumbnailId
-     * @param string $title
-     * @param string $description
+     * @param string $sourceURL
+     * @param string $highQualitySourceURL
+     * @param string $thumbnailID
+     * @param string|null $title
+     * @param string|null $description
      */
-    public function __construct ($url, $hqUrl, $thumbnailId, $title = '', $description = '')
+    public function __construct ($sourceURL, $highQualitySourceURL, $thumbnailID, $title = null, $description = null)
     {
         // Set URL
-        if (filter_var($url, FILTER_VALIDATE_URL) !== false) {
-            $this->url = $url;
+        if (filter_var($sourceURL, FILTER_VALIDATE_URL) !== false) {
+            $this->url = $sourceURL;
         } else {
             throw new InvalidArgumentException('$url is not a valid URL');
         }
 
         // Set high quality URL
-        if (filter_var($hqUrl, FILTER_VALIDATE_URL) !== false) {
-            $this->highQualityUrl = $hqUrl;
+        if (filter_var($highQualitySourceURL, FILTER_VALIDATE_URL) !== false) {
+            $this->highQualityURL = $highQualitySourceURL;
         } else {
             throw new InvalidArgumentException('$hqUrl is not a valid URL');
         }
 
         // Set thumbnail id.
-        $this->thumbnailID = $thumbnailId;
+        $this->thumbnailID = $thumbnailID;
 
         // Set title & description.
-        $this->title = (string)$title;
-        $this->description = (string)$description;
+        $this->title = $title;
+        $this->description = $description;
     }
 
     /**
@@ -87,7 +81,7 @@ class MusicMessageType extends AbstractMessageType
     /**
      * @return string
      */
-    public function getUrl ()
+    public function getSourceURL ()
     {
         return $this->url;
     }
@@ -95,9 +89,9 @@ class MusicMessageType extends AbstractMessageType
     /**
      * @return string
      */
-    public function getHighQualityUrl ()
+    public function getHighQualitySourceURL ()
     {
-        return $this->highQualityUrl;
+        return $this->highQualityURL;
     }
 
     /**
@@ -106,5 +100,13 @@ class MusicMessageType extends AbstractMessageType
     public function getThumbnailID ()
     {
         return $this->thumbnailID;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getType ()
+    {
+        return 'music';
     }
 }
