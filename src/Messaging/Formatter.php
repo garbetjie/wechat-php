@@ -147,12 +147,20 @@ class Formatter
         $articles = [];
 
         foreach ($message->getItems() as $item) {
-            $articles[] = [
-                'title'       => $item['title'],
-                'description' => $item['description'],
-                'url'         => $item['url'],
-                'picurl'      => $item['image'],
+            $article = [
+                'title' => $item->getTitle(),
+                'description' => $item->getDescription(),
             ];
+            
+            if ($item->getURL() !== null) {
+                $article['url'] = $item->getURL();
+            }
+            
+            if ($item->getImageURL() !== null) {
+                $article['picurl'] = $item->getImageURL();
+            }
+            
+            $articles[] = $article;
         }
 
         return ['articles' => $articles];

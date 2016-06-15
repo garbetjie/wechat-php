@@ -18,62 +18,31 @@ class News implements TypeInterface
     {
         // Populate items if given.
         foreach ($items as $item) {
-            $args = [];
-
-            foreach (['title', 'description', 'url', 'image'] as $key) {
-                $args[] = isset($item[$key]) ? $item[$key] : null;
+            if (! ($item instanceof NewsItem)) {
+                throw new InvalidArgumentException('news item must be instance of ' . NewsItem::class);
             }
-
-            $this->items[] = call_user_func_array([$this, 'validateItem'], $args);
+            
+            $this->items[] = $item;
         }
-    }
-
-    /**
-     * Validates and returns the formatted news item.
-     * 
-     * @param string $title
-     * @param string $description
-     * @param string $url
-     * @param string $image
-     *
-     * @return array
-     */
-    private function validateItem ($title, $description, $url, $image)
-    {
-        // Basic validation.
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException('Invalid URL for \'$url\'');
-        }
-
-        if (filter_var($image, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException('Invalid URL for \'$image\'');
-        }
-        
-        return compact('title', 'description', 'url', 'image');
     }
 
     /**
      * Adds a new item to the rich media message. Messaging type is immutable, so a cloned instance will be returned.
      *
-     * @param string $title
-     * @param string $description
-     * @param string $url
-     * @param string $image
+     * @param NewsItem $newsItem - The news item to add to the news message.
      *
      * @return News
      */
-    public function withItem ($title, $description, $url, $image)
+    public function withItem (NewsItem $newsItem)
     {
-        $item = $this->validateItem($title, $description, $url, $image);
-
         $cloned = clone $this;
-        $cloned->items[] = $item;
+        $cloned->items[] = $newsItem;
 
         return $cloned;
     }
 
     /**
-     * @return array
+     * @return NewsItem[]
      */
     public function getItems ()
     {
