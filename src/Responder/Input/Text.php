@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class TextInput extends AbstractInput
+class Text extends Input
 {
     /**
      * @var string
@@ -12,20 +12,15 @@ class TextInput extends AbstractInput
     private $content = '';
 
     /**
-     * @var bool
-     */
-    private $menu = false;
-
-    /**
      * Text constructor.
      *
-     * @param SimpleXMLElement $xml
+     * @param string $content
      */
-    public function __construct (SimpleXMLElement $xml)
+    public function __construct ($sender, $recipient, $messageID, $createdDate, $content)
     {
-        parent::__construct($xml);
-
-        $this->content = (string)$xml->Content;
+        parent::__construct($sender, $recipient, $messageID, $createdDate);
+        
+        $this->content = (string)$content;
     }
 
     /**
@@ -41,8 +36,8 @@ class TextInput extends AbstractInput
     /**
      * @return string
      */
-    public function getEmittedEvent ()
+    public function getEmittedType ()
     {
-        return 'text';
+        return Type::TEXT;
     }
 }

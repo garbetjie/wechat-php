@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class AudioInput extends AbstractInput
+class Audio extends Input
 {
     /**
      * @var string
@@ -21,19 +21,15 @@ class AudioInput extends AbstractInput
      */
     private $recognition;
 
-    /**
-     * AudioMediaType constructor.
-     *
-     * @param SimpleXMLElement $xml
-     */
-    public function __construct (SimpleXMLElement $xml)
+    public function __construct ($sender, $recipient, $messageID, $createdDate, $mediaID, $format, $recognizedSpeech)
     {
-        parent::__construct($xml);
+        parent::__construct($sender, $recipient, $messageID, $createdDate);
         
-        $this->mediaID = (string)$xml->MediaId;
-        $this->format = (string)$xml->Format;
-        $this->recognition = (string)$xml->Recognition;
+        $this->recognition = $recognizedSpeech;
+        $this->format = $format;
+        $this->mediaID = $mediaID;
     }
+
 
     /**
      * Returns the media ID of the audio item.
@@ -68,8 +64,8 @@ class AudioInput extends AbstractInput
     /**
      * @return string
      */
-    public function getEmittedEvent ()
+    public function getEmittedType ()
     {
-        return 'audio';
+        return Type::AUDIO;
     }
 }

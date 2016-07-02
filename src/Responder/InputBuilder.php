@@ -3,18 +3,18 @@
 namespace Garbetjie\WeChatClient\Responder;
 
 use Garbetjie\WeChatClient\Responder\Exception\BadInputTypeException;
-use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
-use Garbetjie\WeChatClient\Responder\Input\AudioInput;
-use Garbetjie\WeChatClient\Responder\Input\EventInput;
-use Garbetjie\WeChatClient\Responder\Input\ImageInput;
-use Garbetjie\WeChatClient\Responder\Input\LinkInput;
-use Garbetjie\WeChatClient\Responder\Input\LocationInput;
-use Garbetjie\WeChatClient\Responder\Input\TextInput;
-use Garbetjie\WeChatClient\Responder\Input\VideoInput;
+use ReflectionClass;
 use SimpleXMLElement;
 
 class InputBuilder
 {
+
+    /**
+     * @param SimpleXMLElement $xml
+     *
+     * @return Input\Input
+     * @throws Exception
+     */
     public function build (SimpleXMLElement $xml)
     {
         // Start parsing the input.
@@ -26,7 +26,7 @@ class InputBuilder
         if (is_callable($callable)) {
             $input = call_user_func($callable, $xml);
         } else {
-            throw new BadInputTypeException("unexpected input type `{$xml->MsgType}`");
+            throw new Exception("unexpected input type `{$xml->MsgType}`");
         }
         
         return $input;
@@ -35,80 +35,154 @@ class InputBuilder
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return TextInput
+     * @return Input\Text
      */
     private function parseTextInput (SimpleXMLElement $xml)
     {
-        return new TextInput($xml);
+        return (new ReflectionClass(Input\Text::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [$xml->Content]
+            )    
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return ImageInput
+     * @return array
+     */
+    private function getCommonMessageProperties (SimpleXMLElement $xml)
+    {
+        return [
+            (string)$xml->FromUserName,
+            (string)$xml->ToUserName,
+            (string)$xml->MsgId,
+            (int)$xml->CreateTime
+        ];
+    }
+
+    /**
+     * @param SimpleXMLElement $xml
+     *
+     * @return Input\Image
      */
     private function parseImageInput (SimpleXMLElement $xml)
     {
-        return new ImageInput($xml);
+        return (new ReflectionClass(Input\Image::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [
+                    (string)$xml->MediaId,
+                    (string)$xml->PicUrl,
+                ]
+            )
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return AudioInput
+     * @return Input\Audio
      */
     private function parseVoiceInput (SimpleXMLElement $xml)
     {
-        return new AudioInput($xml);
+        return (new ReflectionClass(Input\Audio::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [
+                    (string)$xml->MediaId,
+                    (string)$xml->Format,
+                    (string)$xml->Recognition
+                ]
+            )
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return VideoInput
+     * @return Input\Video
      */
     private function parseShortvideoInput (SimpleXMLElement $xml)
     {
-        return new VideoInput($xml, true);
+        return (new ReflectionClass(Input\Video::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [
+                    (string)$xml->MediaId,
+                    (string)$xml->ThumbnailId,
+                    true,
+                ]
+            )
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return VideoInput
+     * @return Input\Video
      */
     private function parseVideoInput (SimpleXMLElement $xml)
     {
-        return new VideoInput($xml, false);
+        return (new ReflectionClass(Input\Video::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [
+                    (string)$xml->MediaId,
+                    (string)$xml->ThumbnailId,
+                    false,
+                ]
+            )
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return LocationInput
+     * @return Input\Location
      */
     private function parseLocationInput (SimpleXMLElement $xml)
     {
-        return new LocationInput($xml);
+        return (new ReflectionClass(Input\Location::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [
+                    [(double)$xml->Location_X, (double)$xml->Location_Y],
+                    (double)$xml->Scale,
+                    (string)$xml->Label,
+                ]
+            )
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return LinkInput
+     * @return Input\Link
      */
     private function parseLinkInput (SimpleXMLElement $xml)
     {
-        return new LinkInput($xml);
+        return (new ReflectionClass(Input\Link::class))->newInstanceArgs(
+            array_merge(
+                $this->getCommonMessageProperties($xml),
+                [
+                    (string)$xml->Url,
+                    (string)$xml->Title,
+                    (string)$xml->Description,
+                ]
+            )
+        );
     }
 
     /**
      * @param SimpleXMLElement $xml
      *
-     * @return EventInput
+     * @todo Refactor creation to include different event types.
+     * @return Input\Event
      */
     private function parseEventInput (SimpleXMLElement $xml)
     {
-        return new EventInput($xml);
+        return new Input\Event($xml);
     }
 }

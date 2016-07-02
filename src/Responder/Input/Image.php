@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class ImageInput extends AbstractInput
+class Image extends Input
 {
     /**
      * @var string
@@ -16,17 +16,12 @@ class ImageInput extends AbstractInput
      */
     private $url;
 
-    /**
-     * ImageMediaType constructor.
-     *
-     * @param SimpleXMLElement $xml
-     */
-    public function __construct (SimpleXMLElement $xml)
+    public function __construct ($sender, $recipient, $messageID, $createdDate, $mediaID, $url)
     {
-        parent::__construct($xml);
+        parent::__construct($sender, $recipient, $messageID, $createdDate);
         
-        $this->mediaID = (string)$xml->MediaId;
-        $this->url = (string)$xml->PicUrl;
+        $this->mediaID = (string)$mediaID;
+        $this->url = (string)$url;
     }
 
     /**
@@ -52,8 +47,8 @@ class ImageInput extends AbstractInput
     /**
      * @return string
      */
-    public function getEmittedEvent ()
+    public function getEmittedType ()
     {
-        return 'image';
+        return Type::IMAGE;
     }
 }

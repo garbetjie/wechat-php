@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class LinkInput extends AbstractInput
+class Link extends Input
 {
     /**
      * @var string
@@ -21,18 +21,13 @@ class LinkInput extends AbstractInput
      */
     private $url;
 
-    /**
-     * LinkInput constructor.
-     *
-     * @param SimpleXMLElement $xml
-     */
-    public function __construct (SimpleXMLElement $xml)
+    public function __construct ($sender, $recipient, $messageID, $createdDate, $url, $title, $description)
     {
-        parent::__construct($xml);
-
-        $this->title = (string)$xml->Title;
-        $this->description = (string)$xml->Description;
-        $this->url = (string)$xml->Url;
+        parent::__construct($sender, $recipient, $messageID, $createdDate);
+        
+        $this->url = $url;
+        $this->title = $title;
+        $this->description = $description;
     }
 
     /**
@@ -68,8 +63,8 @@ class LinkInput extends AbstractInput
     /**
      * @return string
      */
-    public function getEmittedEvent ()
+    public function getEmittedType ()
     {
-        return 'link';
+        return Type::LINK;
     }
 }

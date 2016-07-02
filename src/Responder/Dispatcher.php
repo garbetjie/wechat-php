@@ -2,11 +2,11 @@
 
 namespace Garbetjie\WeChatClient\Responder;
 
-use Garbetjie\WeChatClient\Responder\Exception\ResponderException;
+use Garbetjie\WeChatClient\Responder\Exception;
 use League\Event\Emitter;
 use League\Event\EventInterface;
 use Garbetjie\WeChatClient\Messaging\Type\TypeInterface;
-use Garbetjie\WeChatClient\Responder\Input\EventInput;
+use Garbetjie\WeChatClient\Responder\Input\Event;
 use Garbetjie\WeChatClient\Responder\Input\InputInterface;
 
 class Dispatcher
@@ -56,12 +56,12 @@ class Dispatcher
         $emits = $input->getEmittedEvent();
 
         // Check if the event is a mapped event.
-        if ($input->getEmittedEvent() === 'event' && $input instanceof EventInput) {
+        if ($input->getEmittedEvent() === 'event' && $input instanceof Event) {
             $event = $input->getEventName();
             if (isset($this->eventEmitterMapping[$event])) {
                 $emits = $this->eventEmitterMapping[$event];
             }
-        }
+        }   
 
         // Execute the handler.
         $this->emitter->emit($emits, $input);

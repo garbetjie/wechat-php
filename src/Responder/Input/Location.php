@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 use SimpleXMLElement;
 
-class LocationInput extends AbstractInput
+class Location extends Input
 {
     /**
      * @var array
@@ -21,18 +21,13 @@ class LocationInput extends AbstractInput
      */
     private $name;
 
-    /**
-     * LocationInput constructor.
-     *
-     * @param SimpleXMLElement $xml
-     */
-    public function __construct (SimpleXMLElement $xml)
+    public function __construct ($sender, $recipient, $messageID, $createdDate, array $coordinates, $scale, $label)
     {
-        parent::__construct($xml);
-
-        $this->coordinates = [(float)$xml->Location_X, (float)$xml->Location_Y];
-        $this->scale = (float)$xml->Scale;
-        $this->name = (string)$xml->Label;
+        parent::__construct($sender, $recipient, $messageID, $createdDate);
+        
+        $this->coordinates = $coordinates;
+        $this->scale = $scale;
+        $this->name = $label;
     }
 
     /**
@@ -88,8 +83,8 @@ class LocationInput extends AbstractInput
     /**
      * @return string
      */
-    public function getEmittedEvent ()
+    public function getEmittedType ()
     {
-        return 'location';
+        return Type::LOCATION;
     }
 }
