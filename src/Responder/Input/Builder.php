@@ -1,19 +1,20 @@
 <?php
 
-namespace Garbetjie\WeChatClient\Responder;
+namespace Garbetjie\WeChatClient\Responder\Input;
 
-use Garbetjie\WeChatClient\Responder\Exception\BadInputTypeException;
+use Garbetjie\WeChatClient\Responder\Exception\UnknownInputTypeException;
+use Garbetjie\WeChatClient\Responder\Input;
 use ReflectionClass;
 use SimpleXMLElement;
 
-class InputBuilder
+class Builder
 {
 
     /**
      * @param SimpleXMLElement $xml
      *
      * @return Input\Input
-     * @throws Exception
+     * @throws UnknownInputTypeException
      */
     public function build (SimpleXMLElement $xml)
     {
@@ -26,7 +27,7 @@ class InputBuilder
         if (is_callable($callable)) {
             $input = call_user_func($callable, $xml);
         } else {
-            throw new Exception("unexpected input type `{$xml->MsgType}`");
+            throw new UnknownInputTypeException($xml->MsgType);
         }
         
         return $input;

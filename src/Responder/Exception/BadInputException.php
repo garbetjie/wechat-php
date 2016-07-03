@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Responder\Exception;
 
-class BadInputException extends \Exception
+class BadInputException extends \Exception implements Exception
 {
     /**
      * @var string

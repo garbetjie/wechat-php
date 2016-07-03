@@ -2,7 +2,9 @@
 
 namespace Garbetjie\WeChatClient\Responder\Exception;
 
-class Exception extends \Exception
+use Garbetjie\WeChatClient\Exception\WeChatClientException;
+
+interface Exception extends WeChatClientException
 {
 
 }
