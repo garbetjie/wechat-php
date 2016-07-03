@@ -4,7 +4,7 @@ namespace Garbetjie\WeChatClient\Responder\Input;
 
 final class Type
 {
-    const AUDIO = 'audio';
+    const AUDIO = 'voice';
     const IMAGE = 'image';
     const LINK = 'link';
     const LOCATION = 'location';

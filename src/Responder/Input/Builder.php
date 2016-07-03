@@ -56,8 +56,8 @@ class Builder
     private function getCommonMessageProperties (SimpleXMLElement $xml)
     {
         return [
-            (string)$xml->FromUserName,
             (string)$xml->ToUserName,
+            (string)$xml->FromUserName,
             (string)$xml->MsgId,
             (int)$xml->CreateTime
         ];

@@ -126,6 +126,26 @@ abstract class Handler
         if ($this->sent) {
             throw new Exception\AlreadySentException();
         }
+
+        $headers = array_merge(
+            [
+                'Connection: close',
+                'Content-Length: ' . strlen($reply),
+            ],
+            $headers
+        );
+
+        $hasContentType = false;
+        foreach ($headers as $headerLine) {
+            if (stripos($headerLine, 'Content-Type') !== false) {
+                $hasContentType = true;
+                break;
+            }
+        }
+
+        if (!$hasContentType) {
+            $headers[] = 'Content-Type: application/xml';
+        }
         
         $this->sent = true;
         $this->printReply($reply, $headers);
