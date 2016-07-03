@@ -2,8 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-use Garbetjie\WeChatClient\Messaging\Type\Uploaded;
-
 class Video extends Uploaded
 {
     /**
@@ -14,9 +12,12 @@ class Video extends Uploaded
     private $thumbnailID;
 
     /**
-     * @var string
+     * @inheritdoc
      */
-    protected $type = 'video';
+    public function getType ()
+    {
+        return 'video';
+    }
 
     /**
      * @param string $mediaId

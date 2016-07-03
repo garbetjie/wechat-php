@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-class Audio extends Uploaded implements TypeInterface
+class Audio extends Uploaded
 {
     /**
      * @inheritdoc

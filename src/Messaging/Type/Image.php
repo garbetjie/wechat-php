@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-class Image extends Uploaded implements TypeInterface
+class Image extends Uploaded
 {
     /**
      * @inheritdoc

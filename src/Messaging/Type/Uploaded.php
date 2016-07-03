@@ -2,7 +2,7 @@
 
 namespace Garbetjie\WeChatClient\Messaging\Type;
 
-abstract class Uploaded
+abstract class Uploaded implements TypeInterface
 {
     /**
      * The ID of the media item to be sent (as given when uploading to WeChat).
