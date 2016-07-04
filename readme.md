@@ -28,10 +28,10 @@ All available functionality has been split out into separate services. Each of t
 
 ```php
 // Create a client instance.
-$client = new Garbetjie\WeChatClient\Client();
+$client = new \Garbetjie\WeChatClient\Client();
  
 // Create a service instance.
-$userService = new Garbetjie\WeChatClient\Users\Service($client);
+$userService = new \Garbetjie\WeChatClient\Users\Service($client);
 ```
 
 ## 3. Authenticating
@@ -70,7 +70,7 @@ directory.
 
 ```php
 $cacheDirectory = '/tmp';
-$storage = new Garbetjie\WeChatClient\Authentication\Storage\File($cacheDirectory);
+$storage = new \Garbetjie\WeChatClient\Authentication\Storage\File($cacheDirectory);
 ```
 
 #### Memcached
@@ -80,7 +80,7 @@ $memcached = new \Memcached();
 $memcached->addServer('127.0.0.1', 11211);
 $keyPrefix = 'accessToken:';
  
-$storage = new Garbetjie\WeChatClient\Authentication\Storage\Memcached($memcached, $keyPrefix);
+$storage = new \Garbetjie\WeChatClient\Authentication\Storage\Memcached($memcached, $keyPrefix);
 ```
 
 #### MySQL
@@ -94,7 +94,7 @@ $columnMapping = [
     'expires' => 'expiry_column_name',
 ];
 
-$storage = new Garbetjie\WeChatClient\Authentication\Storage\MySQL($pdo, $tableName, $columnMapping);
+$storage = new \Garbetjie\WeChatClient\Authentication\Storage\MySQL($pdo, $tableName, $columnMapping);
 ```
     
 The MySQL storage adapter can have the table name, as well as the column names customised. This will allow you to ensure
@@ -112,7 +112,7 @@ User group management is done through the `Garbetjie\WeChatClient\Groups\Service
 order to view and modify groups.
 
 ```php
-$groupService = new Garbetjie\WeChatClient\Groups\Service($client);
+$groupService = new \Garbetjie\WeChatClient\Groups\Service($client);
 ```
 
 When creating, modifying or retrieving groups from the API, instances of `Garbetjie\WeChatClient\Groups\Group` will be
@@ -170,7 +170,7 @@ and downloading of media items is possible using the `Garbetjie\WeChatClient\Med
 ### Creating a new instance
 
 ```php
-$mediaService = new Garbetjie\WeChatClient\Media\Service($client);
+$mediaService = new \Garbetjie\WeChatClient\Media\Service($client);
 ```
 
 ### Uploading a file
@@ -219,7 +219,7 @@ Required when uploading a news article. The media ID returned here needs to be u
 **JPG** images only, no larger than 64KB.
  
 ```php
-$thumbnailMediaItem = new Garbetjie\WeChatclient\Media\Type\Thumbnail('/path/to/thumbnail.jpg');
+$thumbnailMediaItem = new \Garbetjie\WeChatclient\Media\Type\Thumbnail('/path/to/thumbnail.jpg');
 ```
 
 #### News
@@ -283,7 +283,7 @@ Temporary codes expire after a developer-determine time period (maximum of 30 da
 expire. However, an official account is limited to having 100,000 permanent codes active at any given time.
 
 ```php
-$qrService = new Garbetjie\WeChatClient\QR\Service($client);
+$qrService = new \Garbetjie\WeChatClient\QR\Service($client);
 ```
  
 ### Creating a temporary QR code
