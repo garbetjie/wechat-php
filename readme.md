@@ -30,24 +30,28 @@ All available functionality has been split out into separate services. Each of t
     $client = new Garbetjie\WeChatClient\Client();
      
     // Create a service instance.
-    $userService = new Garbetjie\WeChatClient\Users\UserService($client);
+    $userService = new Garbetjie\WeChatClient\Users\Service($client);
 
-## 3. Authentication
+## 3. Authenticating
 
 Before any interacting with the WeChat API can take place, an access token will be needed. The Authentication service
 can be used to acquire an access token:
 
-    $client = new Garbetjie\WeChatClient\Client();
-    $appID = 'Your app ID';
-    $secret = 'Your secret key';
-     
-    try {
-        $authService = new Garbetjie\WeChatClient\Authentication\AuthenticationService($client);
-        $accessToken = $authService->authenticate($appID, $secret);
-        $client->setAccessToken($accessToken);
-    } catch (Garbetjie\WeChatClient\Authentication\Exception\AuthenticationException $e) {
-        // Handle errors.
-    }
+```php
+
+use Garbetjie\WeChatClient\Client;
+use Garbetjie\WeChatClient\Authentication;
+ 
+$appID = 'Your app ID';
+$secret = 'Your secret key';
+ 
+try {
+    $authService = new Authentication\Service(new Client());
+    $client = $authService->authenticate($appID, $secret);
+} catch (Authentication\Exception $e) {
+    // Handle errors.
+}
+```
     
 Once you have authenticated, all further API calls made will have your access token automatically injected as part of
 the request.
@@ -64,7 +68,7 @@ directory.
 #### File system
 
     $cacheDirectory = '/tmp';
-    $storage = new Garbetjie\WeChatClient\Authentication\Storage\FileStorage($cacheDirectory);
+    $storage = new Garbetjie\WeChatClient\Authentication\Storage\File($cacheDirectory);
 
 #### Memcached
 
@@ -72,7 +76,7 @@ directory.
     $memcached->addServer('127.0.0.1', 11211);
     $keyPrefix = 'accessToken:';
      
-    $storage = new Garbetjie\WeChatClient\Authentication\Storage\MemcachedStorage($memcached, $keyPrefix);
+    $storage = new Garbetjie\WeChatClient\Authentication\Storage\Memcached($memcached, $keyPrefix);
 
 #### MySQL
 
@@ -84,7 +88,7 @@ directory.
         'expires' => 'expiry_column_name',
     ];
     
-    $storage = new Garbetjie\WeChatClient\Authentication\Storage\MySQLDatabaseStorage($pdo, $tableName, $columnMapping);
+    $storage = new Garbetjie\WeChatClient\Authentication\Storage\MySQL($pdo, $tableName, $columnMapping);
     
 The MySQL storage adapter can have the table name, as well as the column names customised. This will allow you to ensure
 the storage of access tokens fits into your current database structure.
@@ -97,65 +101,83 @@ need to simply implement the `Garbetjie\WeChatClient\Authentication\Storage\Stor
 
 ## 4. Groups
 
-User group management is done through the `Garbetjie\WeChatClient\Groups\GroupsService`. Authentication is required in
+User group management is done through the `Garbetjie\WeChatClient\Groups\Service`. Authentication is required in
 order to view and modify groups.
 
-    $groupService = new Garbetjie\WeChatClient\Groups\GroupsService($client);
+```php
+$groupService = new Garbetjie\WeChatClient\Groups\Service($client);
+```
 
 When creating, modifying or retrieving groups from the API, instances of `Garbetjie\WeChatClient\Groups\Group` will be
 returned.
 
 ### Create a group
 
-    $group = $groupService->createGroup("Test group");
+```php
+$group = $groupService->createGroup("Test group");
+```
 
 ### Modify a group
 
-    $changedGroup = $group->withName('New test name');
-    $groupService->updateGroup($changedGroup);
+```php
+$changedGroup = $group->withName('New test name');
+$groupService->updateGroup($changedGroup);
+```
     
 ### Remove a group
     
-    $groupService->deleteGroup($group);
+```php
+$groupService->deleteGroup($group);
+```
 
 ### Fetch all groups.
 
-    $groups = $groupService->getAllGroups();
-    
-    foreach ($groups as $group) {
-        echo sprintf(
-            "Group #%d with name `%s` has %d user(s)\n",
-            $group->getID(),
-            $group->getName(),
-            $group->getUserCount()
-        );
-    }
+```php
+$groups = $groupService->getAllGroups();
+ 
+foreach ($groups as $group) {
+    echo sprintf(
+        "Group #%d with name `%s` has %d user(s)\n",
+        $group->getID(),
+        $group->getName(),
+        $group->getUserCount()
+    );
+}
+```
 
 ### Fetch a single group.
 
 In reality, this is a thin wrapper around the `Garbetjie\WeChatClient\Groups\GroupsService::getAllGroups()` method call,
 that makes it easier to fetch a single group.
 
-    $group = $groupService->getGroup(1);
+```php
+$group = $groupService->getGroup(1);
+```
 
 
 ## 5. Media
 
 Media items need to be stored on WeChat's servers before they're able to be sent as messages to users. Both the uploading
-and downloading of media items is possible using the `Garbetjie\WeChatClient\Media\MediaService` service.
+and downloading of media items is possible using the `Garbetjie\WeChatClient\Media\Service` service.
 
 ### Creating a new instance
 
-    $mediaService = new Garbetjie\WeChatClient\Media\MediaService($client);
+```php
+$mediaService = new Garbetjie\WeChatClient\Media\Service($client);
+```
 
 ### Uploading a file
 
-    $imageMediaItem = new Garbetjie\WeChatClient\Media\Type\ImageMediaType('/path/to/image.jpg');
-    $uploadedMediaItem = $mediaService->upload($imageMediaItem);
-    
-    // $uploadedMediaItem now has its ID and upload data populated:
-    $uploadedMediaItem->getID();
-    $uploadedMediaItem->getUploadDate();
+```php
+use Garbetjie\WeChatClient\Media\Type;
+ 
+$imageMediaItem = new Type\Image('/path/to/image.jpg');
+$uploadedMediaItem = $mediaService->upload($imageMediaItem);
+ 
+// $uploadedMediaItem now has its ID and upload data populated:
+$uploadedMediaItem->getMediaID();
+$uploadedMediaItem->getExpiresDate();
+```
 
 ### Downloading a media item.
 
@@ -163,18 +185,24 @@ There are 3 different way of downloading a media item:
 
 1. Into a file (pass the path as the `$into` parameter).
 
-        $mediaService->download($uploadedMediaItem->getID(), '/path/to/downloaded.jpg');
+```php
+$mediaService->download($uploadedMediaItem->getMediaID(), '/path/to/downloaded.jpg');
+```
     
 2. Into an already-opened stream (pass a stream into the `$into` parameter).
 
-        $fp = fopen('/tmp/downloaded.jpg', 'wb+');
-        $mediaService->download($uploadedMediaItem->getID(), $fp);
+```php
+$fp = fopen('/tmp/downloaded.jpg', 'wb+');
+$mediaService->download($uploadedMediaItem->getMediaID(), $fp);
+```
         
 3. Or into a temporary stream (don't pass anything for the `$into` parameter) created by the `tmpfile()` function.
 
-        $fp = $mediaService->download($uploadedMediaItem->getID());
-        echo sprintf("Image is %d bytes in size", stream_get_length($fp));
-        fclose($fp);
+```php
+$fp = $mediaService->download($uploadedMediaItem->getMediaID());
+echo sprintf("Image is %d bytes in size", stream_get_length($fp));
+fclose($fp);
+```
 
 ### Available media types
     
@@ -183,37 +211,50 @@ There are 3 different way of downloading a media item:
 Required when uploading a news article. The media ID returned here needs to be used when adding a news article. Supports
 **JPG** images only, no larger than 64KB.
  
-    $thumbnailMediaItem = new Garbetjie\WeChatclient\Media\Type\ThumbnailMediaType('/path/to/thumbnail.jpg');
+```php
+$thumbnailMediaItem = new Garbetjie\WeChatclient\Media\Type\Thumbnail('/path/to/thumbnail.jpg');
+```
 
-#### Article
+#### News
 
 This is used when sending a multi-story news article in a broadcast message. It will need to be uploaded first, and the
 resultant message ID will need to be used when sending the broadcast message.
 
-    $articleMediaItem = (new Garbetjie\WeChatClient\Media\Type\ArticleMediaType())
-        ->withItem([
-            'title' => 'Article title',
-            'content' => '<h2>Article body</h2><p>Content of the item.</p>',
-            'thumbnail' => $thumbnailMediaID,
-        ]);
+```php
+use Garbetjie\WeChatClient\Media\Type;
+ 
+$newsItem = new Type\NewsItem('Article title', 'Content of the article.', $thumbnailMediaItem->getMediaID());
+$newsItem = $newsItem->withAuthor('Author name');
+$newsItem = $newsItem->withURL('http://example.org');
+$newsItem = $newsItem->withSummary('Short summary blurb.');
+$newsItem = $newsItem->withImageShowing(true);
+ 
+$news = (new Type\News())->withItem($newsItem);
+```
     
 #### Audio
 
 Used when sending a snippet of audio to the user. Supported types are AMR and MP3 audio files, no larger than 2MB.
 
-    $audioMessage = new Garbetjie\WeChatClient\Media\Type\AudioMediaType('/path/to/item.mp3');
+```php
+$audioMessage = new \Garbetjie\WeChatClient\Media\Type\Audio('/path/to/item.mp3');
+```
     
 #### Image
 
 Used to send an image to a user. Supports **BMP**, **PNG**, **JPEG**, **JPG** or **GIF** extensions, no larger than 2MB.
 
-    $imageMessage = new Garbetjie\WeChatClient\Media\Type\ImageMediaType('/path/to/image.jpg');
+```php
+$imageMessage = new \Garbetjie\WeChatClient\Media\Type\Image('/path/to/image.jpg');
+```
 
 #### Video
 
 Send a video to a user. Supports **MP4** format, no larger than 10MB in size.
 
-    $videoMediaItem = new Garbetjie\WeChatClient\Media\Type\VideoMediaType('/path/to/video.mp4');
+```php
+$videoMediaItem = new \Garbetjie\WeChatClient\Media\Type\Video('/path/to/video.mp4');
+```
 
 
 ## 6. Menus
@@ -221,7 +262,9 @@ Send a video to a user. Supports **MP4** format, no larger than 10MB in size.
 Menus that are displayed within an official account can be customised via the WeChat API. The
 `Garbetjie\WeChatClient\Menu\MenuService` services enables the modification of this menu:
 
-    $menuService = new Garbetjie\WeChatClient\Menu\MenuService($client);
+```php
+$menuService = new \Garbetjie\WeChatClient\Menu\Service($client);
+```
 
 
 ## 7. QR Codes
@@ -233,20 +276,22 @@ Temporary codes expire after a developer-determine time period (maximum of 30 da
 expire. However, an official account is limited to having 100,000 permanent codes active at any given time.
 
 ```php
-use Garbetjie\WeChatClient\QR\QRCodeService;
- 
-$service = new QRCodeService($client);
+$qrService = new Garbetjie\WeChatClient\QR\Service($client);
 ```
  
 ### Creating a temporary QR code
  
-When creating a temporary QR code, you are limited to a QR code value of a number, in the range of 1 to 100,000:
+When creating a temporary QR code, you are limited to a QR code value of a number, in the range of 1 to 100,000.
+If no expiry time is given, the generated QR code will expire after 30 seconds. You can specify an expiry time of up to
+2 592 000 seconds (30 days).
 
 ```php
-use Garbetjie\WeChatClient\QR\TemporaryCode;
+use Garbetjie\WeChatClient\QR;
  
-$service = new QRCodeService($client);
-$temporaryCode = $service->createTemporaryCode(1000, 3600); // Expires in an hour.
+$service = new QR\Service($client);
+$temporaryCode1 = $service->createTemporaryCode(1000, 3600); // Expires in an hour.
+$temporaryCode2 = $service->createTemporaryCode(1001); // Expires in 30 seconds.
+$temporaryCode3 = $service->createTemporaryCode(1002, 2592000); // Expires in 30 days.
 ```
 
 ### Creating a permanent QR code
@@ -255,9 +300,9 @@ Permanent QR codes are limited to 100,000 of them, and do not have an expiry dat
 (in the range of 1 to 100,000), or you can use a string value of up to 64 characters long.
 
 ```php
-use Garbetjie\WeChatClient\QR\TemporaryCode;
+use Garbetjie\WeChatClient\QR;
  
-$service = new QRCodeService($client);
+$service = new QR\Service($client);
 $permanentCode = $service->createPermanentCode(1000);
 // OR
 $permanentCode = $service->createPermanentCode('Look at me');
