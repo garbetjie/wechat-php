@@ -26,11 +26,13 @@ Requires **PHP 5.6+**.
 All available functionality has been split out into separate services. Each of these services require a
 `Garbetjie\WeChatClient\Client` instance. This client instance should be passed into the service when instantiating:
 
-    // Create a client instance.
-    $client = new Garbetjie\WeChatClient\Client();
-     
-    // Create a service instance.
-    $userService = new Garbetjie\WeChatClient\Users\Service($client);
+```php
+// Create a client instance.
+$client = new Garbetjie\WeChatClient\Client();
+ 
+// Create a service instance.
+$userService = new Garbetjie\WeChatClient\Users\Service($client);
+```
 
 ## 3. Authenticating
 
@@ -38,7 +40,6 @@ Before any interacting with the WeChat API can take place, an access token will 
 can be used to acquire an access token:
 
 ```php
-
 use Garbetjie\WeChatClient\Client;
 use Garbetjie\WeChatClient\Authentication;
  
@@ -67,28 +68,34 @@ directory.
 
 #### File system
 
-    $cacheDirectory = '/tmp';
-    $storage = new Garbetjie\WeChatClient\Authentication\Storage\File($cacheDirectory);
+```php
+$cacheDirectory = '/tmp';
+$storage = new Garbetjie\WeChatClient\Authentication\Storage\File($cacheDirectory);
+```
 
 #### Memcached
 
-    $memcached = new \Memcached();
-    $memcached->addServer('127.0.0.1', 11211);
-    $keyPrefix = 'accessToken:';
-     
-    $storage = new Garbetjie\WeChatClient\Authentication\Storage\Memcached($memcached, $keyPrefix);
+```php
+$memcached = new \Memcached();
+$memcached->addServer('127.0.0.1', 11211);
+$keyPrefix = 'accessToken:';
+ 
+$storage = new Garbetjie\WeChatClient\Authentication\Storage\Memcached($memcached, $keyPrefix);
+```
 
 #### MySQL
 
-    $pdo = new PDO('mysql:host=127.0.0.1;dbname=mydb', 'root', '');
-    $tableName = '_wechat_tokens';
-    $columnMapping = [
-        'token'   => 'token_column_name',
-        'hash'    => 'hash_column_name',
-        'expires' => 'expiry_column_name',
-    ];
-    
-    $storage = new Garbetjie\WeChatClient\Authentication\Storage\MySQL($pdo, $tableName, $columnMapping);
+```php
+$pdo = new PDO('mysql:host=127.0.0.1;dbname=mydb', 'root', '');
+$tableName = '_wechat_tokens';
+$columnMapping = [
+    'token'   => 'token_column_name',
+    'hash'    => 'hash_column_name',
+    'expires' => 'expiry_column_name',
+];
+
+$storage = new Garbetjie\WeChatClient\Authentication\Storage\MySQL($pdo, $tableName, $columnMapping);
+```
     
 The MySQL storage adapter can have the table name, as well as the column names customised. This will allow you to ensure
 the storage of access tokens fits into your current database structure.
