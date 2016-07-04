@@ -14,7 +14,7 @@ class Service extends BaseService
 {
     /**
      * Creates a temporary QR code that is only valid for the limited duration given. The expiry given
-     * cannot be longer than 1,800 seconds (30 minutes), or less than 1 second.
+     * cannot be longer than 2 592 000 seconds (30 days), or less than 1 second.
      *
      * Expiry times of less than 1 second will cause and `InvalidArgumentException` to be thrown.
      *
@@ -27,14 +27,14 @@ class Service extends BaseService
      * @throws Exception
      * @throws InvalidArgumentException
      */
-    public function createTemporaryCode ($value, $expires = 1800)
+    public function createTemporaryCode ($value, $expires = 30)
     {
         if ($expires instanceof DateTimeInterface) {
             $expires = $expires->getTimestamp() - time();
         }
 
-        if ($expires > 1800) {
-            $expires = 1800;
+        if ($expires > 2592000) {
+            $expires = 2592000;
         } elseif ($expires < 1) {
             throw new InvalidArgumentException("code expiry can not be less than 1 second.");
         }
