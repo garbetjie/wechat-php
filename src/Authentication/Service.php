@@ -4,19 +4,24 @@ namespace Garbetjie\WeChatClient\Authentication;
 
 use Garbetjie\WeChatClient\Authentication\Storage\File;
 use Garbetjie\WeChatClient\Authentication\Storage\StorageInterface;
+use Garbetjie\WeChatClient\Client;
 use Garbetjie\WeChatClient\Service as BaseService;
 use GuzzleHttp\Psr7\Request;
 
 class Service extends BaseService
 {
     /**
+     * Authenticates against the WeChat API. If authentication is successful, a modified copy of the client is returned,
+     * with the access token in use.
+     * 
+     * 
      * @param string                $appId     The application ID
      * @param string                $secretKey The application's secret key.
      * @param StorageInterface|null $storage   The optional storage interface to use when persisting access tokens.
      *                                         Defaults to storing them in the system's temporary directory (retrieved
      *                                         using `sys_get_temp_dir()`).
      *
-     * @return AccessToken
+     * @return Client
      *
      * @throws Exception
      */
@@ -50,7 +55,7 @@ class Service extends BaseService
 
             $storage->store($hash, $token);
 
-            return $token;
+            return $this->client->withAccessToken($token);
         }
         
         throw new Exception("bad response: expected properties `access_token`, `expires_in`");
