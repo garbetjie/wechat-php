@@ -66,7 +66,6 @@ class Client extends GuzzleClient
     {
         $handlerStack->remove('wechatClient:response');
         $handlerStack->push(
-            'wechatClient:response',
             function (callable $handler) {
                 return function (RequestInterface $request, array $options = []) use ($handler) {
                     return $handler($request, $options)->then(
@@ -101,7 +100,8 @@ class Client extends GuzzleClient
                         }
                     );
                 };
-            }
+            },
+            'wechatClient:response'
         );
     }
     
@@ -111,7 +111,6 @@ class Client extends GuzzleClient
         
         $handlerStack->remove('wechatClient:authentication');
         $handlerStack->unshift(
-            'wechatClient:authentication',
             function (callable $handler) use ($token) {
                 return function (RequestInterface $request, array $options = []) use ($handler, $token) {
                     if ($token) {
@@ -121,7 +120,8 @@ class Client extends GuzzleClient
 
                     return $handler($request, $options);
                 };
-            }
+            },
+            'wechatClient:authentication'
         );
     }
     
@@ -131,7 +131,6 @@ class Client extends GuzzleClient
         
         $handlerStack->remove('wechatClient:developerMode');
         $handlerStack->unshift(
-            'wechatClient:developerMode',
             function (callable $handler) use ($developerModeEnabled) {
                 return function (RequestInterface $request, array $options = []) use ($handler, $developerModeEnabled) {
                     if ($developerModeEnabled) {
@@ -151,7 +150,8 @@ class Client extends GuzzleClient
 
                     return $handler ($request, $options);
                 };
-            }
+            },
+            'wechatClient:developerMode'
         );
     }
 
