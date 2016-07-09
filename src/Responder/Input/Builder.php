@@ -112,7 +112,7 @@ class Builder
                 $this->getCommonMessageProperties($xml),
                 [
                     (string)$xml->MediaId,
-                    (string)$xml->ThumbnailId,
+                    (string)$xml->ThumbMediaId,
                     true,
                 ]
             )
@@ -131,7 +131,7 @@ class Builder
                 $this->getCommonMessageProperties($xml),
                 [
                     (string)$xml->MediaId,
-                    (string)$xml->ThumbnailId,
+                    (string)$xml->ThumbMediaId,
                     false,
                 ]
             )
