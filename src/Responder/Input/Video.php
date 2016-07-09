@@ -2,8 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Responder\Input;
 
-use SimpleXMLElement;
-
 class Video extends Input
 {
     /**
@@ -19,15 +17,15 @@ class Video extends Input
     /**
      * @var string
      */
-    private $thumbnailID;
+    private $thumbnailMediaID;
 
-    public function __construct ($sender, $recipient, $messageID, $createdDate, $mediaID, $thumbnailMediaID, $shortVideo)
+    public function __construct ($sender, $recipient, $messageID, $createdDate, $mediaID, $thumbnailMediaID, $shortVideo = false)
     {
         parent::__construct($sender, $recipient, $messageID, $createdDate);
         
         $this->sight = $shortVideo;
         $this->mediaID = $mediaID;
-        $this->thumbnailID = $thumbnailMediaID;
+        $this->thumbnailMediaID = $thumbnailMediaID;
     }
 
     /**
@@ -35,7 +33,7 @@ class Video extends Input
      * 
      * @return string
      */
-    public function mediaID ()
+    public function getMediaID ()
     {
         return $this->mediaID;
     }
@@ -45,9 +43,9 @@ class Video extends Input
      * 
      * @return string
      */
-    public function thumbnailID ()
+    public function getThumbnailMediaID ()
     {
-        return $this->thumbnailID;
+        return $this->thumbnailMediaID;
     }
 
     /**

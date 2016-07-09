@@ -2,8 +2,6 @@
 
 namespace Garbetjie\WeChatClient\Responder\Input;
 
-use SimpleXMLElement;
-
 class Audio extends Input
 {
     /**
