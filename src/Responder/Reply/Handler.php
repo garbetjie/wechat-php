@@ -78,7 +78,7 @@ abstract class Handler
         
         $message = array_merge(
             $message,
-            ['FromUserName' => $this->recipient, 'ToUserName' => $this->sender, 'CreateTime' => time()]
+            ['FromUserName' => $this->sender, 'ToUserName' => $this->recipient, 'CreateTime' => time()]
         );
         
         $this->fillElement($doc, $root, $message);
