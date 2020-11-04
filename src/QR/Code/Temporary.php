@@ -2,8 +2,8 @@
 
 namespace Garbetjie\WeChatClient\QR\Code;
 
-use DateTimeInterface;
 use DateTimeImmutable;
+use DateTimeInterface;
 
 class Temporary implements CodeInterface
 {

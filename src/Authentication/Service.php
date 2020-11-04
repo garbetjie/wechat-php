@@ -37,7 +37,7 @@ class Service extends BaseService
 
         // Cached access token is still valid. Return it.
         if ($cached instanceof AccessToken && $cached->valid()) {
-            return $cached;
+            return $this->client->withAccessToken($cached);
         }
 
         $request = new Request(

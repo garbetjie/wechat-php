@@ -9,6 +9,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
+    "ext-json": "*",
     "guzzlehttp/guzzle": "~6.0",
     "league/event": "^2.1",
     "php": ">=5.6",
